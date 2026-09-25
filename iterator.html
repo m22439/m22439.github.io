@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Iterator インタフェース 学習ガイド（空欄エディタ＋実行結果版）</title>
+  <style>
+    :root{
+      --bg1:#eef4ff;
+      --bg2:#f8fbff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#dbe3ef;
+      --card:#ffffff;
+      --shadow:0 14px 34px rgba(15, 23, 42, .08);
+
+      --blue:#2563eb;
+      --cyan:#0891b2;
+      --green:#059669;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --orange:#d97706;
+      --slate:#334155;
+      --pink:#db2777;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px;
+      line-height:1.72;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .container{
+      max-width:1320px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      border-radius:26px;
+      padding:28px 30px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .kicker{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2.1rem, 4.7vw, 3.7rem);
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:1100px;
+      font-size:clamp(1rem, 1.55vw, 1.16rem);
+      opacity:.96;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:800;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.24);
+      white-space:nowrap;
+    }
+
+    .section{
+      margin-top:20px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      border-top:10px solid var(--accent, var(--blue));
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 10px;
+    }
+
+    .num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:84px;
+      padding:9px 14px;
+      border-radius:999px;
+      background:var(--accent, var(--blue));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.98rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(1.42rem, 2.25vw, 2.05rem);
+      line-height:1.2;
+    }
+
+    .lead{
+      margin:0 0 12px;
+      color:#334155;
+      font-size:1.03rem;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      border-left:6px solid transparent;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .note.info{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      border-left-color:#3b82f6;
+    }
+
+    .note.tip{
+      background:#ecfdf5;
+      border-color:#a7f3d0;
+      border-left-color:#10b981;
+    }
+
+    .note.warn{
+      background:#fff1f2;
+      border-color:#fecdd3;
+      border-left-color:#ef4444;
+    }
+
+    .note strong{
+      font-size:1.02rem;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-weight:800;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+
+    .overview-flow{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:stretch;
+      gap:12px;
+      margin:14px 0 2px;
+    }
+
+    .flow-node{
+      flex:1 1 190px;
+      min-width:180px;
+      background:linear-gradient(180deg, #eff6ff, #ffffff);
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      padding:14px 14px 12px;
+      text-align:center;
+      box-shadow:0 10px 24px rgba(37,99,235,.06);
+    }
+
+    .flow-node .icon{
+      font-size:1.75rem;
+      line-height:1;
+      margin-bottom:6px;
+    }
+
+    .flow-node strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:4px;
+    }
+
+    .flow-arrow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#64748b;
+      font-size:2rem;
+      font-weight:900;
+      min-width:26px;
+      padding:0 4px;
+    }
+
+    /* 3.1以降のカードを縦に並べる */
+    .lesson-stack{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    .mini-cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .mini-card .icon{
+      font-size:1.8rem;
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .mini-card strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:5px;
+    }
+
+    .mini-card span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .editor-shell{
+      margin-top:14px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #293548;
+      background:linear-gradient(180deg, #111827, #0b1020);
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .editor-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 14px;
+      background:linear-gradient(135deg, #111827, #1f2937);
+      color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-weight:800;
+      font-size:.94rem;
+      letter-spacing:.02em;
+    }
+
+    .editor-bar .tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#c7d2fe;
+      font-size:.84rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .editor-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:8px 13px;
+      font-weight:900;
+      font-size:.9rem;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .08s ease, filter .08s ease;
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .btn:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+    .btn:active{ transform:translateY(0); filter:brightness(.98); }
+
+    .btn-run{
+      background:linear-gradient(135deg, #22c55e, #16a34a);
+      color:#fff;
+    }
+
+    .btn-reset{
+      background:linear-gradient(135deg, #64748b, #475569);
+      color:#fff;
+    }
+
+    textarea.editor{
+      width:100%;
+      display:block;
+      border:0;
+      outline:0;
+      resize:vertical;
+      background:transparent;
+      color:#d0d9e7; /* 薄めの色味 */
+      padding:16px 18px;
+      font: 1rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-variant-ligatures:none;
+      tab-size:4;
+      caret-color:#f8fafc;
+      overflow:auto;
+      -webkit-text-fill-color:#d0d9e7;
+      opacity:1;
+    }
+
+    textarea.editor::placeholder{
+      color:#8a97ab;
+      opacity:1;
+    }
+
+    textarea.editor::selection{
+      background:#fde68a;
+      color:#111827;
+    }
+
+    textarea.editor::-webkit-scrollbar{
+      width:12px;
+      height:12px;
+    }
+
+    textarea.editor::-webkit-scrollbar-track{
+      background:#0f172a;
+    }
+
+    textarea.editor::-webkit-scrollbar-thumb{
+      background:#475569;
+      border-radius:999px;
+      border:2px solid #0f172a;
+    }
+
+    .result-box{
+      margin-top:12px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #f8fbff, #eef4ff);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .result-title{
+      padding:9px 14px;
+      background:#dbeafe;
+      color:#1e3a8a;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      border-bottom:1px solid #bfdbfe;
+    }
+
+    .result{
+      margin:0;
+      padding:14px 18px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:1rem;
+      line-height:1.7;
+      color:#0f172a;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:3.2em;
+    }
+
+    .result.empty{
+      color:#64748b;
+    }
+
+    .result.error{
+      color:#b91c1c;
+      background:#fff7f7;
+    }
+
+    .footer{
+      margin:18px 0 8px;
+      text-align:center;
+      color:#64748b;
+      font-size:.95rem;
+    }
+
+    .accent-blue{--accent:#2563eb}
+    .accent-cyan{--accent:#0891b2}
+    .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669}
+    .accent-red{--accent:#dc2626}
+    .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+    .accent-pink{--accent:#db2777}
+
+    @media (max-width: 980px){
+      body{font-size:17px}
+      .container{padding:16px}
+      .hero{padding:22px}
+      .section-title{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .num{
+        min-width:72px;
+      }
+      .overview-flow{
+        gap:10px;
+      }
+      .flow-arrow{
+        width:100%;
+        transform:rotate(90deg);
+        margin:-2px 0;
+      }
+      .editor-bar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .editor-actions{
+        justify-content:flex-start;
+      }
+    }
+
+    @media print{
+      @page{margin:12mm}
+      body{
+        background:#fff;
+        color:#111827;
+        font-size:15px;
+      }
+      .container{
+        max-width:none;
+        padding:0;
+      }
+      .hero{
+        background:#eff6ff !important;
+        color:#0f172a !important;
+        box-shadow:none;
+        border:1px solid #c7d2fe;
+      }
+      .badge{
+        background:#dbeafe !important;
+        color:#1d4ed8 !important;
+        border-color:#93c5fd;
+      }
+      .card{
+        box-shadow:none;
+        border:1px solid #dbe3ef;
+      }
+      .editor-shell{
+        background:#fff !important;
+        border:1px solid #cbd5e1 !important;
+        box-shadow:none;
+      }
+      .editor-bar{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+        border-bottom:1px solid #cbd5e1;
+      }
+      .editor-bar .tag{
+        background:#cbd5e1 !important;
+        color:#0f172a !important;
+      }
+      .editor-actions{
+        display:none !important;
+      }
+      textarea.editor{
+        background:#f8fafc !important;
+        color:#334155 !important;
+        -webkit-text-fill-color:#334155 !important;
+        caret-color:#0f172a !important;
+      }
+      .result-box{
+        background:#f8fbff !important;
+      }
+      .result-title{
+        background:#dbeafe !important;
+        color:#1e3a8a !important;
+      }
+      .pill{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .note.info,
+      .note.tip,
+      .note.warn{
+        background:#f8fafc !important;
+      }
+      .card,
+      .mini-card,
+      .note,
+      .editor-shell,
+      .result-box,
+      .flow-node{
+        break-inside:avoid;
+        page-break-inside:avoid;
+      }
+      .footer{color:#475569}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法3 / Iterator インタフェース</div>
+      <h1>Iterator インタフェース 学習ガイド</h1>
+      <p>
+        配列 → List → Iterator の流れが見えやすいように整理した補助資料です。
+        コード欄は、配布資料を見ながら入力し、下の「実行」ボタンで結果を確認できます。
+        ※ ブラウザ内の簡易実行シミュレータです。
+      </p>
+      
+    </header>
+
+    <section class="section card accent-slate">
+      <div class="section-title">
+        <span class="num">全体像</span>
+        <h2>まずは「何を数えるか」と「どう取り出すか」を整理</h2>
+      </div>
+      <p class="lead">
+        配列と List は「データをためる箱」、Iterator は「1 件ずつ取り出す道具」です。
+        この 3 つの役割を分けて考えると、コードの流れが見えやすくなります。
+      </p>
+
+      <div class="overview-flow" aria-label="全体の流れ">
+        <div class="flow-node">
+          <div class="icon">📦</div>
+          <strong>配列 / List</strong>
+          <div class="small">データを格納する</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🔢</div>
+          <strong>length / size()</strong>
+          <div class="small">要素数を調べる</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🎫</div>
+          <strong>iterator()</strong>
+          <div class="small">Iterator を作る</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🔁</div>
+          <strong>hasNext() / next()</strong>
+          <div class="small">順番に取り出す</div>
+        </div>
+      </div>
+
+      <div class="note info">
+        <strong>このページの見方</strong>：下の 3.1 から 3.9 までは、すべて縦に 1 枚ずつ並んでいます。
+        そのまま上から順番に追うと、授業の流れと対応しやすくなります。
+      </div>
+
+    </section>
+
+    <section class="lesson-stack">
+      <!-- 3.1 -->
+      <article class="card accent-blue">
+        <div class="section-title">
+          <span class="num">3.1</span>
+          <h2>配列におけるループ処理</h2>
+        </div>
+        <p class="lead">
+          配列は要素数が固定です。長さは <span class="pill">length</span> で取得し、
+          <span class="pill">for</span> 文の継続条件に使うことで、1 件ずつ処理できます。
+        </p>
+        <ul class="small">
+          <li>要素数は <span class="pill">length</span> で確認する</li>
+          <li>合計や平均の計算でよく使う</li>
+          <li>拡張 for 文なら、取り出し処理をさらに簡単に書ける</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="array-average">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.1 通常の for 文</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.1 通常の for 文のエディタ" style="height:220px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="editor-shell" data-runner="array-average">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.1 拡張 for 文</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.1 拡張 for 文のエディタ" style="height:200px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：<span class="pill">length</span> は属性なので、後ろに <span class="pill">()</span> はつきません。
+          配列の要素数を調べる場面で、最初に間違えやすいポイントです。
+        </div>
+      </article>
+
+      <!-- 3.2 -->
+      <article class="card accent-cyan">
+        <div class="section-title">
+          <span class="num">3.2</span>
+          <h2>List に格納された要素数を取得する方法</h2>
+        </div>
+        <p class="lead">
+          List は可変長です。現在の要素数は <span class="pill">size()</span> で取り出し、
+          要素は <span class="pill">get(i)</span> で取得します。
+        </p>
+        <ul class="small">
+          <li><span class="pill">size()</span> はインスタンスメソッド</li>
+          <li>配列の <span class="pill">length</span> と似た役割</li>
+          <li>for 文の条件式で使うと、配列と同じように平均を求められる</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="list-average">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.2 List と size()</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.2 List と size() のエディタ" style="height:230px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>つまずきポイント</strong>：<span class="pill">size()</span> はメソッドなので <span class="pill">()</span> が必要です。
+          さらに、List の中身を取り出すときは <span class="pill">get(i)</span> を使います。
+        </div>
+      </article>
+
+      <!-- 3.3 -->
+      <article class="card accent-purple">
+        <div class="section-title">
+          <span class="num">3.3</span>
+          <h2>Iterator インタフェースと、それを使う理由</h2>
+        </div>
+        <p class="lead">
+          Iterator を使うと、データを持つ役割と、1 件ずつ取り出す役割を分けられます。
+          役割を分けると、main() に処理を詰め込みすぎない、オブジェクト指向らしい書き方になります。
+        </p>
+
+        <div class="mini-cards">
+          <div class="mini-card">
+            <div class="icon">📚</div>
+            <strong>List</strong>
+            <span>データを保持する</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🎯</div>
+            <strong>Iterator</strong>
+            <span>1 件ずつ取り出す</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🧩</div>
+            <strong>Set でも使える</strong>
+            <span>コレクション全般に応用できる</span>
+          </div>
+        </div>
+
+        <div class="note tip">
+          <strong>イメージ</strong>：<span class="pill">List</span> は「箱」、<span class="pill">Iterator</span> は「箱から順に取り出す手」です。
+          役割が分かれると、コードの見通しがよくなります。
+        </div>
+      </article>
+
+      <!-- 3.4 -->
+      <article class="card accent-pink">
+        <div class="section-title">
+          <span class="num">3.4</span>
+          <h2>List から Iterator のインスタンスを生成する方法</h2>
+        </div>
+        <p class="lead">
+          Iterator は <span class="pill">new</span> で直接作りません。
+          List などのコレクションが持つ <span class="pill">iterator()</span> メソッドを使って生成します。
+        </p>
+        <ul class="small">
+          <li>コレクション API の仕事として Iterator を作る</li>
+          <li>実装クラスを意識しなくてもよい</li>
+          <li>そのコレクション専用の Iterator が返ってくる</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="iterator-create">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.4 iterator() で生成する</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.4 iterator() で生成するエディタ" style="height:130px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：Iterator は <span class="pill">new Iterator&lt;&gt;()</span> のようには作れません。
+          <span class="pill">scoreList.iterator()</span> の形で取得するのが基本です。
+        </div>
+      </article>
+
+      <!-- 3.5 -->
+      <article class="card accent-green">
+        <div class="section-title">
+          <span class="num">3.5</span>
+          <h2>next メソッド</h2>
+        </div>
+        <p class="lead">
+          <span class="pill">next()</span> は、次の要素を返します。呼び出すたびに 1 件ずつ前へ進むので、
+          取り出したい値を変数に入れて使うことが多いです。
+        </p>
+        <ul class="small">
+          <li>戻り値は要素の型になる</li>
+          <li>呼ぶと Iterator の位置が進む</li>
+          <li>先に <span class="pill">hasNext()</span> で確認すると安全</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="next-first">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.5 next() の例</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.5 next() の例のエディタ" style="height:180px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：<span class="pill">next()</span> を、要素がないのに呼ぶとエラーになります。
+          そのため、通常は <span class="pill">hasNext()</span> とセットで使います。
+        </div>
+      </article>
+
+      <!-- 3.6 -->
+      <article class="card accent-orange">
+        <div class="section-title">
+          <span class="num">3.6</span>
+          <h2>hasNext メソッド</h2>
+        </div>
+        <p class="lead">
+          <span class="pill">hasNext()</span> は、まだ次の要素があるかどうかを真偽値で返します。
+          ループの継続条件に使うと、最後まで安全に取り出せます。
+        </p>
+        <ul class="small">
+          <li>戻り値は <span class="pill">boolean</span></li>
+          <li><span class="pill">true</span> の間だけ <span class="pill">next()</span> へ進む</li>
+          <li>Iterator を使った while 文の条件にぴったり合う</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="hasnext-demo">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.6 hasNext() の例</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.6 hasNext() の例のエディタ" style="height:220px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>ポイント</strong>：<span class="pill">hasNext()</span> が <span class="pill">false</span> になったら、もう取り出せる要素はありません。
+          そのまま <span class="pill">next()</span> を呼ばないようにしましょう。
+        </div>
+      </article>
+
+      <!-- 3.7 -->
+      <article class="card accent-slate">
+        <div class="section-title">
+          <span class="num">3.7</span>
+          <h2>Iterator と while 文によるループ処理</h2>
+        </div>
+        <p class="lead">
+          コレクション API では、Iterator の <span class="pill">hasNext()</span> があるため、
+          <span class="pill">while</span> 文で 1 件ずつ処理できます。
+        </p>
+        <ul class="small">
+          <li>配列は主に <span class="pill">for</span> 文</li>
+          <li>Iterator は <span class="pill">while</span> 文と相性がよい</li>
+          <li>要素数を先に数えなくても、最後まで順番に取り出せる</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="iterator-while-average">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.7 while 文による平均計算</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.7 while 文による平均計算のエディタ" style="height:245px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：<span class="pill">next()</span> を 1 回呼ぶと 1 件進みます。
+          <span class="pill">hasNext()</span> と <span class="pill">next()</span> をセットで考えるのがコツです。
+        </div>
+      </article>
+
+      <!-- 3.8 -->
+      <article class="card accent-red">
+        <div class="section-title">
+          <span class="num">3.8</span>
+          <h2>ループ処理内で要素を削除する</h2>
+        </div>
+        <p class="lead">
+          Iterator を使うと、ループの途中で要素を削除できます。削除は <span class="pill">remove()</span> で行い、
+          現在の要素を安全に取り除きます。
+        </p>
+        <ul class="small">
+          <li>削除したいときは <span class="pill">Iterator.remove()</span> を使う</li>
+          <li><span class="pill">next()</span> の後で <span class="pill">remove()</span> を呼ぶ</li>
+          <li>ループ中に <span class="pill">list.remove()</span> を直接使うとトラブルの原因になりやすい</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="remove-prefix">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.8 Iterator.remove() の例</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.8 Iterator.remove() の例のエディタ" style="height:320px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：削除後にもう一度 <span class="pill">remove()</span> を続けて呼ぶと、エラーの原因になります。
+          まず <span class="pill">next()</span> で要素を取得してから、必要なときだけ <span class="pill">remove()</span> を使いましょう。
+        </div>
+      </article>
+
+      <!-- 3.9 -->
+      <article class="card accent-orange">
+        <div class="section-title">
+          <span class="num">3.9</span>
+          <h2>Enumeration インタフェース</h2>
+        </div>
+        <p class="lead">
+          Enumeration は Iterator と同じく、1 件ずつ要素を取り出すための古い仕組みです。
+          以前の Java では <span class="pill">Vector</span> と一緒によく使われましたが、現在はあまり使われません。
+        </p>
+        <ul class="small">
+          <li>Iterator より歴史が古い</li>
+          <li>Vector とセットで見かけることがある</li>
+          <li>今は Iterator を使うのが基本</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="enumeration">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 3.9 Enumeration の例</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="3.9 Enumeration の例のエディタ" style="height:290px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note tip">
+          <strong>覚え方</strong>：<span class="pill">Iterator</span> は今よく使う、<span class="pill">Enumeration</span> は昔の書き方。
+          試験や授業では、「古い仕組み」として見分けられれば十分です。
+        </div>
+      </article>
+    </section>
+
+    <div class="footer">授業用補助資料 / Java Iterator インタフェース（空欄エディタ＋実行結果版）</div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      function unescapeJavaString(s) {
+        return s
+          .replace(/\\\\/g, '\\')
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t');
+      }
+
+      function extractArrayNumbers(code) {
+        const m = code.match(/int\s*\[\]\s*\w+\s*=\s*(?:new\s+int\s*\[\]\s*)?\{([\s\S]*?)\}\s*;/);
+        if (!m) return [];
+        const nums = m[1].match(/-?\d+/g) || [];
+        return nums.map(Number);
+      }
+
+      function extractAddedNumbers(code) {
+        const nums = [];
+        const re = /\.(?:add|addElement)\s*\(\s*(-?\d+)\s*\)/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+          nums.push(Number(m[1]));
+        }
+        return nums;
+      }
+
+      function extractAddedStrings(code) {
+        const items = [];
+        const re = /\.(?:add|addElement)\s*\(\s*"((?:\\.|[^"\\])*)"\s*\)/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+          items.push(unescapeJavaString(m[1]));
+        }
+        return items;
+      }
+
+      function extractPrefix(code) {
+        const m = code.match(/startsWith\(\s*"((?:\\.|[^"\\])*)"\s*\)/);
+        return m ? unescapeJavaString(m[1]) : 'A';
+      }
+
+      function javaTruncDivide(sum, count) {
+        return String(Math.trunc(sum / count));
+      }
+
+      function setResult(resultEl, text, isError = false, isEmpty = false) {
+        resultEl.textContent = text;
+        resultEl.classList.toggle('error', !!isError);
+        resultEl.classList.toggle('empty', !!isEmpty);
+      }
+
+      function computeSample(type, code) {
+        switch (type) {
+          case 'array-average': {
+            const nums = extractArrayNumbers(code);
+            if (!nums.length) return { ok: false, text: '配列の数値が見つかりません。', empty: true };
+            const sum = nums.reduce((a, b) => a + b, 0);
+            return { ok: true, text: javaTruncDivide(sum, nums.length), empty: false };
+          }
+
+          case 'list-average': {
+            const nums = extractAddedNumbers(code);
+            if (!nums.length) return { ok: false, text: 'List の数値が見つかりません。', empty: true };
+            const sum = nums.reduce((a, b) => a + b, 0);
+            return { ok: true, text: javaTruncDivide(sum, nums.length), empty: false };
+          }
+
+          case 'iterator-create':
+            return { ok: true, text: '画面出力なし\n（Iterator を作成するだけ）', empty: false };
+
+          case 'next-first': {
+            const items = extractAddedStrings(code);
+            if (items.length) return { ok: true, text: items[0], empty: false };
+            const nums = extractAddedNumbers(code);
+            if (nums.length) return { ok: true, text: String(nums[0]), empty: false };
+            return { ok: false, text: 'List の要素が見つかりません。', empty: true };
+          }
+
+          case 'hasnext-demo': {
+            const items = extractAddedStrings(code);
+            const nums = extractAddedNumbers(code);
+
+            const values = items.length ? items : nums.map(String);
+            if (!values.length) return { ok: false, text: 'List の要素が見つかりません。', empty: true };
+
+            const first = values[0];
+            const out = [
+              values.length > 0 ? 'true' : 'false',
+              first,
+              values.length > 1 ? 'true' : 'false'
+            ].join('\n');
+
+            return { ok: true, text: out, empty: false };
+          }
+
+          case 'iterator-while-average': {
+            const nums = extractAddedNumbers(code);
+            if (!nums.length) return { ok: false, text: 'List の数値が見つかりません。', empty: true };
+            const sum = nums.reduce((a, b) => a + b, 0);
+            return { ok: true, text: javaTruncDivide(sum, nums.length), empty: false };
+          }
+
+          case 'remove-prefix': {
+            const items = extractAddedStrings(code);
+            if (!items.length) return { ok: false, text: 'List の文字列が見つかりません。', empty: true };
+            const prefix = extractPrefix(code);
+            const filtered = items.filter(s => !s.startsWith(prefix));
+            return {
+              ok: true,
+              text: filtered.length ? filtered.join('\n') : '（出力なし）',
+              empty: false
+            };
+          }
+
+          case 'enumeration': {
+            const items = extractAddedStrings(code);
+            if (!items.length) return { ok: false, text: 'Vector の文字列が見つかりません。', empty: true };
+            return { ok: true, text: items.join('\n'), empty: false };
+          }
+
+          default:
+            return { ok: false, text: '未対応のサンプルです。', empty: true };
+        }
+      }
+
+      function runShell(shell) {
+        const type = shell.dataset.runner;
+        const editor = shell.querySelector('textarea.editor');
+        const result = shell.querySelector('.result');
+        const code = editor.value.trim();
+
+        if (!code) {
+          setResult(result, 'コードが空です。配布資料を見ながら入力してください。', false, true);
+          return;
+        }
+
+        const out = computeSample(type, code);
+        setResult(result, out.text, !out.ok, !!out.empty);
+      }
+
+      function resetShell(shell) {
+        const editor = shell.querySelector('textarea.editor');
+        const result = shell.querySelector('.result');
+        editor.value = '';
+        const placeholder = result.dataset.placeholder || 'ここに実行結果が表示されます';
+        setResult(result, placeholder, false, true);
+      }
+
+      function enableTabInsert(textarea) {
+        textarea.addEventListener('keydown', (e) => {
+          if (e.key !== 'Tab') return;
+          e.preventDefault();
+
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const value = textarea.value;
+
+          textarea.value = value.slice(0, start) + '    ' + value.slice(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.editor-shell').forEach((shell) => {
+          const editor = shell.querySelector('textarea.editor');
+          const btnRun = shell.querySelector('[data-action="run"]');
+          const btnReset = shell.querySelector('[data-action="reset"]');
+          const result = shell.querySelector('.result');
+
+          enableTabInsert(editor);
+          resetShell(shell);
+
+          btnRun.addEventListener('click', () => runShell(shell));
+          btnReset.addEventListener('click', () => resetShell(shell));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
