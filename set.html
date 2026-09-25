@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set インタフェース 学習ガイド（空欄エディタ＋実行結果版）</title>
+  <style>
+    :root{
+      --bg1:#eef4ff;
+      --bg2:#f8fbff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#dbe3ef;
+      --card:#ffffff;
+      --shadow:0 14px 34px rgba(15, 23, 42, .08);
+
+      --blue:#2563eb;
+      --cyan:#0891b2;
+      --green:#059669;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --orange:#d97706;
+      --slate:#334155;
+      --pink:#db2777;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px;
+      line-height:1.72;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .container{
+      max-width:1320px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      border-radius:26px;
+      padding:28px 30px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .kicker{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2.1rem, 4.7vw, 3.7rem);
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:1100px;
+      font-size:clamp(1rem, 1.55vw, 1.16rem);
+      opacity:.96;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:800;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.24);
+      white-space:nowrap;
+    }
+
+    .section{
+      margin-top:20px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      border-top:10px solid var(--accent, var(--blue));
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 10px;
+    }
+
+    .num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:84px;
+      padding:9px 14px;
+      border-radius:999px;
+      background:var(--accent, var(--blue));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.98rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(1.42rem, 2.25vw, 2.05rem);
+      line-height:1.2;
+    }
+
+    .lead{
+      margin:0 0 12px;
+      color:#334155;
+      font-size:1.03rem;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .inline-code{
+      display:inline-block;
+      padding:2px 7px;
+      border-radius:7px;
+      background:#e2e8f0;
+      color:#0f172a;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:.92em;
+      white-space:nowrap;
+    }
+
+    .note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      border-left:6px solid transparent;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .note.info{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      border-left-color:#3b82f6;
+    }
+
+    .note.tip{
+      background:#ecfdf5;
+      border-color:#a7f3d0;
+      border-left-color:#10b981;
+    }
+
+    .note.warn{
+      background:#fff1f2;
+      border-color:#fecdd3;
+      border-left-color:#ef4444;
+    }
+
+    .note strong{
+      font-size:1.02rem;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-weight:800;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+
+    .overview-flow{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:stretch;
+      gap:12px;
+      margin:14px 0 2px;
+    }
+
+    .flow-node{
+      flex:1 1 170px;
+      min-width:170px;
+      background:linear-gradient(180deg, #eff6ff, #ffffff);
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      padding:14px 14px 12px;
+      text-align:center;
+      box-shadow:0 10px 24px rgba(37,99,235,.06);
+    }
+
+    .flow-node .icon{
+      font-size:1.75rem;
+      line-height:1;
+      margin-bottom:6px;
+    }
+
+    .flow-node strong{
+      display:block;
+      font-size:1.05rem;
+      margin-bottom:4px;
+    }
+
+    .flow-node .small{
+      color:#64748b;
+      font-size:.93rem;
+    }
+
+    .flow-arrow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#64748b;
+      font-size:2rem;
+      font-weight:900;
+      min-width:26px;
+      padding:0 4px;
+    }
+
+    .lesson-stack{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    .mini-cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .mini-card .icon{
+      font-size:1.8rem;
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .mini-card strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:5px;
+    }
+
+    .mini-card span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .table-wrap{
+      overflow-x:auto;
+      margin-top:12px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:720px;
+      font-size:.98rem;
+    }
+
+    th, td{
+      padding:13px 12px;
+      border-bottom:1px solid #e2e8f0;
+      vertical-align:top;
+      text-align:left;
+    }
+
+    th{
+      background:#eff6ff;
+      color:#0f172a;
+      font-weight:800;
+    }
+
+    tr:last-child td{
+      border-bottom:none;
+    }
+
+    .editor-shell{
+      margin-top:14px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #293548;
+      background:linear-gradient(180deg, #111827, #0b1020);
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .editor-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 14px;
+      background:linear-gradient(135deg, #111827, #1f2937);
+      color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-weight:800;
+      font-size:.94rem;
+      letter-spacing:.02em;
+    }
+
+    .editor-bar .tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#c7d2fe;
+      font-size:.84rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .editor-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:8px 13px;
+      font-weight:900;
+      font-size:.9rem;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .08s ease, filter .08s ease;
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .btn:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+    .btn:active{ transform:translateY(0); filter:brightness(.98); }
+
+    .btn-run{
+      background:linear-gradient(135deg, #22c55e, #16a34a);
+      color:#fff;
+    }
+
+    .btn-reset{
+      background:linear-gradient(135deg, #64748b, #475569);
+      color:#fff;
+    }
+
+    textarea.editor{
+      width:100%;
+      display:block;
+      border:0;
+      outline:0;
+      resize:vertical;
+      background:transparent;
+      color:#d0d9e7;
+      padding:16px 18px;
+      font:1rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-variant-ligatures:none;
+      tab-size:4;
+      caret-color:#f8fafc;
+      overflow:auto;
+      -webkit-text-fill-color:#d0d9e7;
+      opacity:1;
+    }
+
+    textarea.editor::placeholder{
+      color:#8a97ab;
+      opacity:1;
+    }
+
+    textarea.editor::selection{
+      background:#fde68a;
+      color:#111827;
+    }
+
+    textarea.editor::-webkit-scrollbar{
+      width:12px;
+      height:12px;
+    }
+
+    textarea.editor::-webkit-scrollbar-track{
+      background:#0f172a;
+    }
+
+    textarea.editor::-webkit-scrollbar-thumb{
+      background:#475569;
+      border-radius:999px;
+      border:2px solid #0f172a;
+    }
+
+    .result-box{
+      margin-top:12px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #f8fbff, #eef4ff);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .result-title{
+      padding:9px 14px;
+      background:#dbeafe;
+      color:#1e3a8a;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      border-bottom:1px solid #bfdbfe;
+    }
+
+    .result{
+      margin:0;
+      padding:14px 18px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:1rem;
+      line-height:1.7;
+      color:#0f172a;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:3.2em;
+    }
+
+    .result.empty{
+      color:#64748b;
+    }
+
+    .result.error{
+      color:#b91c1c;
+      background:#fff7f7;
+    }
+
+    .footer{
+      margin:18px 0 8px;
+      text-align:center;
+      color:#64748b;
+      font-size:.95rem;
+    }
+
+    .accent-blue{--accent:#2563eb}
+    .accent-cyan{--accent:#0891b2}
+    .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669}
+    .accent-red{--accent:#dc2626}
+    .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+    .accent-pink{--accent:#db2777}
+
+    @media (max-width: 980px){
+      body{font-size:17px}
+      .container{padding:16px}
+      .hero{padding:22px}
+      .section-title{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .num{
+        min-width:72px;
+      }
+      .overview-flow{
+        gap:10px;
+      }
+      .flow-arrow{
+        width:100%;
+        transform:rotate(90deg);
+        margin:-2px 0;
+      }
+      .editor-bar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .editor-actions{
+        justify-content:flex-start;
+      }
+    }
+
+    @media print{
+      @page{margin:12mm}
+      body{
+        background:#fff;
+        color:#111827;
+        font-size:15px;
+      }
+      .container{
+        max-width:none;
+        padding:0;
+      }
+      .hero{
+        background:#eff6ff !important;
+        color:#0f172a !important;
+        box-shadow:none;
+        border:1px solid #c7d2fe;
+      }
+      .badge{
+        background:#dbeafe !important;
+        color:#1d4ed8 !important;
+        border-color:#93c5fd;
+      }
+      .card{
+        box-shadow:none;
+        border:1px solid #dbe3ef;
+      }
+      .editor-shell{
+        background:#fff !important;
+        border:1px solid #cbd5e1 !important;
+        box-shadow:none;
+      }
+      .editor-bar{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+        border-bottom:1px solid #cbd5e1;
+      }
+      .editor-bar .tag{
+        background:#cbd5e1 !important;
+        color:#0f172a !important;
+      }
+      .editor-actions{
+        display:none !important;
+      }
+      textarea.editor{
+        background:#f8fafc !important;
+        color:#334155 !important;
+        -webkit-text-fill-color:#334155 !important;
+        caret-color:#0f172a !important;
+      }
+      .result-box{
+        background:#f8fbff !important;
+      }
+      .result-title{
+        background:#dbeafe !important;
+        color:#1e3a8a !important;
+      }
+      .pill{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .note.info,
+      .note.tip,
+      .note.warn{
+        background:#f8fafc !important;
+      }
+      .card,
+      .mini-card,
+      .note,
+      .editor-shell,
+      .result-box,
+      .flow-node{
+        break-inside:avoid;
+        page-break-inside:avoid;
+      }
+      .footer{color:#475569}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法3 / Set インタフェース</div>
+      <h1>Set インタフェース 学習ガイド</h1>
+      <p>
+        Set の特徴と代表的な実装クラスを見やすく整理した補助資料です。
+        コード欄は空欄スタートなので、紙資料を見ながら入力し、下の「実行」ボタンで結果を確認できます。
+        ※ ブラウザ内の簡易実行シミュレータです。
+      </p>
+    </header>
+
+    <section class="section card accent-slate">
+      <div class="section-title">
+        <span class="num">全体像</span>
+        <h2>Set は「重複しない集合」</h2>
+      </div>
+      <p class="lead">
+        Set は数学の集合のイメージです。<span class="pill">重複しない</span>ことが大きな特徴で、
+        List のように <span class="pill">○番目</span> の要素を取り出すことはできません。
+      </p>
+
+      <div class="overview-flow" aria-label="Set の全体像">
+        <div class="flow-node">
+          <div class="icon">🧺</div>
+          <strong>Set</strong>
+          <div class="small">重複なしの集合</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">⚡</div>
+          <strong>HashSet</strong>
+          <div class="small">速い・順序なし</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🔢</div>
+          <strong>hashCode()</strong>
+          <div class="small">格納位置を決める</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🔍</div>
+          <strong>contains()</strong>
+          <div class="small">あるか確認</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🌳</div>
+          <strong>TreeSet / LinkedHashSet</strong>
+          <div class="small">並び順が違う</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>List</th>
+              <th>Set</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>重複</td>
+              <td>あり</td>
+              <td>なし</td>
+            </tr>
+            <tr>
+              <td>順序</td>
+              <td>保証される</td>
+              <td>保証されない（実装による）</td>
+            </tr>
+            <tr>
+              <td>インデックス</td>
+              <td>使える</td>
+              <td>使えない</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note info">
+        <strong>このページの見方</strong>：4.1 から 4.10 までは、Set の基本から代表的な実装クラスまでを順番に並べています。
+        各カードのコード欄は空欄なので、紙資料を見ながら入力して、右下の結果を確認してください。
+      </div>
+    </section>
+
+    <section class="lesson-stack">
+      <article class="card accent-blue">
+        <div class="section-title">
+          <span class="num">4.1</span>
+          <h2>Set インタフェースの特徴</h2>
+        </div>
+        <p class="lead">
+          Set は「同じものを 2 回入れない」コレクションです。List と違って順序は保証されないので、
+          <span class="pill">i 番目</span> を扱う書き方はできません。
+        </p>
+        <ul class="small">
+          <li>重複した要素は 1 つにまとまる</li>
+          <li>順序は保証されない</li>
+          <li>インデックスによる操作はできない</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-unique">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.1 特徴の確認</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.1 Set の特徴のエディタ" style="height:210px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：Set には「○番目の要素」という考え方がありません。
+          List の感覚で <span class="pill">get(0)</span> のように取り出そうとしないようにしましょう。
+        </div>
+      </article>
+
+      <article class="card accent-cyan">
+        <div class="section-title">
+          <span class="num">4.2</span>
+          <h2>HashSet クラス</h2>
+        </div>
+        <p class="lead">
+          Set の実装クラスでよく使われるのが <span class="pill">HashSet</span> です。
+          内部ではハッシュテーブルを使うので、追加・削除・検索が速いのが特徴です。
+        </p>
+        <ul class="small">
+          <li>順序は保証されない</li>
+          <li>ハッシュ値を使って要素を管理する</li>
+          <li>衝突が少ないと高速に動作する</li>
+        </ul>
+
+        <div class="mini-cards">
+          <div class="mini-card">
+            <div class="icon">⚡</div>
+            <strong>HashSet</strong>
+            <span>速さ重視</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🌳</div>
+            <strong>TreeSet</strong>
+            <span>並び順重視</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🔗</div>
+            <strong>LinkedHashSet</strong>
+            <span>追加順重視</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>実装クラス</th>
+                <th>順序</th>
+                <th>特徴</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>HashSet</td>
+                <td>保証されない</td>
+                <td>高速に扱いやすい</td>
+              </tr>
+              <tr>
+                <td>TreeSet</td>
+                <td>自然順序</td>
+                <td>自動で並び替えられる</td>
+              </tr>
+              <tr>
+                <td>LinkedHashSet</td>
+                <td>追加した順</td>
+                <td>順番を残したいときに便利</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note info">
+          <strong>ポイント</strong>：Set の中でも「何を重視するか」で実装クラスを選びます。
+          まずは <span class="pill">HashSet</span> を覚え、必要に応じて <span class="pill">TreeSet</span> や <span class="pill">LinkedHashSet</span> を使い分けます。
+        </div>
+      </article>
+
+      <article class="card accent-purple">
+        <div class="section-title">
+          <span class="num">4.3</span>
+          <h2>hashCode メソッド</h2>
+        </div>
+        <p class="lead">
+          HashSet では、要素をどこに置くかを決めるためにハッシュ値を使います。
+          その値を求めるのが <span class="pill">hashCode()</span> で、<span class="pill">Object</span> クラスのメソッドとして用意されています。
+        </p>
+        <ul class="small">
+          <li>ハッシュ値は格納先を決めるために使う</li>
+          <li>同じ文字列なら同じ hashCode になる</li>
+          <li>Set の内部動作を理解するヒントになる</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="hashcode">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.3 hashCode()</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.3 hashCode() のエディタ" style="height:170px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：<span class="pill">hashCode()</span> は「見た目の文字」ではなく、内部で使う数値です。
+          値が同じかどうかだけでなく、Set の管理方法に関わることを覚えておきましょう。
+        </div>
+      </article>
+
+      <article class="card accent-pink">
+        <div class="section-title">
+          <span class="num">4.4</span>
+          <h2>Set のインスタンスを生成する方法</h2>
+        </div>
+        <p class="lead">
+          Set は <span class="pill">new</span> 演算子で実装クラスを作ります。
+          たとえば <span class="inline-code">Set&lt;String&gt; set = new HashSet&lt;String&gt;();</span> のように書きます。
+        </p>
+        <ul class="small">
+          <li>Set インタフェースそのものではなく、実装クラスを生成する</li>
+          <li>よく使うのは HashSet</li>
+          <li>必要に応じて TreeSet や LinkedHashSet も使う</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-create">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.4 Set の生成</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.4 Set の生成エディタ" style="height:150px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>ポイント</strong>：Set は <span class="pill">new Set&lt;&gt;()</span> のようには書きません。
+          <span class="pill">new HashSet&lt;String&gt;()</span> のように、実装クラスを使って生成します。
+        </div>
+      </article>
+
+      <article class="card accent-green">
+        <div class="section-title">
+          <span class="num">4.5</span>
+          <h2>Set への要素の追加</h2>
+        </div>
+        <p class="lead">
+          要素を追加するときは <span class="pill">add()</span> を使います。
+          同じ値を何度追加しても、Set には 1 つ分しか残りません。
+        </p>
+        <ul class="small">
+          <li>追加は <span class="pill">add()</span></li>
+          <li>同じ要素を追加しても増えない</li>
+          <li>Set は重複を自動で防ぐ</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-add">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.5 add()</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.5 add() のエディタ" style="height:180px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：<span class="pill">add()</span> は「追加できたか」を返すことがありますが、まずは
+          <span class="pill">重複しない</span> という性質を優先して覚えましょう。
+        </div>
+      </article>
+
+      <article class="card accent-orange">
+        <div class="section-title">
+          <span class="num">4.6</span>
+          <h2>Set に格納された要素の参照</h2>
+        </div>
+        <p class="lead">
+          Set では <span class="pill">get()</span> が使えません。順番が保証されないため、要素を 1 件ずつ見るときは
+          <span class="pill">拡張 for 文</span> か <span class="pill">Iterator</span> を使います。
+        </p>
+        <ul class="small">
+          <li>List のように <span class="pill">get(i)</span> は使えない</li>
+          <li>参照するときは 1 件ずつ取り出す</li>
+          <li>HashSet は表示順が保証されない</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-reference">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.6 参照（for / Iterator）</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.6 Set の参照エディタ" style="height:300px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>補足</strong>：HashSet では、表示順が毎回同じとは限りません。
+          結果の順番が紙資料と少し違っても、要素が同じなら正解です。
+        </div>
+      </article>
+
+      <article class="card accent-red">
+        <div class="section-title">
+          <span class="num">4.7</span>
+          <h2>Set に格納された要素の検索</h2>
+        </div>
+        <p class="lead">
+          ある要素が入っているか調べるときは <span class="pill">contains()</span> を使います。
+          戻り値は <span class="pill">true / false</span> なので、条件分岐にも使いやすいです。
+        </p>
+        <ul class="small">
+          <li><span class="pill">indexOf()</span> ではなく <span class="pill">contains()</span></li>
+          <li>結果は真偽値</li>
+          <li>HashSet でも順序に関係なく検索できる</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-contains">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.7 contains()</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.7 contains() のエディタ" style="height:180px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note tip">
+          <strong>覚え方</strong>：<span class="pill">contains()</span> は「入っている？」を調べるメソッドです。
+          迷ったら「検索は contains」と覚えると分かりやすいです。
+        </div>
+      </article>
+
+      <article class="card accent-slate">
+        <div class="section-title">
+          <span class="num">4.8</span>
+          <h2>Set に格納された要素の削除</h2>
+        </div>
+        <p class="lead">
+          1 つだけ削除するなら <span class="pill">remove()</span>、すべて削除するなら <span class="pill">clear()</span> を使います。
+          途中で要素を見ながら削除したい場合は、Iterator の <span class="pill">remove()</span> も使います。
+        </p>
+        <ul class="small">
+          <li>単一の要素は <span class="pill">remove()</span> で削除</li>
+          <li>全部消すときは <span class="pill">clear()</span></li>
+          <li>繰り返し処理中の削除は Iterator の <span class="pill">remove()</span> が安全</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="set-remove">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.8 remove() と clear()</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.8 remove() と clear() のエディタ" style="height:280px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>注意</strong>：Set の要素を全部消すときは <span class="pill">clear()</span> です。
+          ひとつずつ消す <span class="pill">remove()</span> と混同しないようにしましょう。
+        </div>
+      </article>
+
+      <article class="card accent-purple">
+        <div class="section-title">
+          <span class="num">4.9</span>
+          <h2>TreeSet クラス</h2>
+        </div>
+        <p class="lead">
+          TreeSet は Set の実装クラスの 1 つで、要素を自然順序で並べます。
+          文字列なら文字コード順になるので、HashSet のように順番がバラバラになりません。
+        </p>
+        <ul class="small">
+          <li>自然順序で表示される</li>
+          <li>文字列は文字コード順</li>
+          <li>順番をそろえて出したいときに便利</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="treeset">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.9 TreeSet</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.9 TreeSet のエディタ" style="height:230px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>ポイント</strong>：TreeSet は「並び替えたい」ときに便利です。
+          文字列のサンプルでは <span class="pill">abc → def → ghi</span> の順で表示されます。
+        </div>
+      </article>
+
+      <article class="card accent-orange">
+        <div class="section-title">
+          <span class="num">4.10</span>
+          <h2>LinkedHashSet クラス</h2>
+        </div>
+        <p class="lead">
+          LinkedHashSet も Set の実装クラスの 1 つです。
+          ハッシュテーブルと連結リストの性質を持ち、追加した順番をそのまま保てます。
+        </p>
+        <ul class="small">
+          <li>追加した順番が保持される</li>
+          <li>HashSet より表示順を見やすくしたいときに便利</li>
+          <li>順番を残しつつ重複を防ぎたい場合に向く</li>
+        </ul>
+
+        <div class="editor-shell" data-runner="linkedhashset">
+          <div class="editor-bar">
+            <span>📝 入力エディタ / 4.10 LinkedHashSet</span>
+            <div class="editor-actions">
+              <button type="button" class="btn btn-run" data-action="run">▶ 実行</button>
+              <button type="button" class="btn btn-reset" data-action="reset">↺ 初期化</button>
+            </div>
+          </div>
+          <textarea class="editor" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off"
+            placeholder="ここにコードを入力してください" aria-label="4.10 LinkedHashSet のエディタ" style="height:230px;"></textarea>
+          <div class="result-box" aria-live="polite">
+            <div class="result-title">実行結果</div>
+            <pre class="result empty" data-placeholder="ここに実行結果が表示されます">ここに実行結果が表示されます</pre>
+          </div>
+        </div>
+
+        <div class="note tip">
+          <strong>覚え方</strong>：<span class="pill">LinkedHashSet</span> は「入れた順に並ぶ Set」です。
+          表示順を保ちたいときに覚えておくと便利です。
+        </div>
+      </article>
+
+      <article class="card accent-slate">
+        <div class="section-title">
+          <span class="num">まとめ</span>
+          <h2>Set を使い分けるポイント</h2>
+        </div>
+        <p class="lead">
+          まずは HashSet を基本にし、<span class="pill">並び替えたいなら TreeSet</span>、
+          <span class="pill">追加順を残したいなら LinkedHashSet</span> と覚えると整理しやすいです。
+        </p>
+
+        <div class="mini-cards">
+          <div class="mini-card">
+            <div class="icon">⚡</div>
+            <strong>HashSet</strong>
+            <span>速さ重視・順序なし</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🌳</div>
+            <strong>TreeSet</strong>
+            <span>自然順序で表示</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🔗</div>
+            <strong>LinkedHashSet</strong>
+            <span>追加した順を保持</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🔍</div>
+            <strong>contains()</strong>
+            <span>あるか調べる</span>
+          </div>
+          <div class="mini-card">
+            <div class="icon">🗑</div>
+            <strong>remove() / clear()</strong>
+            <span>削除する</span>
+          </div>
+        </div>
+
+        <div class="note info">
+          <strong>試験前の確認</strong>：
+          Set は <span class="pill">重複なし</span>、<span class="pill">順序は実装次第</span>、<span class="pill">index は使えない</span> の 3 つをまず思い出しましょう。
+        </div>
+      </article>
+    </section>
+
+    <div class="footer">授業用補助資料 / Set インタフェース（空欄エディタ＋実行結果版）</div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      function stripComments(code) {
+        return code
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/\/\/.*$/gm, '');
+      }
+
+      function unescapeJavaString(s) {
+        return s
+          .replace(/\\\\/g, '\\')
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t');
+      }
+
+      function uniquePreserveOrder(arr) {
+        const seen = new Set();
+        const out = [];
+        for (const item of arr) {
+          if (!seen.has(item)) {
+            seen.add(item);
+            out.push(item);
+          }
+        }
+        return out;
+      }
+
+      function parseAddedStrings(code) {
+        const items = [];
+        const re = /\.(?:add|addElement)\s*\(\s*"((?:\\.|[^"\\])*)"\s*\)/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+          items.push(unescapeJavaString(m[1]));
+        }
+        return items;
+      }
+
+      function parseRemoveStrings(code) {
+        const items = [];
+        const re = /\.(?:remove)\s*\(\s*"((?:\\.|[^"\\])*)"\s*\)/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+          items.push(unescapeJavaString(m[1]));
+        }
+        return items;
+      }
+
+      function parseContainsStrings(code) {
+        const items = [];
+        const re = /\.(?:contains)\s*\(\s*"((?:\\.|[^"\\])*)"\s*\)/g;
+        let m;
+        while ((m = re.exec(code)) !== null) {
+          items.push(unescapeJavaString(m[1]));
+        }
+        return items;
+      }
+
+      function parseFirstStringLiteral(code) {
+        const m = code.match(/"((?:\\.|[^"\\])*)"/);
+        return m ? unescapeJavaString(m[1]) : null;
+      }
+
+      function javaStringHash(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) {
+          h = ((h * 31) + str.charCodeAt(i)) | 0;
+        }
+        return String(h);
+      }
+
+      function formatLines(items) {
+        return items.length ? items.join('\n') : '（空）';
+      }
+
+      function repeatText(text, count) {
+        if (count <= 1) return text;
+        return Array.from({ length: count }, () => text).join('\n');
+      }
+
+      function buildItemsByOrder(type, code) {
+        const clean = stripComments(code);
+        let items = uniquePreserveOrder(parseAddedStrings(clean));
+
+        if (/clear\s*\(\s*\)/.test(clean)) {
+          return [];
+        }
+
+        const removals = uniquePreserveOrder(parseRemoveStrings(clean));
+        if (removals.length) {
+          items = items.filter(v => !removals.includes(v));
+        }
+
+        if (type === 'treeset') {
+          items = uniquePreserveOrder(items).sort((a, b) => a.localeCompare(b, 'ja'));
+        } else {
+          items = uniquePreserveOrder(items);
+        }
+
+        return items;
+      }
+
+      function setResult(resultEl, text, isError = false, isEmpty = false) {
+        resultEl.textContent = text;
+        resultEl.classList.toggle('error', !!isError);
+        resultEl.classList.toggle('empty', !!isEmpty);
+      }
+
+      function computeSample(type, code) {
+        const clean = stripComments(code);
+
+        switch (type) {
+          case 'set-unique': {
+            const items = buildItemsByOrder('hashset', clean);
+            return { ok: true, text: formatLines(items), empty: items.length === 0 };
+          }
+
+          case 'hashcode': {
+            if (!/hashCode\s*\(\s*\)/.test(clean)) {
+              return { ok: false, text: 'hashCode() を使ったコードを入力してください。', empty: true };
+            }
+            const s = parseFirstStringLiteral(clean);
+            if (s === null) {
+              return { ok: false, text: '文字列が見つかりません。', empty: true };
+            }
+            return { ok: true, text: javaStringHash(s), empty: false };
+          }
+
+          case 'set-create': {
+            const classMatch = clean.match(/new\s+([A-Za-z_]\w*)\s*(?:<[^>]+>)?\s*\(/);
+            const className = classMatch ? classMatch[1] : 'HashSet';
+            const items = buildItemsByOrder('hashset', clean);
+            if (items.length > 0) {
+              return { ok: true, text: formatLines(items), empty: false };
+            }
+            return { ok: true, text: `空の ${className} を生成しました`, empty: false };
+          }
+
+          case 'set-add': {
+            const items = buildItemsByOrder('hashset', clean);
+            if (!items.length) {
+              return { ok: false, text: 'add() した要素が見つかりません。', empty: true };
+            }
+            return { ok: true, text: formatLines(items), empty: false };
+          }
+
+          case 'set-reference': {
+            const items = buildItemsByOrder('hashset', clean);
+            const hasForEach = /for\s*\(\s*String\s+\w+\s*:\s*\w+\s*\)/.test(clean);
+            const hasIterator = /while\s*\(\s*\w+\.hasNext\s*\(\s*\)\s*\)/.test(clean);
+            const repeat = (hasForEach ? 1 : 0) + (hasIterator ? 1 : 0) || 1;
+            return { ok: true, text: repeatText(formatLines(items), repeat), empty: items.length === 0 };
+          }
+
+          case 'set-contains': {
+            const items = buildItemsByOrder('hashset', clean);
+            const queries = parseContainsStrings(clean);
+            if (!queries.length) {
+              return { ok: false, text: 'contains() の条件が見つかりません。', empty: true };
+            }
+            const out = queries.map(q => String(items.includes(q)));
+            return { ok: true, text: out.join('\n'), empty: false };
+          }
+
+          case 'set-remove': {
+            const items = buildItemsByOrder('hashset', clean);
+            const hasForEach = /for\s*\(\s*String\s+\w+\s*:\s*\w+\s*\)/.test(clean);
+            const hasIterator = /while\s*\(\s*\w+\.hasNext\s*\(\s*\)\s*\)/.test(clean);
+            const repeat = (hasForEach ? 1 : 0) + (hasIterator ? 1 : 0) || 1;
+            return { ok: true, text: repeatText(formatLines(items), repeat), empty: items.length === 0 };
+          }
+
+          case 'treeset': {
+            const items = buildItemsByOrder('treeset', clean);
+            return { ok: true, text: formatLines(items), empty: items.length === 0 };
+          }
+
+          case 'linkedhashset': {
+            const items = buildItemsByOrder('linkedhashset', clean);
+            return { ok: true, text: formatLines(items), empty: items.length === 0 };
+          }
+
+          default:
+            return { ok: false, text: '未対応のサンプルです。', empty: true };
+        }
+      }
+
+      function runShell(shell) {
+        const type = shell.dataset.runner;
+        const editor = shell.querySelector('textarea.editor');
+        const result = shell.querySelector('.result');
+        const code = editor.value.trim();
+
+        if (!code) {
+          setResult(result, 'コードが空です。紙資料を見ながら入力してください。', false, true);
+          return;
+        }
+
+        const out = computeSample(type, code);
+        setResult(result, out.text, !out.ok, !!out.empty);
+      }
+
+      function resetShell(shell) {
+        const editor = shell.querySelector('textarea.editor');
+        const result = shell.querySelector('.result');
+        editor.value = '';
+        const placeholder = result.dataset.placeholder || 'ここに実行結果が表示されます';
+        setResult(result, placeholder, false, true);
+      }
+
+      function enableTabInsert(textarea) {
+        textarea.addEventListener('keydown', (e) => {
+          if (e.key !== 'Tab') return;
+          e.preventDefault();
+
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const value = textarea.value;
+
+          textarea.value = value.slice(0, start) + '    ' + value.slice(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.editor-shell').forEach((shell) => {
+          const editor = shell.querySelector('textarea.editor');
+          const btnRun = shell.querySelector('[data-action="run"]');
+          const btnReset = shell.querySelector('[data-action="reset"]');
+
+          enableTabInsert(editor);
+          resetShell(shell);
+
+          btnRun.addEventListener('click', () => runShell(shell));
+          btnReset.addEventListener('click', () => resetShell(shell));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
