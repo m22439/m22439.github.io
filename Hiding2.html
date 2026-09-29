@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java 隠蔽 学習ガイド</title>
+  <style>
+    :root{
+      --bg1:#eef4ff;
+      --bg2:#f8fbff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#dbe3ef;
+      --card:#ffffff;
+      --shadow:0 14px 34px rgba(15, 23, 42, .08);
+
+      --blue:#2563eb;
+      --cyan:#0891b2;
+      --green:#059669;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --orange:#d97706;
+      --slate:#334155;
+      --pink:#db2777;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px;
+      line-height:1.75;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .container{
+      max-width:1320px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      border-radius:26px;
+      padding:28px 30px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .kicker{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2.1rem, 4.8vw, 3.7rem);
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:1120px;
+      font-size:clamp(1rem, 1.55vw, 1.16rem);
+      opacity:.96;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:800;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.24);
+      white-space:nowrap;
+    }
+
+    .section{
+      margin-top:20px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      border-top:10px solid var(--accent, var(--blue));
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 10px;
+    }
+
+    .num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:92px;
+      padding:9px 14px;
+      border-radius:999px;
+      background:var(--accent, var(--blue));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.98rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(1.42rem, 2.25vw, 2.05rem);
+      line-height:1.2;
+    }
+
+    .lead{
+      margin:0 0 12px;
+      color:#334155;
+      font-size:1.03rem;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      border-left:6px solid transparent;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .note.info{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      border-left-color:#3b82f6;
+    }
+
+    .note.tip{
+      background:#ecfdf5;
+      border-color:#a7f3d0;
+      border-left-color:#10b981;
+    }
+
+    .note.warn{
+      background:#fff1f2;
+      border-color:#fecdd3;
+      border-left-color:#ef4444;
+    }
+
+    .note strong{
+      font-size:1.02rem;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-weight:800;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+
+    .flow-grid{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:stretch;
+      gap:12px;
+      margin:14px 0 2px;
+    }
+
+    .flow-node{
+      flex:1 1 200px;
+      min-width:180px;
+      background:linear-gradient(180deg, #eff6ff, #ffffff);
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      padding:14px 14px 12px;
+      text-align:center;
+      box-shadow:0 10px 24px rgba(37,99,235,.06);
+    }
+
+    .flow-node .icon{
+      font-size:1.85rem;
+      line-height:1;
+      margin-bottom:6px;
+    }
+
+    .flow-node strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:4px;
+    }
+
+    .flow-node .small{
+      color:#475569;
+    }
+
+    .flow-arrow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#64748b;
+      font-size:2rem;
+      font-weight:900;
+      min-width:26px;
+      padding:0 4px;
+    }
+
+    .split-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:14px;
+    }
+
+    .panel{
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .panel h3{
+      margin:0 0 10px;
+      font-size:1.15rem;
+      line-height:1.3;
+    }
+
+    .mini-cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .mini-card .icon{
+      font-size:1.8rem;
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .mini-card strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:5px;
+    }
+
+    .mini-card span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .compare-wrap{
+      margin-top:14px;
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid #dbe3ef;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .compare-table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:820px;
+      background:#fff;
+    }
+
+    .compare-table th,
+    .compare-table td{
+      padding:14px 15px;
+      vertical-align:top;
+      border-bottom:1px solid #e2e8f0;
+      border-right:1px solid #e2e8f0;
+      text-align:left;
+      font-size:1rem;
+    }
+
+    .compare-table th:last-child,
+    .compare-table td:last-child{border-right:0}
+
+    .compare-table thead th{
+      background:linear-gradient(135deg, #eff6ff, #dbeafe);
+      color:#0f172a;
+      font-weight:900;
+      font-size:1.02rem;
+    }
+
+    .compare-table tbody tr:nth-child(even) td{
+      background:#f8fbff;
+    }
+
+    .compare-label{
+      font-weight:900;
+      white-space:nowrap;
+      color:#334155;
+      width:20%;
+    }
+
+    .code-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .code-title{
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .code-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 10px;
+      border-radius:999px;
+      background:#e0f2fe;
+      color:#075985;
+      font-size:.88rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .code-block{
+      margin:0;
+      padding:16px 18px;
+      border-radius:18px;
+      overflow:auto;
+      border:1px solid #0f172a;
+      background:linear-gradient(180deg, #0f172a, #111827);
+      color:#dbeafe;
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+      font:1rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      tab-size:4;
+      white-space:pre;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .code-block code{
+      font:inherit;
+    }
+
+    .kw{color:#93c5fd;font-weight:800}
+    .type{color:#c4b5fd;font-weight:800}
+    .str{color:#86efac}
+    .com{color:#94a3b8;font-style:italic}
+    .method{color:#67e8f9}
+    .anno{color:#f9a8d4}
+    .numlit{color:#fdba74}
+    .field{color:#fda4af}
+
+    .output-box{
+      margin-top:12px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #f8fbff, #eef4ff);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .output-title{
+      padding:9px 14px;
+      background:#dbeafe;
+      color:#1e3a8a;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      border-bottom:1px solid #bfdbfe;
+    }
+
+    .output-text{
+      margin:0;
+      padding:14px 18px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:1rem;
+      line-height:1.7;
+      color:#0f172a;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:3.2em;
+    }
+
+    .binding-grid{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:12px;
+      align-items:center;
+      margin-top:14px;
+    }
+
+    .binding-card{
+      border-radius:18px;
+      padding:16px 16px 14px;
+      color:#fff;
+      box-shadow:0 10px 22px rgba(15,23,42,.08);
+      border:1px solid rgba(255,255,255,.18);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .binding-card.blue{
+      background:linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .binding-card.purple{
+      background:linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .binding-card.green{
+      background:linear-gradient(135deg, #059669, #047857);
+    }
+
+    .binding-tag{
+      display:inline-block;
+      margin-bottom:10px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      font-size:.86rem;
+      font-weight:900;
+      letter-spacing:.03em;
+    }
+
+    .binding-main{
+      font-size:1.32rem;
+      font-weight:900;
+      line-height:1.25;
+      margin-bottom:6px;
+    }
+
+    .binding-sub{
+      font-size:.94rem;
+      opacity:.96;
+    }
+
+    .binding-arrow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2rem;
+      color:#64748b;
+      font-weight:900;
+    }
+
+    .binding-summary{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .binding-chip{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#1e1b4b;
+      font-weight:800;
+      font-size:.92rem;
+      border:1px solid #c7d2fe;
+    }
+
+    .legend-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .legend-item{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+    }
+
+    .legend-item strong{
+      display:block;
+      margin-bottom:5px;
+      font-size:1.05rem;
+    }
+
+    .legend-item span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .footer{
+      margin:18px 0 8px;
+      text-align:center;
+      color:#64748b;
+      font-size:.95rem;
+    }
+
+    .accent-blue{--accent:#2563eb}
+    .accent-cyan{--accent:#0891b2}
+    .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669}
+    .accent-red{--accent:#dc2626}
+    .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+    .accent-pink{--accent:#db2777}
+
+    @media (max-width: 980px){
+      body{font-size:17px}
+      .container{padding:16px}
+      .hero{padding:22px}
+      .section-title{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .num{
+        min-width:72px;
+      }
+      .flow-grid{
+        gap:10px;
+      }
+      .flow-arrow{
+        width:100%;
+        transform:rotate(90deg);
+        margin:-2px 0;
+      }
+      .split-layout,
+      .binding-grid{
+        grid-template-columns:1fr;
+      }
+      .binding-arrow{
+        transform:rotate(90deg);
+      }
+    }
+
+    @media print{
+      @page{margin:12mm}
+      body{
+        background:#fff;
+        color:#111827;
+        font-size:15px;
+      }
+      .container{
+        max-width:none;
+        padding:0;
+      }
+      .hero{
+        background:#eff6ff !important;
+        color:#0f172a !important;
+        box-shadow:none;
+        border:1px solid #c7d2fe;
+      }
+      .badge{
+        background:#dbeafe !important;
+        color:#1d4ed8 !important;
+        border-color:#93c5fd;
+      }
+      .card{
+        box-shadow:none;
+        border:1px solid #dbe3ef;
+      }
+      .panel,
+      .mini-card,
+      .legend-item,
+      .flow-node,
+      .binding-card{
+        box-shadow:none;
+      }
+      .code-block{
+        background:#f8fafc !important;
+        color:#0f172a !important;
+        border:1px solid #cbd5e1 !important;
+      }
+      .kw{color:#1d4ed8 !important}
+      .type{color:#7c3aed !important}
+      .str{color:#047857 !important}
+      .com{color:#64748b !important}
+      .method{color:#0891b2 !important}
+      .anno{color:#be185d !important}
+      .numlit{color:#b45309 !important}
+      .field{color:#be123c !important}
+      .compare-table thead th{
+        background:#dbeafe !important;
+      }
+      .output-box{
+        background:#f8fbff !important;
+      }
+      .output-title{
+        background:#dbeafe !important;
+        color:#1e3a8a !important;
+      }
+      .binding-card.blue,
+      .binding-card.purple,
+      .binding-card.green{
+        background:#f8fafc !important;
+        color:#0f172a !important;
+        border:1px solid #cbd5e1;
+      }
+      .binding-tag{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .binding-chip{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+        border-color:#cbd5e1;
+      }
+      .pill{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .note.info,
+      .note.tip,
+      .note.warn{
+        background:#f8fafc !important;
+      }
+      .footer{color:#475569}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法2</div>
+      <h1>隠蔽</h1>
+      <p>
+        この資料は、スーパークラス / サブクラスの関係を使って、
+        「なぜ隠蔽が起こるのか」「なぜ静的束縛と言えるのか」を見やすくまとめた補助資料です。
+      </p>
+      <div class="badge-row">
+        <span class="badge">superclass</span>
+        <span class="badge">subclass</span>
+        <span class="badge">static binding</span>
+        <span class="badge">dynamic binding</span>
+        <span class="badge">hiding</span>
+      </div>
+    </header>
+
+    <section class="section card accent-slate">
+      <div class="section-title">
+        <span class="num">まず結論</span>
+        <h2>「隠蔽」の特徴は「静的束縛」にある</h2>
+      </div>
+      <p class="lead">
+        スーパークラス型の変数から見ると、見えるメンバは <span class="pill">変数の宣言型</span> で決まります。
+        つまり、インスタンスがサブクラスでも、変数の型がスーパークラスなら、スーパークラス側の変数が見えます。
+      </p>
+
+      <div class="flow-grid" aria-label="静的束縛の流れ">
+        <div class="flow-node">
+          <div class="icon">🧩</div>
+          <strong>宣言型を見る</strong>
+          <div class="small">変数の型でアクセス先を決める</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">🖥️</div>
+          <strong>コンパイル時に決定</strong>
+          <div class="small">実行前に見えるものが決まる</div>
+        </div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node">
+          <div class="icon">📌</div>
+          <strong>スーパークラス側が見える</strong>
+          <div class="small">同名のサブクラス側は隠れる</div>
+        </div>
+      </div>
+
+      <div class="note.info">
+        <strong>覚え方</strong>：
+        <span class="pill">メソッドはインスタンスを見る</span>、
+        <span class="pill">変数は宣言型を見る</span>。
+        この 1 文が、オーバーライドと隠蔽の違いを見分けるコツです。
+      </div>
+    </section>
+
+    <section class="section card accent-purple">
+      <div class="section-title">
+        <span class="num">1</span>
+        <h2>静的束縛と動的束縛</h2>
+      </div>
+      <p class="lead">
+        静的束縛（Static Binding）は、<span class="pill">コンパイル時</span> に決まります。
+        動的束縛（Dynamic Binding）は、<span class="pill">実行時</span> にインスタンスの型で決まります。
+      </p>
+
+      <div class="split-layout">
+        <div class="panel">
+          <h3>静的束縛 / Static Binding</h3>
+          <p class="small">
+            変数の宣言型で決まります。フィールドや static メソッドは、この見方になります。
+          </p>
+          <div class="mini-cards">
+            <div class="mini-card">
+              <div class="icon">⏱️</div>
+              <strong>決まるタイミング</strong>
+              <span>コンパイル時</span>
+            </div>
+            <div class="mini-card">
+              <div class="icon">🏷️</div>
+              <strong>見るもの</strong>
+              <span>変数の宣言型</span>
+            </div>
+          </div>
+          <pre class="code-block"><code><span class="type">A</span> x = <span class="kw">new</span> <span class="type">B</span>();
+System.out.<span class="method">println</span>(x.name);   <span class="com">// A の name</span>
+System.out.<span class="method">println</span>(x.price);  <span class="com">// A の price</span></code></pre>
+        </div>
+
+        <div class="panel">
+          <h3>動的束縛 / Dynamic Binding</h3>
+          <p class="small">
+            インスタンスの型で決まります。インスタンスメソッドは、この見方になります。
+          </p>
+          <div class="mini-cards">
+            <div class="mini-card">
+              <div class="icon">🕒</div>
+              <strong>決まるタイミング</strong>
+              <span>実行時</span>
+            </div>
+            <div class="mini-card">
+              <div class="icon">🎯</div>
+              <strong>見るもの</strong>
+              <span>実際に生成されたインスタンスの型</span>
+            </div>
+          </div>
+          <pre class="code-block"><code><span class="type">A</span> x = <span class="kw">new</span> <span class="type">B</span>();
+x.show();  <span class="com">// B の show()</span></code></pre>
+        </div>
+      </div>
+
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>静的束縛</th>
+              <th>動的束縛</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="compare-label">決まる時</td>
+              <td>コンパイル時</td>
+              <td>実行時</td>
+            </tr>
+            <tr>
+              <td class="compare-label">見るもの</td>
+              <td>変数の宣言型</td>
+              <td>インスタンスの型</td>
+            </tr>
+            <tr>
+              <td class="compare-label">対象</td>
+              <td>インスタンス変数、クラス変数、クラスメソッド</td>
+              <td>インスタンスメソッド</td>
+            </tr>
+            <tr>
+              <td class="compare-label">例</td>
+              <td><span class="pill">p.name</span> / <span class="pill">p.price</span></td>
+              <td><span class="pill">p.show()</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note.tip">
+        <strong>ポイント</strong>：
+        オーバーライドは動的束縛、隠蔽は静的束縛です。
+        どちらも「同じ名前」が出てきますが、見え方のルールが違います。
+      </div>
+    </section>
+
+    <section class="section card accent-cyan">
+      <div class="section-title">
+        <span class="num">2</span>
+        <h2>なぜ隠蔽が必要なのか</h2>
+      </div>
+      <p class="lead">
+        スーパークラスとサブクラスで、同じ名前でも意味が違うことがあります。
+        隠蔽があると、<span class="pill">どの型として見ているか</span> がはっきりし、学習しやすくなります。
+      </p>
+
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="icon">📦</div>
+          <strong>同名でも別の値を持てる</strong>
+          <span>スーパークラスとサブクラスで、別々のフィールドを持てます。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">🔍</div>
+          <strong>読み方が明確になる</strong>
+          <span>変数の宣言型を見るだけで、どこを参照するか分かります。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">🎓</div>
+          <strong>継承の仕組みを理解しやすい</strong>
+          <span>静的束縛と動的束縛の違いを比較できます。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">🧭</div>
+          <strong>コードの見通しがよい</strong>
+          <span>「インスタンス」と「宣言型」を分けて考えられます。</span>
+        </div>
+      </div>
+
+      <div class="note.warn">
+        <strong>注意</strong>：
+        学習では同名のメンバを使って比較しますが、実際の開発では混乱を避けるために、
+        同じ名前をたくさん使いすぎないほうが安全です。
+      </div>
+    </section>
+
+    <section class="section card accent-blue">
+      <div class="section-title">
+        <span class="num">3</span>
+        <h2>サンプル 1：変数の宣言型が Product のとき</h2>
+      </div>
+      <p class="lead">
+        <span class="pill">Product p = new Printer("Epsun-ZZZ", 45000);</span> のように書くと、
+        変数 <span class="pill">p</span> は Product 型として扱われます。
+        そのため、<span class="pill">p.name</span> と <span class="pill">p.price</span> は Product 側を見ます。
+      </p>
+
+      <div class="split-layout">
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">コード</span>
+            <span class="code-tag">ページ 12 の例</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">class</span> <span class="type">Test</span>{
+    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> main(<span class="type">String</span> args[]){
+        <span class="com">// スーパークラスの型で変数を宣言</span>
+        <span class="type">Product</span> p = <span class="kw">new</span> <span class="type">Printer</span>(<span class="str">"Epsun-ZZZ"</span>, <span class="numlit">45000</span>);
+
+        <span class="com">// name と price を出力</span>
+        <span class="com">// この場合、静的束縛により、スーパークラスの name と price を指す</span>
+        System.out.<span class="method">println</span>(p.name + <span class="str">"\t"</span> + p.price);
+    }
+}
+
+<span class="kw">class</span> <span class="type">Product</span>{
+    <span class="kw">protected</span> <span class="type">String</span> name;
+    <span class="kw">protected</span> <span class="kw">int</span> price;
+    <span class="kw">public</span> <span class="type">Product</span>(){
+        name = <span class="str">"スーパークラス"</span>;
+        price = <span class="numlit">40000</span>;
+    }
+}
+
+<span class="kw">class</span> <span class="type">Printer</span> <span class="kw">extends</span> <span class="type">Product</span>{
+    <span class="kw">protected</span> <span class="type">String</span> name;
+    <span class="kw">protected</span> <span class="kw">double</span> price;
+    <span class="kw">public</span> <span class="type">Printer</span>(<span class="type">String</span> x,<span class="kw">int</span> y){
+        <span class="com">// スーパークラスの引数のないコンストラクタを暗黙的に呼び出す</span>
+        name = x;
+        price = y;
+    }
+}</code></pre>
+        </div>
+
+        <div class="panel">
+          <h3>見え方の図</h3>
+          <div class="binding-grid" style="margin-top:10px;">
+            <div class="binding-card blue">
+              <div class="binding-tag">宣言型</div>
+              <div class="binding-main">Product p</div>
+              <div class="binding-sub">p は Product として見られる</div>
+            </div>
+            <div class="binding-arrow">➡️</div>
+            <div class="binding-card purple">
+              <div class="binding-tag">インスタンス</div>
+              <div class="binding-main">new Printer()</div>
+              <div class="binding-sub">中身は Printer のインスタンス</div>
+            </div>
+          </div>
+
+          <div class="binding-summary">
+            <span class="binding-chip">p.name → Product.name</span>
+            <span class="binding-chip">p.price → Product.price</span>
+          </div>
+
+          <div class="output-box">
+            <div class="output-title">実行結果</div>
+            <div class="output-text">スーパークラス 40000</div>
+          </div>
+
+          <div class="note.info">
+            <strong>ここが重要</strong>：
+            インスタンスは Printer でも、<span class="pill">変数 p の型は Product</span> です。
+            だから、見えるのは Product 側のメンバになります。
+          </div>
+        </div>
+      </div>
+
+      <div class="note.warn">
+        <strong>つまずきやすい点</strong>：
+        <span class="pill">new Printer()</span> だから Printer の値が見える、とは限りません。
+        <span class="pill">変数の型</span> が Product なら、変数から見えるのは Product 側です。
+      </div>
+    </section>
+
+    <section class="section card accent-orange">
+      <div class="section-title">
+        <span class="num">4</span>
+        <h2>サンプル 2：変数の宣言型が Printer のとき</h2>
+      </div>
+      <p class="lead">
+        今度は <span class="pill">Printer p = new Printer("Epsun-ZZZ", 45000);</span> です。
+        この場合は変数の型も Printer なので、<span class="pill">p.name</span> と <span class="pill">p.price</span> は Printer 側を見ます。
+      </p>
+
+      <div class="split-layout">
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">コード</span>
+            <span class="code-tag">ページ 13 の例</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">class</span> <span class="type">Test</span>{
+    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> main(<span class="type">String</span> args[]){
+        <span class="com">// サブクラスの型で変数を宣言</span>
+        <span class="type">Printer</span> p = <span class="kw">new</span> <span class="type">Printer</span>(<span class="str">"Epsun-ZZZ"</span>, <span class="numlit">45000</span>);
+
+        <span class="com">// name と price を出力</span>
+        <span class="com">// この場合、静的束縛により、サブクラスの name と price を指す</span>
+        System.out.<span class="method">println</span>(p.name + <span class="str">"\t"</span> + p.price);
+    }
+}
+
+<span class="kw">class</span> <span class="type">Product</span>{
+    <span class="kw">protected</span> <span class="type">String</span> name;
+    <span class="kw">protected</span> <span class="kw">int</span> price;
+    <span class="kw">public</span> <span class="type">Product</span>(){
+        name = <span class="str">"スーパークラス"</span>;
+        price = <span class="numlit">40000</span>;
+    }
+}
+
+<span class="kw">class</span> <span class="type">Printer</span> <span class="kw">extends</span> <span class="type">Product</span>{
+    <span class="kw">protected</span> <span class="type">String</span> name;
+    <span class="kw">protected</span> <span class="kw">double</span> price;
+    <span class="kw">public</span> <span class="type">Printer</span>(<span class="type">String</span> x,<span class="kw">int</span> y){
+        <span class="com">// スーパークラスの引数のないコンストラクタを暗黙的に呼び出す</span>
+        name = x;
+        price = y;
+    }
+}</code></pre>
+        </div>
+
+        <div class="panel">
+          <h3>見え方の図</h3>
+          <div class="binding-grid" style="margin-top:10px;">
+            <div class="binding-card blue">
+              <div class="binding-tag">宣言型</div>
+              <div class="binding-main">Printer p</div>
+              <div class="binding-sub">p は Printer として見られる</div>
+            </div>
+            <div class="binding-arrow">➡️</div>
+            <div class="binding-card green">
+              <div class="binding-tag">インスタンス</div>
+              <div class="binding-main">new Printer()</div>
+              <div class="binding-sub">参照型とインスタンスの型が一致している</div>
+            </div>
+          </div>
+
+          <div class="binding-summary">
+            <span class="binding-chip">p.name → Printer.name</span>
+            <span class="binding-chip">p.price → Printer.price</span>
+          </div>
+
+          <div class="output-box">
+            <div class="output-title">実行結果</div>
+            <div class="output-text">Epsun-ZZZ 45000.0</div>
+          </div>
+
+          <div class="note.tip">
+            <strong>注目</strong>：
+            <span class="pill">45000.0</span> と小数になるのは、
+            Printer 側の <span class="pill">price</span> が <span class="pill">double</span> だからです。
+          </div>
+        </div>
+      </div>
+
+      <div class="note.info">
+        <strong>補足</strong>：
+        コンストラクタは継承されませんが、サブクラスのコンストラクタの中で
+        スーパークラスのコンストラクタが先に呼ばれます。ここでは <span class="pill">super()</span> が暗黙的に呼ばれています。
+      </div>
+    </section>
+
+    <section class="section card accent-green">
+      <div class="section-title">
+        <span class="num">まとめ</span>
+        <h2>今日のポイント 4 つ</h2>
+      </div>
+      <p class="lead">
+        「どこを見ているか」を意識すると、隠蔽と静的束縛が理解しやすくなります。
+      </p>
+
+      <div class="legend-grid">
+        <div class="legend-item">
+          <strong>1. 隠蔽は静的束縛</strong>
+          <span>変数の宣言型で、見えるメンバが決まる。</span>
+        </div>
+        <div class="legend-item">
+          <strong>2. オーバーライドは動的束縛</strong>
+          <span>インスタンスメソッドはインスタンスの型で決まる。</span>
+        </div>
+        <div class="legend-item">
+          <strong>3. Product p と Printer p で結果が違う</strong>
+          <span>同じ new Printer() でも、変数の型で見え方が変わる。</span>
+        </div>
+        <div class="legend-item">
+          <strong>4. 変数の型が見え方を決める</strong>
+          <span>宣言型を見れば、どのメンバが参照されるか分かる。</span>
+        </div>
+      </div>
+
+      <div class="note.info">
+        <strong>最後に</strong>：
+        <span class="pill">メソッドはインスタンス</span>、
+        <span class="pill">変数は宣言型</span>。
+        まずはこの 1 文を覚えると、問題を読みやすくなります。
+      </div>
+    </section>
+
+    <div class="footer">授業用補助資料 / Java 隠蔽と静的束縛（スーパークラス・サブクラス表記版）</div>
+  </div>
+</body>
+</html>
