@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java 抽象クラスとインターフェイス</title>
+  <style>
+    :root{
+      --bg1:#eef4ff;
+      --bg2:#f8fbff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#dbe3ef;
+      --shadow:0 14px 34px rgba(15, 23, 42, .08);
+
+      --blue:#2563eb;
+      --cyan:#0891b2;
+      --green:#059669;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --orange:#d97706;
+      --slate:#334155;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px;
+      line-height:1.75;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .container{
+      max-width:1320px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      border-radius:26px;
+      padding:28px 30px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .kicker{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2.1rem, 4.8vw, 3.7rem);
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:1180px;
+      font-size:clamp(1rem, 1.55vw, 1.16rem);
+      opacity:.96;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:800;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.24);
+      white-space:nowrap;
+    }
+
+    .section{margin-top:20px;}
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      border-top:10px solid var(--accent, var(--blue));
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 10px;
+    }
+
+    .num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:92px;
+      padding:9px 14px;
+      border-radius:999px;
+      background:var(--accent, var(--blue));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.98rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(1.42rem, 2.25vw, 2.05rem);
+      line-height:1.2;
+    }
+
+    .lead{
+      margin:0 0 12px;
+      color:#334155;
+      font-size:1.03rem;
+    }
+
+    .note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      border-left:6px solid transparent;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .note.info{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      border-left-color:#3b82f6;
+    }
+
+    .note.tip{
+      background:#ecfdf5;
+      border-color:#a7f3d0;
+      border-left-color:#10b981;
+    }
+
+    .note.warn{
+      background:#fff1f2;
+      border-color:#fecdd3;
+      border-left-color:#ef4444;
+    }
+
+    .note strong{font-size:1.02rem;}
+
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-weight:800;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+
+    .feature-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .feature-item{
+      border-radius:16px;
+      padding:14px 15px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .feature-item strong{
+      display:block;
+      margin-bottom:6px;
+      font-size:1.05rem;
+    }
+
+    .feature-item span{
+      color:var(--muted);
+      font-size:.96rem;
+    }
+
+    .split-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:14px;
+    }
+
+    .panel{
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .panel h3{
+      margin:0 0 10px;
+      font-size:1.15rem;
+      line-height:1.3;
+    }
+
+    .code-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .code-title{
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .code-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 10px;
+      border-radius:999px;
+      background:#e0f2fe;
+      color:#075985;
+      font-size:.88rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .code-block{
+      margin:0;
+      padding:16px 18px;
+      border-radius:18px;
+      overflow:auto;
+      border:1px solid #0f172a;
+      background:linear-gradient(180deg, #0f172a, #111827);
+      color:#dbeafe;
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+      font:1rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      tab-size:4;
+      white-space:pre;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .code-block code{font:inherit;}
+
+    .rule-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .rule-item{
+      border-radius:16px;
+      padding:14px 15px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+      font-size:.98rem;
+      line-height:1.68;
+    }
+
+    .rule-item strong{
+      display:inline-block;
+      margin-right:6px;
+      color:#0f172a;
+    }
+
+    .quiz-note{
+      margin:0 0 10px;
+      color:#334155;
+    }
+
+    .quiz-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .quiz-option{
+      width:100%;
+      cursor:pointer;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border-radius:16px;
+      padding:14px 16px;
+      text-align:left;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      transition:transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      color:#0f172a;
+    }
+
+    .quiz-option:hover{
+      transform:translateY(-1px);
+      border-color:#93c5fd;
+      box-shadow:0 14px 26px rgba(15,23,42,.08);
+    }
+
+    .quiz-option:active{transform:translateY(0);}
+
+    .quiz-option.active{
+      border-color:var(--accent, var(--blue));
+      box-shadow:0 14px 28px rgba(37,99,235,.12);
+    }
+
+    .quiz-option.correct{
+      border-color:#22c55e;
+      background:linear-gradient(180deg, #f0fdf4, #ecfdf5);
+    }
+
+    .quiz-option.incorrect{
+      border-color:#ef4444;
+      background:linear-gradient(180deg, #fff1f2, #ffe4e6);
+    }
+
+    .quiz-option-inner{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .quiz-num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:42px;
+      height:42px;
+      border-radius:999px;
+      background:#e2e8f0;
+      color:#0f172a;
+      font-weight:900;
+      font-size:1rem;
+    }
+
+    .quiz-code{
+      display:block;
+      white-space:pre-wrap;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      line-height:1.65;
+      font-size:0.98rem;
+      color:#0f172a;
+    }
+
+    .result-box{
+      margin-top:12px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #f8fbff, #eef4ff);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .result-box.ok{
+      background:linear-gradient(180deg, #f0fdf4, #ecfdf5);
+      border-color:#bbf7d0;
+    }
+
+    .result-box.error{
+      background:linear-gradient(180deg, #fff1f2, #ffe4e6);
+      border-color:#fecdd3;
+    }
+
+    .result-title{
+      padding:9px 14px;
+      background:#dbeafe;
+      color:#1e3a8a;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      border-bottom:1px solid #bfdbfe;
+    }
+
+    .result-box.ok .result-title{
+      background:#d1fae5;
+      color:#065f46;
+      border-bottom-color:#a7f3d0;
+    }
+
+    .result-box.error .result-title{
+      background:#ffe4e6;
+      color:#9f1239;
+      border-bottom-color:#fecdd3;
+    }
+
+    .result-text{
+      margin:0;
+      padding:14px 18px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:1rem;
+      line-height:1.7;
+      color:#0f172a;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:3.2em;
+    }
+
+    .editor-shell{
+      margin-top:14px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #0f172a;
+      background:#0f172a;
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+    }
+
+    .editor-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      background:linear-gradient(135deg, #1e293b, #0f172a);
+      color:#e2e8f0;
+      border-bottom:1px solid rgba(148,163,184,.22);
+      flex-wrap:wrap;
+    }
+
+    .toolbar-title{
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+
+    .run-btn{
+      border:none;
+      cursor:pointer;
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:900;
+      background:linear-gradient(135deg, #22c55e, #16a34a);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(34,197,94,.22);
+    }
+
+    .run-btn:hover{filter:brightness(1.05);}
+    .run-btn:active{transform:translateY(1px);}
+
+    .java-editor{
+      width:100%;
+      display:block;
+      min-height:280px;
+      border:0;
+      outline:none;
+      resize:vertical;
+      padding:14px 16px;
+      background:#0f172a;
+      color:#e2e8f0;
+      font:0.95rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      tab-size:4;
+      caret-color:#93c5fd;
+      white-space:pre;
+      overflow:auto;
+      box-sizing:border-box;
+    }
+
+    .java-editor::placeholder{color:#94a3b8;}
+    .java-editor:focus{box-shadow:inset 0 0 0 2px rgba(59,130,246,.28);}
+
+    .footer{
+      margin:18px 0 8px;
+      text-align:center;
+      color:#64748b;
+      font-size:.95rem;
+    }
+
+    .accent-blue{--accent:#2563eb}
+    .accent-cyan{--accent:#0891b2}
+    .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669}
+    .accent-red{--accent:#dc2626}
+    .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+
+    @media (max-width: 980px){
+      body{font-size:17px}
+      .container{padding:16px}
+      .hero{padding:22px}
+      .section-title{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .num{min-width:72px;}
+      .split-layout{grid-template-columns:1fr;}
+    }
+
+    @media print{
+      @page{margin:12mm}
+      body{
+        background:#fff;
+        color:#111827;
+        font-size:15px;
+      }
+      .container{
+        max-width:none;
+        padding:0;
+      }
+      .hero{
+        background:#eff6ff !important;
+        color:#0f172a !important;
+        box-shadow:none;
+        border:1px solid #c7d2fe;
+      }
+      .badge{
+        background:#dbeafe !important;
+        color:#1d4ed8 !important;
+        border-color:#93c5fd;
+      }
+      .card{
+        box-shadow:none;
+        border:1px solid #dbe3ef;
+      }
+      .panel,
+      .feature-item,
+      .rule-item,
+      .quiz-option{
+        box-shadow:none;
+      }
+      .editor-shell{
+        background:#fff !important;
+        border:1px solid #cbd5e1 !important;
+        box-shadow:none !important;
+      }
+      .editor-toolbar{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .run-btn{
+        display:none !important;
+      }
+      .java-editor{
+        background:#fff !important;
+        color:#0f172a !important;
+        border-top:1px solid #cbd5e1 !important;
+      }
+      .code-block{
+        background:#f8fafc !important;
+        color:#0f172a !important;
+        border:1px solid #cbd5e1 !important;
+      }
+      .result-box{
+        box-shadow:none;
+      }
+      .result-box.ok .result-title{
+        background:#d1fae5 !important;
+        color:#065f46 !important;
+      }
+      .result-box.error .result-title{
+        background:#ffe4e6 !important;
+        color:#9f1239 !important;
+      }
+      .pill{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .note.info,
+      .note.tip,
+      .note.warn{
+        background:#f8fafc !important;
+      }
+      .footer{color:#475569}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法2</div>
+      <h1>抽象クラス</h1>
+      <p>
+        抽象クラスの特徴、文法上の規則、練習問題、サンプルをまとめた学習ページです。
+        まずは「なぜ抽象クラスが必要なのか」から確認しましょう。
+      </p>
+
+      <div class="badge-row">
+        <span class="badge">abstract class</span>
+        <span class="badge">abstract method</span>
+        <span class="badge">constructor</span>
+      </div>
+    </header>
+
+    <section class="section card accent-slate">
+      <div class="section-title">
+        <span class="num">1</span>
+        <h2>なぜ抽象クラスが必要なのか</h2>
+      </div>
+      <p class="lead">
+        抽象クラスは、<strong>共通部分は親クラスにまとめたい</strong>、
+        でも <strong>動きは子クラスごとに違う</strong> というときに使います。
+        初学者のうちは、<span class="pill">共通の設計図</span> を作る仕組みだと考えると分かりやすいです。
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-item">
+          <strong>① 共通部分をまとめる</strong>
+          <span>名前や取得メソッドなど、どの子クラスにもある部分を親クラスに置けます。</span>
+        </div>
+        <div class="feature-item">
+          <strong>② 違う部分をはっきりさせる</strong>
+          <span>子クラスごとに異なる処理は抽象メソッドにして、実装を任せます。</span>
+        </div>
+        <div class="feature-item">
+          <strong>③ 実装漏れを防ぐ</strong>
+          <span>子クラスは抽象メソッドを必ずオーバーライドするので、書き忘れを防げます。</span>
+        </div>
+      </div>
+
+      <div class="note.info">
+        <strong>例</strong>：
+        <span class="pill">Human</span> クラスでは、
+        <span class="pill">name</span> と <span class="pill">getName()</span> は共通です。
+        しかし <span class="pill">show()</span> は「どう表示するか」が人によって違います。
+        こういうときに抽象クラスが役に立ちます。
+      </div>
+    </section>
+
+    <section class="section card accent-blue">
+      <div class="section-title">
+        <span class="num">2</span>
+        <h2>抽象クラスの特徴</h2>
+      </div>
+      <p class="lead">
+        抽象クラスは設計上、次のような特徴を持ちます。
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-item">
+          <strong>① インスタンス化できない。</strong>
+          <span>抽象クラスそのものを <span class="pill">new</span> することはできません。</span>
+        </div>
+        <div class="feature-item">
+          <strong>② 抽象メソッドを持つことができる。</strong>
+          <span>抽象メソッドは、内容を持たない「形式だけのメソッド」です。</span>
+        </div>
+        <div class="feature-item">
+          <strong>③ 抽象メソッドは具象クラスで必ずオーバーライドする。</strong>
+          <span>継承した側で、処理内容を実装します。</span>
+        </div>
+      </div>
+
+      <div class="note.info">
+        <strong>補足</strong>：
+        抽象メソッドは、抽象的なアルゴリズムを表現します。
+        ここでいう抽象的なアルゴリズムとは、内容を持たないアルゴリズム
+        （アルゴリズムの共通形式）のことです。
+      </div>
+    </section>
+
+    <section class="section card accent-purple">
+      <div class="section-title">
+        <span class="num">3</span>
+        <h2>抽象クラスの作成</h2>
+      </div>
+      <p class="lead">
+        抽象クラスを作成するには、クラスに <span class="pill">abstract</span> 修飾子を設定します。
+        抽象メソッドを作成するには、メソッドに <span class="pill">abstract</span> 修飾子を設定します。
+      </p>
+
+      <div class="split-layout">
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">サンプルコード</span>
+            <span class="code-tag">abstract class Human</span>
+          </div>
+          <pre class="code-block"><code>abstract class Human{
+    private String _name;//氏名
+
+    public Human(String name){
+        _name=name;
+    }
+    public String getName(){
+        return _name;
+    }
+    public abstract void show(); //抽象メソッド
+}</code></pre>
+        </div>
+
+        <div class="panel">
+          <h3>ポイント</h3>
+          <ul style="margin:0 0 0 18px; padding:0; color:#334155;">
+            <li><span class="pill">Human</span> は抽象クラスなので、直接インスタンス化できません。</li>
+            <li><span class="pill">show()</span> は抽象メソッドで、内容を持ちません。</li>
+            <li>抽象クラスでも、コンストラクタや通常のメソッドは作成できます。</li>
+          </ul>
+
+          <div class="note.tip">
+            <strong>覚え方</strong>：
+            <span class="pill">abstract class</span> は「設計図」、
+            <span class="pill">abstract method</span> は「実装を後で決める約束」です。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section card accent-cyan">
+      <div class="section-title">
+        <span class="num">4</span>
+        <h2>抽象クラスに関する文法上の規則</h2>
+      </div>
+      <p class="lead">
+        抽象クラスや抽象メソッドには、次のような規則があります。
+      </p>
+
+      <div class="rule-list">
+        <div class="rule-item"><strong>①</strong> abstract 修飾子と final 修飾子は同時に設定できない。</div>
+        <div class="rule-item"><strong>②</strong> 抽象クラスにはコンストラクタを作成することはできるが、そのコンストラクタからインスタンス化することはできない。</div>
+        <div class="rule-item"><strong>③</strong> 抽象クラスは抽象メソッドを持つことができる（抽象メソッドを作成しなくてもよい）。</div>
+        <div class="rule-item"><strong>④</strong> 抽象メソッドはブレースを含んではいけない（＝メソッドの内容を持ってはいけない）。</div>
+        <div class="rule-item"><strong>⑤</strong> 抽象メソッドは private を設定できない。</div>
+        <div class="rule-item"><strong>⑥</strong> 具象クラスによって抽象クラスを継承する場合、すべての抽象メソッドをオーバーライドしなければならない。</div>
+        <div class="rule-item"><strong>⑦</strong> 抽象クラスに main メソッドを作成することは可能である。</div>
+        <div class="rule-item"><strong>⑧</strong> 抽象クラスにクラスメソッドを作成することは可能である。</div>
+      </div>
+
+      <div class="note.info">
+        <strong>補足</strong>：
+        抽象クラスを抽象クラスで継承する場合は、抽象メソッドをオーバーライドしなくても良いです。
+      </div>
+    </section>
+
+    <section class="section card accent-orange">
+      <div class="section-title">
+        <span class="num">5</span>
+        <h2>練習問題 1</h2>
+      </div>
+      <p class="lead">
+        次のなかで、正しく記述された抽象クラスはどれですか。
+      </p>
+      <p class="quiz-note">※複数正解があります。番号を押すと、正解 / 不正解 / 解説が表示されます。</p>
+
+      <div class="quiz-list" id="quiz-list">
+        <button type="button" class="quiz-option" data-quiz="1">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">①</span>
+            <div class="quiz-code">abstract final class Car{}</div>
+          </div>
+        </button>
+
+        <button type="button" class="quiz-option" data-quiz="2">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">②</span>
+            <div class="quiz-code">abstract class Car{
+    public void show(){
+        System.out.println("表示");
+    }
+}</div>
+          </div>
+        </button>
+
+        <button type="button" class="quiz-option" data-quiz="3">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">③</span>
+            <div class="quiz-code">abstract class Car{
+    public abstract void show(){
+        System.out.println("表示");
+    }
+}</div>
+          </div>
+        </button>
+
+        <button type="button" class="quiz-option" data-quiz="4">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">④</span>
+            <div class="quiz-code">abstract class Car{
+    public abstract void show(){}
+}</div>
+          </div>
+        </button>
+
+        <button type="button" class="quiz-option" data-quiz="5">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">⑤</span>
+            <div class="quiz-code">abstract class Car{
+    public static void main(String args[]){
+        System.out.println("表示");
+    }
+}</div>
+          </div>
+        </button>
+
+        <button type="button" class="quiz-option" data-quiz="6">
+          <div class="quiz-option-inner">
+            <span class="quiz-num">⑥</span>
+            <div class="quiz-code">abstract class Car{
+    public Car(){ System.out.println("表示");}
+}</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="result-box" id="quiz-result" style="margin-top:14px;">
+        <div class="result-title">判定結果</div>
+        <div class="result-text" id="quiz-result-text">番号を押すと、ここに判定と解説が表示されます。</div>
+      </div>
+    </section>
+
+    <section class="section card accent-green">
+      <div class="section-title">
+        <span class="num">6</span>
+        <h2>抽象クラスのサンプル</h2>
+      </div>
+      <p class="lead">
+        下のエディタに、配布済みのテキストを見ながらコードを入力してください。
+        エディタは空です。<span class="pill">実行</span> を押すと、実行結果が表示されます。
+      </p>
+
+      <div class="editor-shell">
+        <div class="editor-toolbar">
+          <span class="toolbar-title">コードエディタ</span>
+          <button type="button" class="run-btn" id="sample-run">実行</button>
+        </div>
+        <textarea class="java-editor" id="sample-editor" spellcheck="false"></textarea>
+      </div>
+
+      <div class="result-box" id="sample-result" style="margin-top:14px;">
+        <div class="result-title" id="sample-result-title">実行結果</div>
+        <div class="result-text" id="sample-result-text">コードを書いてから「実行」を押してください。</div>
+      </div>
+
+      <div class="note.tip">
+        <strong>ポイント</strong>：
+        <span class="pill">Printer p = new Printer();</span> によって Printer のコンストラクタが呼ばれ、
+        その前に <span class="pill">Product</span> のコンストラクタが実行されます。
+      </div>
+    </section>
+
+    <section class="section card accent-red">
+      <div class="section-title">
+        <span class="num">7</span>
+        <h2>コンパイルエラーになるサンプル</h2>
+      </div>
+      <p class="lead">
+        抽象クラスのコンストラクタが引数付きしかない場合、サブクラスの暗黙的な <span class="pill">super()</span> 呼び出しでエラーになります。
+      </p>
+
+      <div class="split-layout">
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">コード</span>
+            <span class="code-tag">エラーになる例</span>
+          </div>
+          <pre class="code-block"><code>class Test{
+    public static void main(String args[]){
+        Printer p=new Printer();
+    }
+}
+abstract class Product{
+    public Product(int x){
+        System.out.println("Pruduct"+x);
+    }
+}
+class Printer extends Product{
+    public Printer(){
+        //ここで暗黙的にスーパークラスのコンストラクタが呼ばれる
+        System.out.println("Printer");
+    }
+}</code></pre>
+        </div>
+
+        <div class="panel">
+          <div class="result-box error">
+            <div class="result-title">コンパイルエラー</div>
+            <div class="result-text">error: constructor Product in class Product cannot be applied to given types;
+  required: int
+  found: no arguments
+  reason: actual and formal argument lists differ in length</div>
+          </div>
+
+          <div class="note.warn">
+            <strong>理由</strong>：
+            <span class="pill">Printer</span> のコンストラクタは、暗黙的に
+            <span class="pill">super()</span> を呼びます。
+            しかし <span class="pill">Product</span> には <span class="pill">Product(int x)</span> しかないため、
+            引数なしコンストラクタが存在せず、コンパイルできません。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">授業用補助資料 / Java 抽象クラスとインターフェイス</div>
+  </div>
+
+  <script>
+    (function () {
+      /* -----------------------------
+       * Quiz
+       * ----------------------------- */
+      const quizData = {
+        1: {
+          correct: false,
+          explanation: "abstract と final は同時に設定できません。抽象クラスは final にできません。"
+        },
+        2: {
+          correct: true,
+          explanation: "abstract class でも、通常のメソッド（内容を持つメソッド）は定義できます。"
+        },
+        3: {
+          correct: false,
+          explanation: "abstract メソッドにメソッド本体（{ }）を付けることはできません。"
+        },
+        4: {
+          correct: false,
+          explanation: "abstract メソッドはブレースを持てません。"
+        },
+        5: {
+          correct: true,
+          explanation: "abstract class でも main メソッドを作成できます。"
+        },
+        6: {
+          correct: true,
+          explanation: "abstract class でもコンストラクタは作成できます。インスタンス化はできませんが、継承時に呼ばれます。"
+        }
+      };
+
+      const quizResultBox = document.getElementById("quiz-result");
+      const quizResultText = document.getElementById("quiz-result-text");
+      const quizButtons = document.querySelectorAll(".quiz-option");
+
+      function setQuizResult(isCorrect, explanation) {
+        quizResultBox.classList.remove("ok", "error");
+        quizResultBox.classList.add(isCorrect ? "ok" : "error");
+        quizResultBox.querySelector(".result-title").textContent = isCorrect ? "正解" : "不正解";
+        quizResultText.textContent = explanation;
+      }
+
+      function clearQuizState() {
+        quizButtons.forEach(btn => {
+          btn.classList.remove("active", "correct", "incorrect");
+          btn.setAttribute("aria-pressed", "false");
+        });
+      }
+
+      quizButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const data = quizData[btn.dataset.quiz];
+          if (!data) return;
+
+          clearQuizState();
+          btn.classList.add("active", data.correct ? "correct" : "incorrect");
+          btn.setAttribute("aria-pressed", "true");
+          setQuizResult(data.correct, data.explanation);
+        });
+      });
+
+      /* -----------------------------
+       * Sample editor simulator
+       * ----------------------------- */
+      const sampleEditor = document.getElementById("sample-editor");
+      const sampleRunBtn = document.getElementById("sample-run");
+      const sampleResultBox = document.getElementById("sample-result");
+      const sampleResultTitle = document.getElementById("sample-result-title");
+      const sampleResultText = document.getElementById("sample-result-text");
+
+      function stripComments(code) {
+        return code
+          .replace(/\/\*[\s\S]*?\*\//g, "")
+          .replace(/\/\/.*$/gm, "");
+      }
+
+      function setSampleResult(type, title, text) {
+        sampleResultBox.classList.remove("ok", "error");
+        if (type === "ok" || type === "error") {
+          sampleResultBox.classList.add(type);
+        }
+        sampleResultTitle.textContent = title;
+        sampleResultText.textContent = text;
+      }
+
+      function simulateAbstractSample(code) {
+        const cleaned = stripComments(code).replace(/\r/g, "");
+
+        if (!cleaned.trim()) {
+          return {
+            type: "neutral",
+            title: "実行結果",
+            text: "コードを書いてから「実行」を押してください。"
+          };
+        }
+
+        const successPattern =
+          /class\s+Test\b[\s\S]*?Printer\s+p\s*=\s*new\s+Printer\s*\(\s*\)\s*;/m.test(cleaned) &&
+          /abstract\s+class\s+Product\b[\s\S]*?public\s+Product\s*\(\s*\)\s*\{[\s\S]*?System\.out\.println\s*\(\s*["']スーパークラス["']\s*\)/m.test(cleaned) &&
+          /class\s+Printer\s+extends\s+Product\b[\s\S]*?public\s+Printer\s*\(\s*\)\s*\{[\s\S]*?System\.out\.println\s*\(\s*["']サブクラス["']\s*\)/m.test(cleaned);
+
+        if (successPattern) {
+          return {
+            type: "ok",
+            title: "実行結果",
+            text: "スーパークラス\nサブクラス"
+          };
+        }
+
+        const compileErrorPattern =
+          /abstract\s+class\s+Product\b[\s\S]*?public\s+Product\s*\(\s*int\s+x\s*\)/m.test(cleaned) &&
+          /class\s+Printer\s+extends\s+Product\b[\s\S]*?public\s+Printer\s*\(\s*\)\s*\{/m.test(cleaned) &&
+          !/super\s*\(\s*\)/m.test(cleaned);
+
+        if (compileErrorPattern) {
+          return {
+            type: "error",
+            title: "コンパイルエラー",
+            text:
+`error: constructor Product in class Product cannot be applied to given types;
+  required: int
+  found: no arguments
+  reason: actual and formal argument lists differ in length`
+          };
+        }
+
+        return {
+          type: "neutral",
+          title: "実行結果",
+          text: "配布済みテキストのサンプルコードを入力して「実行」を押してください。"
+        };
+      }
+
+      function runSample() {
+        const result = simulateAbstractSample(sampleEditor.value);
+        setSampleResult(result.type, result.title, result.text);
+      }
+
+      sampleRunBtn.addEventListener("click", runSample);
+
+      sampleEditor.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = sampleEditor.selectionStart;
+          const end = sampleEditor.selectionEnd;
+          const value = sampleEditor.value;
+          sampleEditor.value = value.slice(0, start) + "\t" + value.slice(end);
+          sampleEditor.selectionStart = sampleEditor.selectionEnd = start + 1;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          runSample();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
