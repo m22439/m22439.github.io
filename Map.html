@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Map インタフェース 学習ガイド</title>
+  <style>
+    /* 原型の Iterator.html のスタイルを完全継承 */
+    :root{
+      --bg1:#eef4ff; --bg2:#f8fbff; --ink:#0f172a; --muted:#475569; --line:#dbe3ef;
+      --card:#ffffff; --shadow:0 14px 34px rgba(15, 23, 42, .08);
+      --blue:#2563eb; --cyan:#0891b2; --green:#059669; --purple:#7c3aed;
+      --red:#dc2626; --orange:#d97706; --slate:#334155; --pink:#db2777;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px; line-height:1.72;
+      background: radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%), radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%), linear-gradient(180deg, var(--bg2), var(--bg1));
+    }
+    .container{ max-width:1320px; margin:0 auto; padding:22px; }
+    .hero{
+      border-radius:26px; padding:28px 30px; color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.16);
+    }
+    .kicker{
+      display:inline-block; margin:0 0 10px; padding:6px 12px; border-radius:999px;
+      background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem; font-weight:800; letter-spacing:.04em;
+    }
+    .hero h1{ margin:0 0 10px; font-size:clamp(2.1rem, 4.7vw, 3.7rem); line-height:1.12; letter-spacing:.02em; }
+    .hero p{ margin:0; max-width:1100px; font-size:clamp(1rem, 1.55vw, 1.16rem); opacity:.96; }
+    .section{ margin-top:20px; }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px; padding:22px; box-shadow:var(--shadow);
+      border:1px solid var(--line); border-top:10px solid var(--accent, var(--blue));
+    }
+    .section-title{ display:flex; align-items:center; gap:12px; margin:0 0 10px; }
+    .num{
+      flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center;
+      min-width:84px; padding:9px 14px; border-radius:999px;
+      background:var(--accent, var(--blue)); color:#fff; font-weight:900;
+      font-size:.98rem; box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+    .section-title h2{ margin:0; font-size:clamp(1.42rem, 2.25vw, 2.05rem); line-height:1.2; }
+    .lead{ margin:0 0 12px; color:#334155; font-size:1.03rem; }
+    .note{ margin-top:14px; padding:14px 16px; border-radius:16px; border-left:6px solid transparent; }
+    .note.info{ background:#eff6ff; border-color:#bfdbfe; border-left-color:#3b82f6; }
+    .note.tip{ background:#ecfdf5; border-color:#a7f3d0; border-left-color:#10b981; }
+    .note.warn{ background:#fff1f2; border-color:#fecdd3; border-left-color:#ef4444; }
+    .pill{ display:inline-block; padding:3px 10px; border-radius:999px; background:#eef2ff; color:#3730a3; font-weight:800; font-size:.92rem; }
+    .overview-flow{ display:flex; flex-wrap:wrap; align-items:stretch; gap:12px; margin:14px 0 2px; }
+    .flow-node{
+      flex:1 1 190px; min-width:180px; background:linear-gradient(180deg, #eff6ff, #ffffff);
+      border:1px solid #bfdbfe; border-radius:18px; padding:14px; text-align:center;
+    }
+    .flow-arrow{ display:flex; align-items:center; justify-content:center; color:#64748b; font-size:2rem; font-weight:900; }
+    .editor-shell{
+      margin-top:14px; border-radius:18px; overflow:hidden; border:1px solid #293548;
+      background:linear-gradient(180deg, #111827, #0b1020); box-shadow:0 12px 24px rgba(15,23,42,.10);
+    }
+    .editor-bar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 14px; background:linear-gradient(135deg, #111827, #1f2937); color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.08); font-weight:800; font-size:.94rem;
+    }
+    .btn{ border:0; border-radius:999px; padding:8px 13px; font-weight:900; font-size:.9rem; cursor:pointer; }
+    .btn-run{ background:linear-gradient(135deg, #22c55e, #16a34a); color:#fff; }
+    .btn-reset{ background:linear-gradient(135deg, #64748b, #475569); color:#fff; }
+    textarea.editor{
+      width:100%; display:block; border:0; outline:0; resize:vertical; background:transparent;
+      color:#d0d9e7; padding:16px 18px; font: 1rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;
+      tab-size:4; caret-color:#f8fafc;
+    }
+    .result-box{ margin-top:12px; border-radius:16px; overflow:hidden; border:1px solid #cbd5e1; background:#f8fbff; }
+    .result-title{ padding:9px 14px; background:#dbeafe; color:#1e3a8a; font-weight:900; font-size:.92rem; }
+    .result{ margin:0; padding:14px 18px; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; min-height:3.2em; }
+    .result.error{ color:#b91c1c; background:#fff7f7; }
+    .footer{ margin-top:30px; text-align:center; color:var(--muted); padding-bottom:20px;}
+    pre.static-code { background: #f1f5f9; padding: 20px; border-radius: 12px; font-family: monospace; font-size: 0.95rem; color: #334155; border: 1px solid #e2e8f0; overflow-x: auto; line-height: 1.5; }
+    .accent-blue{--accent:#2563eb} .accent-cyan{--accent:#0891b2} .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669} .accent-red{--accent:#dc2626} .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法3</div>
+      <h1>5. Map インタフェース 学習ガイド</h1>
+      <p>
+        Mapは、キー（Key）と値（Value）をペアにして要素を管理するデータ構造です。
+        資料（p.23〜28）を見ながら、空のエディタにコードを打ち込んで動作を確認しましょう。
+      </p>
+    </header>
+
+    <!-- 5.1〜5.2 解説セクション -->
+    <section class="section card accent-slate">
+      <div class="section-title">
+        <span class="num">解説</span>
+        <h2>5.1〜5.2 Mapとハッシュテーブルの仕組み</h2>
+      </div>
+      <p class="lead">
+        Map（HashMap）がなぜ高速なのか、その秘密は「ハッシュテーブル」というデータ構造にあります。
+      </p>
+      
+      <div class="note info">
+        <strong>ハッシュテーブルとは？</strong><br>
+        たとえば、100冊の本がある本棚から特定の本を探すとき、端から1冊ずつ見ていく（Listのやり方）のは時間がかかります。
+        ハッシュテーブルは、<strong>「本のタイトル（キー）」から「本棚の番号（ハッシュ値）」を一瞬で計算する</strong>仕組みです。計算した番号の場所へ直接手を伸ばすため、データが何万件あっても一瞬で取り出せるのです。
+      </div>
+
+      <div class="overview-flow">
+        <div class="flow-node"><strong>キー (Key)</strong><br><small>"name"</small></div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node"><strong>ハッシュ関数</strong><br><small>「棚番号3」と計算</small></div>
+        <div class="flow-arrow">➡️</div>
+        <div class="flow-node"><strong>値 (Value)</strong><br><small>"itoh"</small></div>
+      </div>
+    </section>
+
+    <section class="lesson-stack">
+      <!-- 5.3 -->
+      <article class="card accent-blue">
+        <div class="section-title">
+          <span class="num">5.3</span>
+          <h2>Map インスタンスの生成</h2>
+        </div>
+        <p class="lead">Mapは「キーの型」と「値の型」の2つを指定します。資料p.23を参考に打ち込みましょう。</p>
+        <div class="editor-shell" data-runner="map-create">
+          <div class="editor-bar">
+            <span>📝 エディタ：Mapの生成（importを忘れずに）</span>
+            <div class="editor-actions">
+              <button class="btn btn-run" data-action="run">▶ 実行</button>
+              <button class="btn btn-reset" data-action="reset">↺ クリア</button>
+            </div>
+          </div>
+          <textarea class="editor" style="height:150px;" spellcheck="false" placeholder="ここにコードを入力..."></textarea>
+          <div class="result-box">
+            <div class="result-title">実行結果</div>
+            <pre class="result"></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5.4 / 5.5 -->
+      <article class="card accent-cyan">
+        <div class="section-title">
+          <span class="num">5.4/5.5</span>
+          <h2>追加 (put) と参照 (get)</h2>
+        </div>
+        <p class="lead">追加は <span class="pill">put()</span>、取得は <span class="pill">get()</span> です。資料p.24を練習してください。</p>
+        <div class="editor-shell" data-runner="map-put-get">
+          <div class="editor-bar">
+            <span>📝 エディタ：put と get の練習</span>
+            <div class="editor-actions">
+              <button class="btn btn-run" data-action="run">▶ 実行</button>
+              <button class="btn btn-reset" data-action="reset">↺ クリア</button>
+            </div>
+          </div>
+          <textarea class="editor" style="height:220px;" spellcheck="false" placeholder="ここにコードを入力..."></textarea>
+          <div class="result-box">
+            <div class="result-title">実行結果</div>
+            <pre class="result"></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5.6 -->
+      <article class="card accent-purple">
+        <div class="section-title">
+          <span class="num">5.6</span>
+          <h2>全要素の参照 (entrySet)</h2>
+        </div>
+        <p class="lead">拡張for文と <span class="pill">entrySet()</span> を使います。資料p.25を参考にしてください。</p>
+        <div class="editor-shell" data-runner="map-entry">
+          <div class="editor-bar">
+            <span>📝 エディタ：繰り返し処理の練習</span>
+            <div class="editor-actions">
+              <button class="btn btn-run" data-action="run">▶ 実行</button>
+              <button class="btn btn-reset" data-action="reset">↺ クリア</button>
+            </div>
+          </div>
+          <textarea class="editor" style="height:250px;" spellcheck="false" placeholder="ここにコードを入力..."></textarea>
+          <div class="result-box">
+            <div class="result-title">実行結果</div>
+            <pre class="result"></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5.8 / 5.9 -->
+      <article class="card accent-orange">
+        <div class="section-title">
+          <span class="num">5.8/5.9</span>
+          <h2>検索とキー一覧 (containsKey / keySet)</h2>
+        </div>
+        <p class="lead">資料p.26を参考に、キーが存在するか調べる方法を確認しましょう。</p>
+        <div class="editor-shell" data-runner="map-search">
+          <div class="editor-bar">
+            <span>📝 エディタ：検索の練習</span>
+            <div class="editor-actions">
+              <button class="btn btn-run" data-action="run">▶ 実行</button>
+              <button class="btn btn-reset" data-action="reset">↺ クリア</button>
+            </div>
+          </div>
+          <textarea class="editor" style="height:250px;" spellcheck="false" placeholder="ここにコードを入力..."></textarea>
+          <div class="result-box">
+            <div class="result-title">実行結果</div>
+            <pre class="result"></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5.12 -->
+      <article class="card accent-slate">
+        <div class="section-title">
+          <span class="num">5.12</span>
+          <h2>Hashtable クラス（参考コード）</h2>
+        </div>
+        <p class="lead">
+          古いJavaで使われていたクラスです。現在はHashMapを使うのが一般的ですが、古い現場では必須の知識です。
+        </p>
+        <pre class="static-code">
+import java.util.*;
+
+class CollectionSample {
+    public static void main(String[] args) {
+        Hashtable&lt;String, String&gt; ht = new Hashtable&lt;String, String&gt;();
+
+        ht.put("first_name", "taro");
+        ht.put("last_name", "tanaka");
+        ht.put("email", "taro@example.jp");
+
+        // Enumerationを使用して取り出す
+        Enumeration&lt;String&gt; e = ht.keys();
+
+        while (e.hasMoreElements()) {
+            String key = e.nextElement();
+            String value = ht.get(key);
+            System.out.println(key + ": " + value);
+        }
+    }
+}</pre>
+        <div class="note tip">
+          <strong>講師の目</strong>：Hashtableは、複数のプログラムから同時にアクセスしても壊れない「スレッドセーフ」という特徴がありますが、その分少し重いという面もあります。
+        </div>
+      </article>
+    </section>
+
+    <div class="footer">Java情報処理実習 / 5. Mapインタフェース</div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+      function setResult(el, text, isError = false) {
+        el.textContent = text;
+        el.classList.toggle('error', isError);
+      }
+
+      function simulateJava(type, code) {
+        const cleanCode = code.trim();
+        
+        // --- 簡易コンパイルエラーチェック ---
+        if (!cleanCode) return { ok: false, msg: "error: code is empty" };
+        if (!cleanCode.includes("import java.util.*;")) {
+          return { ok: false, msg: "error: cannot find symbol\n  symbol: class Map\n  location: package java.util" };
+        }
+        if (cleanCode.includes("add(") && !type.includes("list")) {
+          return { ok: false, msg: "error: cannot find symbol\n  symbol: method add(String,String)\n  location: interface Map<String,String>\n  (ヒント: Mapへの追加は put() です)" };
+        }
+        if (cleanCode.length > 10 && !cleanCode.includes(";")) {
+          return { ok: false, msg: "error: ';' expected" };
+        }
+        if (cleanCode.includes("get") && !cleanCode.includes("map.get")) {
+          return { ok: false, msg: "error: variable map might not have been initialized" };
+        }
+
+        // --- 実行ロジックのシミュレーション ---
+        let output = [];
+        const putRegex = /\.put\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/g;
+        let match;
+        const data = new Map();
+        while ((match = putRegex.exec(cleanCode)) !== null) { data.set(match[1], match[2]); }
+
+        try {
+          switch (type) {
+            case 'map-create':
+              if (!cleanCode.includes("HashMap")) throw new Error("HashMapの実装クラスが指定されていません");
+              output.push("Mapを生成しました");
+              break;
+            case 'map-put-get':
+              const getRegex = /\.get\s*\(\s*"([^"]+)"\s*\)/g;
+              while ((match = getRegex.exec(cleanCode)) !== null) {
+                output.push(data.get(match[1]) || "null");
+              }
+              break;
+            case 'map-entry':
+              if (!cleanCode.includes("entrySet")) throw new Error("entrySet() が使用されていません");
+              data.forEach((v, k) => output.push(`${k}:${v}`));
+              break;
+            case 'map-search':
+              const ckRegex = /containsKey\s*\(\s*"([^"]+)"\s*\)/g;
+              while ((match = ckRegex.exec(cleanCode)) !== null) { output.push(data.has(match[1]).toString()); }
+              if (cleanCode.includes("keySet")) data.forEach((v, k) => output.push(k));
+              break;
+          }
+        } catch (e) {
+          return { ok: false, msg: "Exception in thread \"main\" java.lang.Error: " + e.message };
+        }
+
+        return { ok: true, msg: output.join('\n') || "（出力なし：System.out.println を確認してください）" };
+      }
+
+      document.querySelectorAll('.editor-shell').forEach(shell => {
+        const editor = shell.querySelector('textarea.editor');
+        const runBtn = shell.querySelector('[data-action="run"]');
+        const resetBtn = shell.querySelector('[data-action="reset"]');
+        const result = shell.querySelector('.result');
+
+        runBtn.addEventListener('click', () => {
+          const res = simulateJava(shell.dataset.runner, editor.value);
+          setResult(result, res.msg, !res.ok);
+        });
+
+        resetBtn.addEventListener('click', () => {
+          editor.value = "";
+          setResult(result, "");
+        });
+
+        editor.addEventListener('keydown', e => {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            const s = editor.selectionStart;
+            editor.value = editor.value.substring(0, s) + "    " + editor.value.substring(editor.selectionEnd);
+            editor.selectionStart = editor.selectionEnd = s + 4;
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
