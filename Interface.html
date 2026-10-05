@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java 抽象クラスとインターフェイス 学習ガイド</title>
+  <style>
+    :root{
+      --bg1:#eef4ff;
+      --bg2:#f8fbff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#dbe3ef;
+      --card:#ffffff;
+      --shadow:0 14px 34px rgba(15, 23, 42, .08);
+
+      --blue:#2563eb;
+      --cyan:#0891b2;
+      --green:#059669;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --orange:#d97706;
+      --slate:#334155;
+      --pink:#db2777;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+      font-size:18px;
+      line-height:1.75;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.13), transparent 26%),
+        radial-gradient(circle at top right, rgba(14,165,233,.11), transparent 28%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .container{
+      max-width:1320px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      border-radius:26px;
+      padding:28px 30px;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(15,23,42,.98), rgba(37,99,235,.95) 52%, rgba(6,182,212,.93));
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .kicker{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2.1rem, 4.8vw, 3.7rem);
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:1120px;
+      font-size:clamp(1rem, 1.55vw, 1.16rem);
+      opacity:.96;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:800;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.24);
+      white-space:nowrap;
+    }
+
+    .section{
+      margin-top:20px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.98), #fff);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+      border-top:10px solid var(--accent, var(--blue));
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:0 0 10px;
+    }
+
+    .num{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:92px;
+      padding:9px 14px;
+      border-radius:999px;
+      background:var(--accent, var(--blue));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.03em;
+      font-size:.98rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.18);
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(1.42rem, 2.25vw, 2.05rem);
+      line-height:1.2;
+    }
+
+    .lead{
+      margin:0 0 12px;
+      color:#334155;
+      font-size:1.03rem;
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      border-left:6px solid transparent;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .note.info{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      border-left-color:#3b82f6;
+    }
+
+    .note.tip{
+      background:#ecfdf5;
+      border-color:#a7f3d0;
+      border-left-color:#10b981;
+    }
+
+    .note.warn{
+      background:#fff1f2;
+      border-color:#fecdd3;
+      border-left-color:#ef4444;
+    }
+
+    .note strong{
+      font-size:1.02rem;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-weight:800;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+
+    .split-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:14px;
+    }
+
+    .panel{
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .panel h3{
+      margin:0 0 10px;
+      font-size:1.15rem;
+      line-height:1.3;
+    }
+
+    .panel.ng{ border-color:#fecdd3; background:linear-gradient(180deg, #ffffff, #fff5f6); }
+    .panel.ok{ border-color:#a7f3d0; background:linear-gradient(180deg, #ffffff, #f2fdf8); }
+
+    .mini-cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .mini-card .icon{
+      font-size:1.8rem;
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .mini-card strong{
+      display:block;
+      font-size:1.08rem;
+      margin-bottom:5px;
+    }
+
+    .mini-card span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .compare-wrap{
+      margin-top:14px;
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid #dbe3ef;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .compare-table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:620px;
+      background:#fff;
+    }
+
+    .compare-table th,
+    .compare-table td{
+      padding:14px 15px;
+      vertical-align:top;
+      border-bottom:1px solid #e2e8f0;
+      border-right:1px solid #e2e8f0;
+      text-align:left;
+      font-size:1rem;
+    }
+
+    .compare-table th:last-child,
+    .compare-table td:last-child{border-right:0}
+
+    .compare-table thead th{
+      background:linear-gradient(135deg, #eff6ff, #dbeafe);
+      color:#0f172a;
+      font-weight:900;
+      font-size:1.02rem;
+    }
+
+    .compare-table tbody tr:nth-child(even) td{
+      background:#f8fbff;
+    }
+
+    .compare-label{
+      font-weight:900;
+      white-space:nowrap;
+      color:#334155;
+      width:20%;
+    }
+
+    .code-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .code-title{
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .code-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 10px;
+      border-radius:999px;
+      background:#e0f2fe;
+      color:#075985;
+      font-size:.88rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .code-tag.ng{ background:#ffe4e6; color:#be123c; }
+    .code-tag.ok{ background:#d1fae5; color:#047857; }
+
+    .code-block{
+      margin:0;
+      padding:16px 18px;
+      border-radius:18px;
+      overflow:auto;
+      border:1px solid #0f172a;
+      background:linear-gradient(180deg, #0f172a, #111827);
+      color:#dbeafe;
+      box-shadow:0 12px 24px rgba(15,23,42,.10);
+      font:1rem/1.7 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      tab-size:4;
+      white-space:pre;
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .code-block code{
+      font:inherit;
+    }
+
+    .kw{color:#93c5fd;font-weight:800}
+    .type{color:#c4b5fd;font-weight:800}
+    .str{color:#86efac}
+    .com{color:#94a3b8;font-style:italic}
+    .method{color:#67e8f9}
+    .anno{color:#f9a8d4}
+    .numlit{color:#fdba74}
+    .field{color:#fda4af}
+    .err{color:#fca5a5;font-weight:800;text-decoration:underline wavy #ef4444}
+
+    .output-box{
+      margin-top:12px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #cbd5e1;
+      background:linear-gradient(180deg, #f8fbff, #eef4ff);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .output-title{
+      padding:9px 14px;
+      background:#dbeafe;
+      color:#1e3a8a;
+      font-size:.92rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      border-bottom:1px solid #bfdbfe;
+    }
+
+    .output-text{
+      margin:0;
+      padding:14px 18px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+      font-size:1rem;
+      line-height:1.7;
+      color:#0f172a;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:3.2em;
+    }
+
+    /* ===== 継承図 ===== */
+    .diagram-box{
+      margin:4px 0 12px;
+      padding:10px;
+      border-radius:16px;
+      background:#fff;
+      border:1px dashed #cbd5e1;
+    }
+
+    .diagram{
+      display:block;
+      width:100%;
+      height:auto;
+      max-width:520px;
+      margin:0 auto;
+    }
+
+    .diagram text{ font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif; }
+    .d-title{ font-size:17px; font-weight:900; fill:#0f172a; }
+    .d-code{ font-size:13.5px; fill:#475569; font-family:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace !important; }
+    .d-stereo{ font-size:12px; font-weight:800; fill:#7c3aed; }
+    .d-label{ font-size:13px; font-weight:800; }
+    .d-big{ font-size:26px; font-weight:900; fill:#fff; }
+
+    .verdict{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 12px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:.92rem;
+      margin-bottom:10px;
+    }
+    .verdict.ng{ background:#ffe4e6; color:#be123c; }
+    .verdict.ok{ background:#d1fae5; color:#047857; }
+
+    .legend-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .legend-item{
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+    }
+
+    .legend-item strong{
+      display:block;
+      margin-bottom:5px;
+      font-size:1.05rem;
+    }
+
+    .legend-item span{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .footer{
+      margin:18px 0 8px;
+      text-align:center;
+      color:#64748b;
+      font-size:.95rem;
+    }
+
+    .accent-blue{--accent:#2563eb}
+    .accent-cyan{--accent:#0891b2}
+    .accent-purple{--accent:#7c3aed}
+    .accent-green{--accent:#059669}
+    .accent-red{--accent:#dc2626}
+    .accent-orange{--accent:#d97706}
+    .accent-slate{--accent:#334155}
+    .accent-pink{--accent:#db2777}
+
+    @media (max-width: 980px){
+      body{font-size:17px}
+      .container{padding:16px}
+      .hero{padding:22px}
+      .section-title{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .num{
+        min-width:72px;
+      }
+      .split-layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media print{
+      @page{margin:12mm}
+      body{
+        background:#fff;
+        color:#111827;
+        font-size:15px;
+      }
+      .container{
+        max-width:none;
+        padding:0;
+      }
+      .hero{
+        background:#eff6ff !important;
+        color:#0f172a !important;
+        box-shadow:none;
+        border:1px solid #c7d2fe;
+      }
+      .badge{
+        background:#dbeafe !important;
+        color:#1d4ed8 !important;
+        border-color:#93c5fd;
+      }
+      .card{
+        box-shadow:none;
+        border:1px solid #dbe3ef;
+      }
+      .panel,
+      .mini-card,
+      .legend-item{
+        box-shadow:none;
+      }
+      .code-block{
+        background:#f8fafc !important;
+        color:#0f172a !important;
+        border:1px solid #cbd5e1 !important;
+      }
+      .kw{color:#1d4ed8 !important}
+      .type{color:#7c3aed !important}
+      .str{color:#047857 !important}
+      .com{color:#64748b !important}
+      .method{color:#0891b2 !important}
+      .anno{color:#be185d !important}
+      .numlit{color:#b45309 !important}
+      .field{color:#be123c !important}
+      .err{color:#be123c !important}
+      .compare-table thead th{
+        background:#dbeafe !important;
+      }
+      .output-box{
+        background:#f8fbff !important;
+      }
+      .output-title{
+        background:#dbeafe !important;
+        color:#1e3a8a !important;
+      }
+      .pill{
+        background:#e2e8f0 !important;
+        color:#0f172a !important;
+      }
+      .note.info,
+      .note.tip,
+      .note.warn{
+        background:#f8fafc !important;
+      }
+      .footer{color:#475569}
+    }
+
+    /* ===== 練習問題（自動チェックつき） ===== */
+    .quiz-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px 16px;
+      margin-top:12px;
+      padding:12px 16px;
+      border-radius:16px;
+      background:#fdf2f8;
+      border:1px solid #fbcfe8;
+    }
+
+    .quiz-progress{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .quiz-progress .binding-chip{
+      background:#fff;
+      border-color:#fbcfe8;
+      color:#831843;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .check-status{
+      font-size:.92rem;
+      font-weight:800;
+      color:#475569;
+    }
+
+    .check-status.on{ color:#047857; }
+    .check-status.off{ color:#b45309; }
+
+    .quiz-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+      gap:16px;
+      margin-top:14px;
+    }
+
+    .q-card{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-width:0;
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(180deg, #ffffff, #f8fbff);
+      border:1px solid #e2e8f0;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .q-card[data-result="正解"]{ border-color:#6ee7b7; }
+    .q-card[data-result="部分正解"]{ border-color:#fcd34d; }
+    .q-card[data-result="不正解"]{ border-color:#fca5a5; }
+
+    .q-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .q-no{
+      font-size:1.15rem;
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .q-card .code-block{
+      font-size:.95rem;
+    }
+
+    .q-label{
+      display:block;
+      font-weight:900;
+      font-size:.95rem;
+      color:#334155;
+    }
+
+    .q-answer{
+      width:100%;
+      min-height:5.2em;
+      resize:vertical;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1.5px solid #cbd5e1;
+      background:#ffffff;
+      color:#0f172a;
+      font:inherit;
+      font-size:1rem;
+      line-height:1.65;
+    }
+
+    .q-answer:focus{
+      outline:none;
+      border-color:#db2777;
+      box-shadow:0 0 0 3px rgba(219,39,119,.18);
+    }
+
+    .q-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:9px 16px;
+      font:inherit;
+      font-size:.95rem;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .12s ease, opacity .12s ease;
+    }
+
+    .btn:focus-visible{
+      outline:3px solid #f9a8d4;
+      outline-offset:2px;
+    }
+
+    .btn:active{ transform:translateY(1px); }
+    .btn[disabled]{ opacity:.5; cursor:not-allowed; }
+
+    .btn-main{
+      background:linear-gradient(135deg, #db2777, #be185d);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(219,39,119,.22);
+    }
+
+    .btn-sub{
+      background:#eef2ff;
+      color:#3730a3;
+      border:1px solid #c7d2fe;
+    }
+
+    .judge{
+      border-radius:14px;
+      padding:12px 14px;
+      border-left:6px solid #94a3b8;
+      background:#f8fafc;
+      font-size:.98rem;
+    }
+
+    .judge[hidden]{ display:none; }
+
+    .judge-verdict{
+      display:inline-block;
+      margin-bottom:4px;
+      padding:3px 12px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:.95rem;
+      background:#e2e8f0;
+      color:#0f172a;
+    }
+
+    .judge.ok{ background:#ecfdf5; border-left-color:#10b981; }
+    .judge.ok .judge-verdict{ background:#d1fae5; color:#047857; }
+    .judge.partial{ background:#fffbeb; border-left-color:#f59e0b; }
+    .judge.partial .judge-verdict{ background:#fef3c7; color:#b45309; }
+    .judge.ng{ background:#fff1f2; border-left-color:#ef4444; }
+    .judge.ng .judge-verdict{ background:#ffe4e6; color:#be123c; }
+    .judge.wait{ background:#f8fafc; border-left-color:#db2777; color:#475569; }
+    .judge.info{ background:#eff6ff; border-left-color:#3b82f6; color:#1e3a8a; }
+
+    .judge p{ margin:4px 0 0; }
+    .judge .hint{ color:#475569; }
+
+    .model{
+      border-radius:14px;
+      padding:12px 14px;
+      background:#f5f3ff;
+      border:1px solid #ddd6fe;
+      font-size:.98rem;
+    }
+
+    .model[hidden]{ display:none; }
+
+    .model strong{
+      display:block;
+      color:#5b21b6;
+      margin-bottom:2px;
+    }
+
+    .model p{ margin:0; }
+
+    .points{
+      margin:6px 0 0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:4px;
+    }
+
+    .points li{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      font-size:.95rem;
+    }
+
+    .points .mark{
+      flex:0 0 auto;
+      width:1.5em;
+      text-align:center;
+      font-weight:900;
+    }
+
+    .points li.hit .mark{ color:#047857; }
+    .points li.miss{ color:#64748b; }
+    .points li.miss .mark{ color:#94a3b8; }
+
+    @media print{
+      .q-actions, .quiz-bar .check-status{ display:none !important; }
+      .q-card{ box-shadow:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="kicker">Java基本文法2</div>
+      <h1>抽象クラスとインターフェイス</h1>
+      <p>
+        「なぜ多重継承は禁止なのか？」「なぜ変数は定数なのか？」<br>
+        Javaのルールに隠された「安全設計」の理由をセットで学びましょう。
+      </p>
+      <div class="badge-row">
+        <span class="badge">interface</span>
+        <span class="badge">implements</span>
+        <span class="badge">no multiple inheritance</span>
+        <span class="badge">public static final</span>
+        <span class="badge">練習問題つき</span>
+      </div>
+    </header>
+
+    <!-- セクション：多重継承の禁止理由 -->
+    <section class="section card accent-red">
+      <div class="section-title">
+        <span class="num">深掘り</span>
+        <h2>なぜJavaは「多重継承」を禁止したのか？</h2>
+      </div>
+      <p class="lead">
+        Javaでは <span class="pill">class A extends B, C</span> のような多重継承はできません。
+        これには明確な理由があります。下の 2 つの図を見比べてみましょう。
+      </p>
+
+      <div class="split-layout">
+        <!-- NG：クラスの多重継承 -->
+        <div class="panel ng">
+          <span class="verdict ng">✕ クラスの多重継承（Javaでは禁止）</span>
+          <h3>「ひし形継承」の衝突を防ぐ</h3>
+
+          <div class="diagram-box">
+            <svg class="diagram" viewBox="0 0 520 380" role="img" aria-label="ひし形継承の図。クラスBとクラスCがそれぞれ処理の異なるexecメソッドを持ち、クラスAが両方を継承すると、どちらのexecを実行するか決められない。">
+              <defs>
+                <marker id="triNg" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+                  <path d="M1,1 L13,7 L1,13 Z" fill="#ffffff" stroke="#475569" stroke-width="1.6"/>
+                </marker>
+                <marker id="triNgRed" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+                  <path d="M1,1 L13,7 L1,13 Z" fill="#ffffff" stroke="#dc2626" stroke-width="1.6"/>
+                </marker>
+              </defs>
+
+              <!-- 継承線 -->
+              <line x1="115" y1="140" x2="222" y2="78" stroke="#475569" stroke-width="2.2" marker-end="url(#triNg)"/>
+              <line x1="405" y1="140" x2="298" y2="78" stroke="#475569" stroke-width="2.2" marker-end="url(#triNg)"/>
+              <line x1="225" y1="278" x2="140" y2="214" stroke="#dc2626" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#triNgRed)"/>
+              <line x1="295" y1="278" x2="380" y2="214" stroke="#dc2626" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#triNgRed)"/>
+
+              <!-- X -->
+              <rect x="185" y="14" width="150" height="62" rx="12" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+              <text x="260" y="40" text-anchor="middle" class="d-title">class X</text>
+              <text x="260" y="62" text-anchor="middle" class="d-code">exec()</text>
+
+              <!-- B -->
+              <rect x="25" y="140" width="180" height="72" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+              <text x="115" y="168" text-anchor="middle" class="d-title">class B</text>
+              <text x="115" y="194" text-anchor="middle" class="d-code">exec(){ 処理B }</text>
+
+              <!-- C -->
+              <rect x="315" y="140" width="180" height="72" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+              <text x="405" y="168" text-anchor="middle" class="d-title">class C</text>
+              <text x="405" y="194" text-anchor="middle" class="d-code">exec(){ 処理C }</text>
+
+              <!-- ? -->
+              <circle cx="260" cy="176" r="26" fill="#dc2626"/>
+              <text x="260" y="186" text-anchor="middle" class="d-big">?</text>
+
+              <!-- A -->
+              <rect x="170" y="278" width="180" height="66" rx="12" fill="#fff1f2" stroke="#dc2626" stroke-width="2.4"/>
+              <text x="260" y="304" text-anchor="middle" class="d-title">class A</text>
+              <text x="260" y="328" text-anchor="middle" class="d-code">extends B, C</text>
+
+              <text x="260" y="370" text-anchor="middle" class="d-label" fill="#be123c">a.exec() は 処理B？ 処理C？ → 決められない！</text>
+            </svg>
+          </div>
+
+          <p class="small">
+            もしクラスBとクラスCの両方が同じ名前のメソッド（例えば <code>exec()</code>）を、<strong>それぞれ違う中身で</strong>持っていたらどうなるでしょう？<br>
+            クラスAで <code>exec()</code> を呼んだ際、<strong>「BとCのどちらの処理を実行すべきか」</strong>判断できなくなり、プログラムが混乱します。
+            継承関係を線で結ぶと「ひし形」になるため、<strong>ひし形継承（ダイヤモンド問題）</strong>と呼ばれます。
+          </p>
+        </div>
+
+        <!-- OK：インターフェイスの複数実装 -->
+        <div class="panel ok">
+          <span class="verdict ok">○ インターフェイスの複数実装（OK）</span>
+          <h3>インターフェイスなら安全な理由</h3>
+
+          <div class="diagram-box">
+            <svg class="diagram" viewBox="0 0 520 380" role="img" aria-label="インターフェイスの複数実装の図。インターフェイスBとCはexecの名前だけを持ち、クラスAが自分でexecの中身を1つだけ実装するので衝突しない。">
+              <defs>
+                <marker id="triOk" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+                  <path d="M1,1 L13,7 L1,13 Z" fill="#ffffff" stroke="#059669" stroke-width="1.6"/>
+                </marker>
+              </defs>
+
+              <!-- 実装線（点線＝implements） -->
+              <line x1="225" y1="258" x2="140" y2="174" stroke="#059669" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#triOk)"/>
+              <line x1="295" y1="258" x2="380" y2="174" stroke="#059669" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#triOk)"/>
+
+              <!-- B -->
+              <rect x="25" y="70" width="180" height="104" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+              <text x="115" y="96" text-anchor="middle" class="d-stereo">«interface»</text>
+              <text x="115" y="120" text-anchor="middle" class="d-title">B</text>
+              <text x="115" y="148" text-anchor="middle" class="d-code">void exec();</text>
+              <text x="115" y="166" text-anchor="middle" class="d-code" style="font-size:12px">（名前だけ・中身なし）</text>
+
+              <!-- C -->
+              <rect x="315" y="70" width="180" height="104" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+              <text x="405" y="96" text-anchor="middle" class="d-stereo">«interface»</text>
+              <text x="405" y="120" text-anchor="middle" class="d-title">C</text>
+              <text x="405" y="148" text-anchor="middle" class="d-code">void exec();</text>
+              <text x="405" y="166" text-anchor="middle" class="d-code" style="font-size:12px">（名前だけ・中身なし）</text>
+
+              <text x="260" y="40" text-anchor="middle" class="d-label" fill="#475569">どちらも「exec() を持つ」という約束だけ</text>
+
+              <!-- ✓ -->
+              <circle cx="260" cy="214" r="26" fill="#059669"/>
+              <text x="260" y="224" text-anchor="middle" class="d-big">✓</text>
+
+              <!-- A -->
+              <rect x="150" y="258" width="220" height="86" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2.4"/>
+              <text x="260" y="284" text-anchor="middle" class="d-title">class A</text>
+              <text x="260" y="306" text-anchor="middle" class="d-code">implements B, C</text>
+              <text x="260" y="330" text-anchor="middle" class="d-code" style="fill:#047857;font-weight:800">exec(){ Aが自分で書く }</text>
+
+              <text x="260" y="370" text-anchor="middle" class="d-label" fill="#047857">a.exec() は A の処理 1 つだけ → 迷わない！</text>
+            </svg>
+          </div>
+
+          <p class="small">
+            インターフェイスは「メソッドの名前（型）」だけを定義し、「中身の処理」を持ちません。<br>
+            複数のインターフェイスを実装しても、<strong>中身を書くのは自分自身（実装クラス）</strong>なので、衝突が起こりようがないのです。
+          </p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">コードで確認</span>
+            <span class="code-tag ng">コンパイルエラー</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">class</span> <span class="type">B</span> { <span class="kw">void</span> <span class="method">exec</span>(){ <span class="com">/* 処理B */</span> } }
+<span class="kw">class</span> <span class="type">C</span> { <span class="kw">void</span> <span class="method">exec</span>(){ <span class="com">/* 処理C */</span> } }
+
+<span class="kw">class</span> <span class="type">A</span> <span class="kw">extends</span> <span class="type">B</span><span class="err">, C</span> { }  <span class="com">// ✕ extends は 1 つだけ</span></code></pre>
+        </div>
+        <div class="panel">
+          <div class="code-header">
+            <span class="code-title">コードで確認</span>
+            <span class="code-tag ok">OK</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">B</span> { <span class="kw">void</span> <span class="method">exec</span>(); }
+<span class="kw">interface</span> <span class="type">C</span> { <span class="kw">void</span> <span class="method">exec</span>(); }
+
+<span class="kw">class</span> <span class="type">A</span> <span class="kw">implements</span> <span class="type">B</span>, <span class="type">C</span> {  <span class="com">// ○ 複数OK</span>
+    <span class="kw">public</span> <span class="kw">void</span> <span class="method">exec</span>(){ <span class="com">/* Aの処理 */</span> }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="note info">
+        <strong>結論：</strong> 多重継承は「構造を複雑にしすぎる」ため禁止されました。インターフェイスは<strong>「安全に複数の役割を持たせる」</strong>ための賢い妥協案なのです。
+      </div>
+    </section>
+
+    <!-- セクション：定数になる理由 -->
+    <section class="section card accent-orange">
+      <div class="section-title">
+        <span class="num">深掘り</span>
+        <h2>なぜ変数は自動的に「定数」になるのか？</h2>
+      </div>
+      <p class="lead">
+        インターフェイスで <span class="pill">double TAX = 0.5;</span> と書くと、自動的に <span class="pill">public static final</span> になります。
+      </p>
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="icon">🏛️</div>
+          <strong>なぜ static なのか？</strong>
+          <span>インターフェイスは <code>new</code> してインスタンスを作れません。だから、個別のインスタンスに属する変数を持つことは不可能で、型そのものに属する static になる必要があります。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">🔒</div>
+          <strong>なぜ final なのか？</strong>
+          <span>インターフェイスは「設計の約束事（コントラクト）」です。実装するクラスごとに値を書き換えられてしまうと、共通の規格としての信頼性が損なわれてしまうため、定数に固定されます。</span>
+        </div>
+      </div>
+      <div class="note warn">
+        <strong>注意：</strong> メンバ変数（インスタンス変数）を持つことはできません。共通の「データ構造（状態）」を持ちたい場合は、インターフェイスではなく<strong>抽象クラス</strong>を選んでください。
+      </div>
+    </section>
+
+    <!-- セクション：文法ルール -->
+    <section class="section card accent-purple">
+      <div class="section-title">
+        <span class="num">1</span>
+        <h2>インターフェイスの定義ルール</h2>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>ルール</th>
+              <th>内容</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="compare-label">キーワード</td>
+              <td><code>interface</code> で宣言し、<code>implements</code> で実装する。</td>
+            </tr>
+            <tr>
+              <td class="compare-label">メソッド</td>
+              <td>自動的に <code>public abstract</code> になる。<strong>中身 { } は書けない。</strong></td>
+            </tr>
+            <tr>
+              <td class="compare-label">フィールド</td>
+              <td>自動的に <code>public static final</code> になる。<strong>必ず初期化が必要。</strong></td>
+            </tr>
+            <tr>
+              <td class="compare-label">実装の義務</td>
+              <td>実装クラスは、定義された<strong>すべての抽象メソッド</strong>を実装しなければならない。</td>
+            </tr>
+            <tr>
+              <td class="compare-label">同時利用</td>
+              <td>クラスの継承(extends)とインターフェイスの実装(implements)は同時に行える。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- セクション：サンプルコード -->
+    <section class="section card accent-blue">
+      <div class="section-title">
+        <span class="num">2</span>
+        <h2>サンプルコード：Productインターフェイス</h2>
+      </div>
+      <div class="panel">
+        <div class="code-header">
+          <span class="code-title">コード</span>
+          <span class="code-tag">interface / implements</span>
+        </div>
+        <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span> {
+    <span class="com">// 自動的に public static final になる</span>
+    <span class="kw">double</span> <span class="field">TAX</span> = <span class="numlit">0.5</span>;
+
+    <span class="com">// 自動的に public abstract になる</span>
+    <span class="type">String</span> <span class="method">getSpec</span>();
+    <span class="kw">void</span> <span class="method">show</span>();
+}
+
+<span class="kw">class</span> <span class="type">Printer</span> <span class="kw">implements</span> <span class="type">Product</span> {
+    <span class="com">// 実装クラスでは必ず public をつける</span>
+    <span class="kw">public</span> <span class="type">String</span> <span class="method">getSpec</span>() {
+        <span class="kw">return</span> <span class="str">"2400dpi"</span>;
+    }
+
+    <span class="kw">public</span> <span class="kw">void</span> <span class="method">show</span>() {
+        <span class="com">// 定数はそのまま利用可能</span>
+        System.out.<span class="method">println</span>(<span class="str">"税率："</span> + <span class="field">TAX</span>);
+    }
+}</code></pre>
+        <div class="output-box">
+          <div class="output-title">show() の実行結果</div>
+          <div class="output-text">税率：0.5</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- セクション：よくあるエラー -->
+    <section class="section card accent-pink">
+      <div class="section-title">
+        <span class="num">3</span>
+        <h2>コンパイルエラーになる理由（練習問題より）</h2>
+      </div>
+      <p class="lead">試験や開発で間違いやすいポイントをチェック！</p>
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="icon">🚫</div>
+          <strong>修飾子の間違い</strong>
+          <span>インターフェイスに <code>private</code> や <code>protected</code> は使えません。誰でも使えるように <code>public</code> である必要があります。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">✏️</div>
+          <strong>処理を書いた</strong>
+          <span><code>void show() { ... }</code> のように { } を書くとエラーです。インターフェイスは「名前」だけの定義です。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">📉</div>
+          <strong>アクセス権の縮小</strong>
+          <span>実装クラスで <code>public</code> を付け忘れるとエラーです（デフォルトだとアクセス権が狭くなるため）。</span>
+        </div>
+        <div class="mini-card">
+          <div class="icon">⚠️</div>
+          <strong>static / final メソッド</strong>
+          <span>インターフェイスのメソッドに <code>static</code> や <code>final</code> は指定できません（※Javaの基本ルールとして）。</span>
+        </div>
+      </div>
+
+      <div class="note info">
+        <strong>発展（Java 8 以降）</strong>：
+        この資料は基本ルールで説明していますが、Java 8 以降は <span class="pill">default メソッド</span> と
+        <span class="pill">static メソッド</span>（中身ありで書ける）、Java 9 以降は <span class="pill">private メソッド</span> も使えます。
+        なお、2 つのインターフェイスの default メソッドが同名で衝突した場合は、実装クラスでオーバーライドしないとコンパイルエラーになるため、
+        「最後は実装クラスが 1 つに決める」という安全設計は保たれています。
+      </div>
+    </section>
+
+
+    <!-- セクション：練習問題６（自動チェックつき） -->
+    <section class="section card accent-pink" id="practice">
+      <div class="section-title">
+        <span class="num">4</span>
+        <h2>練習問題６：なぜコンパイルエラーになる？</h2>
+      </div>
+      <p class="lead">
+        次のコードは、それぞれコンパイルエラーになります。<span class="pill">理由</span> を自分の言葉で書き、
+        「自動チェック」を押してください。押さえられた採点ポイントに ✓ が付きます。最後は「模範解答を見る」で確認しましょう。
+      </p>
+
+      <div class="quiz-bar">
+        <div class="quiz-progress">
+          <span class="binding-chip" id="prog-done">チェック済み 0 / 9</span>
+          <span class="binding-chip" id="prog-ok">正解 0</span>
+        </div>
+        <span class="check-status">自動チェックはキーワードによる簡易判定です</span>
+      </div>
+
+      <div class="quiz-grid">
+
+        <!-- ① -->
+        <article class="q-card" data-q="1">
+          <div class="q-head">
+            <span class="q-no">問題 ①</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="err">private</span> <span class="type">String</span> <span class="method">getSpec</span>();
+}</code></pre>
+          <label class="q-label" for="ans-1">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-1" placeholder="例：〜だから、〜は指定できない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ② -->
+        <article class="q-card" data-q="2">
+          <div class="q-head">
+            <span class="q-no">問題 ②</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="err">protected</span> <span class="type">String</span> <span class="method">getSpec</span>();
+}</code></pre>
+          <label class="q-label" for="ans-2">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-2" placeholder="例：〜だから、〜は指定できない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ③ -->
+        <article class="q-card" data-q="3">
+          <div class="q-head">
+            <span class="q-no">問題 ③</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="err">static</span> <span class="type">String</span> <span class="method">getSpec</span>();
+}</code></pre>
+          <label class="q-label" for="ans-3">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-3" placeholder="例：〜だから、〜は指定できない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ④ -->
+        <article class="q-card" data-q="4">
+          <div class="q-head">
+            <span class="q-no">問題 ④</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="err">final</span> <span class="type">String</span> <span class="method">getSpec</span>();
+}</code></pre>
+          <label class="q-label" for="ans-4">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-4" placeholder="例：〜だから、〜は指定できない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ⑤ -->
+        <article class="q-card" data-q="5">
+          <div class="q-head">
+            <span class="q-no">問題 ⑤</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="err">synchronized</span> <span class="type">String</span> <span class="method">getSpec</span>();
+}</code></pre>
+          <label class="q-label" for="ans-5">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-5" placeholder="例：〜だから、〜は指定できない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ⑥ -->
+        <article class="q-card" data-q="6">
+          <div class="q-head">
+            <span class="q-no">問題 ⑥</span>
+            <span class="code-tag">インターフェイスの定義</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="type">String</span> <span class="method">getSpec</span>()<span class="err">{ }</span>;
+}</code></pre>
+          <label class="q-label" for="ans-6">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-6" placeholder="例：〜だから、〜は書けない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ⑦ -->
+        <article class="q-card" data-q="7">
+          <div class="q-head">
+            <span class="q-no">問題 ⑦</span>
+            <span class="code-tag">実装クラス</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="type">String</span> <span class="method">getSpec</span>();
+}
+<span class="kw">class</span> <span class="type">Printer</span> <span class="kw">implements</span> <span class="type">Product</span>{
+    <span class="err">protected</span> <span class="type">String</span> <span class="method">getSpec</span>(){
+        <span class="kw">return</span> <span class="str">""</span>;
+    }
+}</code></pre>
+          <label class="q-label" for="ans-7">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-7" placeholder="例：〜だから、〜にできない。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ⑧ -->
+        <article class="q-card" data-q="8">
+          <div class="q-head">
+            <span class="q-no">問題 ⑧</span>
+            <span class="code-tag">実装クラス</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="type">String</span> <span class="method">getSpec</span>();
+    <span class="kw">void</span> <span class="method">show</span>();
+}
+<span class="kw">class</span> <span class="err">Printer</span> <span class="kw">implements</span> <span class="type">Product</span>{
+    <span class="kw">public</span> <span class="type">String</span> <span class="method">getSpec</span>(){
+        <span class="kw">return</span> <span class="str">""</span>;
+    }
+}</code></pre>
+          <label class="q-label" for="ans-8">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-8" placeholder="例：〜していないから。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+        <!-- ⑨ -->
+        <article class="q-card" data-q="9">
+          <div class="q-head">
+            <span class="q-no">問題 ⑨</span>
+            <span class="code-tag">実装クラス</span>
+          </div>
+          <pre class="code-block"><code><span class="kw">interface</span> <span class="type">Product</span>{
+    <span class="type">String</span> <span class="method">getSpec</span>();
+}
+<span class="kw">class</span> <span class="type">Printer</span> <span class="kw">implements</span> <span class="type">Product</span>{
+    <span class="err">String</span> <span class="method">getSpec</span>(){
+        <span class="kw">return</span> <span class="str">""</span>;
+    }
+}</code></pre>
+          <label class="q-label" for="ans-9">エラーになる理由</label>
+          <textarea class="q-answer" id="ans-9" placeholder="例：〜だから、〜が必要。"></textarea>
+          <div class="q-actions">
+            <button type="button" class="btn btn-main" data-act="judge">自動チェック</button>
+            <button type="button" class="btn btn-sub" data-act="model">模範解答を見る</button>
+          </div>
+          <div class="judge" hidden></div>
+          <div class="model" hidden></div>
+        </article>
+
+      </div>
+
+
+      <div class="note tip">
+        <strong>ヒント</strong>：
+        ①〜⑥は「インターフェイスのメソッドは自動的に <span class="pill">public abstract</span> になる」、
+        ⑦〜⑨は「実装クラスの義務」と「アクセス権は狭められない」がカギです。
+      </div>
+    </section>
+
+    <div class="footer">授業用補助資料 / 情報処理科 Javaプログラミング講座</div>
+  </div>
+
+  <script>
+  (function(){
+    "use strict";
+
+    /*
+      各問題の採点ポイント。
+      kw: そのポイントを押さえたとみなすキーワード（どれか1つが含まれればOK）
+      need: 正解に必要なポイント（points の番号）
+      alt: 別解。ここに並べたポイントがすべて含まれていても正解
+    */
+    var PROBLEMS = {
+      1: {
+        answer: "インターフェイスのメソッドは自動的に public abstract になる。抽象メソッドは実装クラスで実装（オーバーライド）される前提なので、外から見えない private は指定できない。",
+        points: [
+          { label: "インターフェイスのメソッドは public（public abstract）になる", kw: ["public", "パブリック", "公開", "abstract", "抽象"] },
+          { label: "private は指定できない", kw: ["private", "プライベート"] },
+          { label: "（別解）private メソッドには中身が必要", kw: ["中身", "本体", "処理", "{", "ボディ"], extra: true }
+        ],
+        need: [0, 1], alt: [1, 2]
+      },
+      2: {
+        answer: "インターフェイスのメソッドは自動的に public abstract になり、アクセス修飾子は public しか使えない。protected は指定できない。",
+        points: [
+          { label: "インターフェイスのメソッドは public になる", kw: ["public", "パブリック", "公開", "abstract", "抽象"] },
+          { label: "protected は指定できない", kw: ["protected", "プロテクテッド"] }
+        ],
+        need: [0, 1]
+      },
+      3: {
+        answer: "インターフェイスのメソッドは抽象メソッド（public abstract）であり、実装クラスでオーバーライドして使う。static（クラスメソッド）はオーバーライドできないので、抽象メソッドに static は指定できない。",
+        points: [
+          { label: "インターフェイスのメソッドは抽象メソッドで、オーバーライドして使う", kw: ["抽象", "abstract", "オーバーライド", "上書き", "実装"] },
+          { label: "static（クラスメソッド）は指定できない", kw: ["static", "スタティック", "クラスメソッド", "静的"] },
+          { label: "（別解）static メソッドには中身が必要", kw: ["中身", "本体", "処理", "{", "ボディ"], extra: true }
+        ],
+        need: [0, 1], alt: [1, 2]
+      },
+      4: {
+        answer: "final は「オーバーライド禁止」という意味。抽象メソッドは実装クラスで必ずオーバーライド（実装）しなければならないので、final と矛盾し、指定できない。",
+        points: [
+          { label: "final はオーバーライド禁止の意味", kw: ["final", "ファイナル"] },
+          { label: "抽象メソッドはオーバーライド（実装）される必要がある", kw: ["オーバーライド", "上書き", "再定義", "実装"] }
+        ],
+        need: [0, 1]
+      },
+      5: {
+        answer: "synchronized は処理の中身（実装）に対する指定で、中身を持たない抽象メソッドには指定できない。インターフェイスのメソッドに synchronized は使えない。",
+        points: [
+          { label: "synchronized は指定できない修飾子", kw: ["synchronized", "シンクロナイズド", "同期"] },
+          { label: "中身（実装）のない抽象メソッドだから", kw: ["抽象", "abstract", "中身", "処理", "実装", "本体"] }
+        ],
+        need: [0, 1]
+      },
+      6: {
+        answer: "インターフェイスのメソッドは自動的に抽象メソッドになるので、中身 { } を書くことはできない。処理は実装クラスに書く。",
+        points: [
+          { label: "インターフェイスのメソッドは抽象メソッド", kw: ["抽象", "abstract", "インターフェイス", "インタフェース", "interface"] },
+          { label: "中身 { } は書けない", kw: ["中身", "本体", "処理", "{", "ブロック", "ボディ", "実装"] }
+        ],
+        need: [0, 1]
+      },
+      7: {
+        answer: "インターフェイスのメソッドは public。実装クラスでオーバーライドするとき、アクセス修飾子を protected にするとアクセス権が public より狭くなるためエラー。実装するメソッドは public にしなければならない。",
+        points: [
+          { label: "インターフェイスのメソッドは public", kw: ["public", "パブリック"] },
+          { label: "オーバーライドでアクセス権を狭くできない", kw: ["狭", "弱", "小さ", "縮小", "下げ", "制限"] }
+        ],
+        need: [0, 1]
+      },
+      8: {
+        answer: "Printer クラスが show() メソッドを実装していない。インターフェイスを実装するクラスは、定義されたすべての抽象メソッドを実装しなければならない（実装しないなら抽象クラスにする必要がある）。",
+        points: [
+          { label: "show() を実装していない", kw: ["show"] },
+          { label: "すべての抽象メソッドを実装する義務がある", kw: ["実装", "オーバーライド", "定義", "書い", "書か", "書く"] }
+        ],
+        need: [0, 1]
+      },
+      9: {
+        answer: "修飾子を付けないとアクセス権はデフォルト（パッケージ）になり、public より狭くなる。インターフェイスの public なメソッドを狭いアクセス権でオーバーライドすることになるためエラー。public を付ける必要がある。",
+        points: [
+          { label: "public を付ける必要がある", kw: ["public", "パブリック"] },
+          { label: "修飾子なし（デフォルト）は public より狭い", kw: ["狭", "弱", "小さ", "縮小", "デフォルト", "パッケージ", "修飾子"] }
+        ],
+        need: [0, 1]
+      }
+    };
+
+    var results = {};
+
+    /* 全角英数を半角に、英字を小文字に、空白を除く */
+    function normalize(s){
+      return s
+        .replace(/[Ａ-Ｚａ-ｚ０-９｛｝]/g, function(ch){ return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); })
+        .toLowerCase()
+        .replace(/\s+/g, "");
+    }
+
+    function hits(text, point){
+      return point.kw.some(function(k){ return text.indexOf(normalize(k)) >= 0; });
+    }
+
+    function allHit(list, hitFlags){
+      return list && list.every(function(i){ return hitFlags[i]; });
+    }
+
+    /* ---------- 下書きの保存（この端末のブラウザだけ） ---------- */
+    function loadDraft(key){
+      try { return localStorage.getItem("iface-" + key) || ""; } catch (e) { return ""; }
+    }
+    function saveDraft(key, v){
+      try { localStorage.setItem("iface-" + key, v); } catch (e) { /* 保存できなくても動作は続ける */ }
+    }
+
+    /* ---------- 自動チェック ---------- */
+    function check(card, id){
+      var ta = card.querySelector(".q-answer");
+      var box = card.querySelector(".judge");
+      var raw = ta.value.trim();
+      box.hidden = false;
+      box.textContent = "";
+
+      if (raw.length < 4) {
+        box.className = "judge info";
+        var m = document.createElement("p");
+        m.textContent = "理由を書いてから「自動チェック」を押してください。";
+        box.appendChild(m);
+        ta.focus();
+        return;
+      }
+
+      var p = PROBLEMS[id];
+      var text = normalize(raw);
+      var flags = p.points.map(function(pt){ return hits(text, pt); });
+
+      var mainHits = p.need.filter(function(i){ return flags[i]; }).length;
+      var verdict;
+      if (allHit(p.need, flags) || allHit(p.alt, flags)) verdict = "正解";
+      else if (mainHits > 0) verdict = "部分正解";
+      else verdict = "不正解";
+
+      var kind = verdict === "正解" ? "ok" : (verdict === "部分正解" ? "partial" : "ng");
+      box.className = "judge " + kind;
+
+      var v = document.createElement("span");
+      v.className = "judge-verdict";
+      v.textContent = verdict;
+      box.appendChild(v);
+
+      var ul = document.createElement("ul");
+      ul.className = "points";
+      p.points.forEach(function(pt, i){
+        if (pt.extra && !flags[i]) return;   /* 別解は当たったときだけ表示 */
+        var li = document.createElement("li");
+        li.className = flags[i] ? "hit" : "miss";
+        var mark = document.createElement("span");
+        mark.className = "mark";
+        mark.textContent = flags[i] ? "✓" : "－";
+        var t = document.createElement("span");
+        t.textContent = pt.label;
+        li.appendChild(mark);
+        li.appendChild(t);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+
+      var note = document.createElement("p");
+      note.className = "hint";
+      note.textContent = verdict === "正解"
+        ? "ポイントを押さえています。模範解答と見比べて、説明の筋道も確認しましょう。"
+        : "「－」のポイントが説明に入っているか見直しましょう。キーワードによる簡易判定なので、最後は模範解答で確認してください。";
+      box.appendChild(note);
+
+      results[id] = verdict;
+      card.setAttribute("data-result", verdict);
+      updateProgress();
+    }
+
+    function showModel(card, id){
+      var box = card.querySelector(".model");
+      var btn = card.querySelector('[data-act="model"]');
+      if (!box.hidden) {
+        box.hidden = true;
+        btn.textContent = "模範解答を見る";
+        return;
+      }
+      box.textContent = "";
+      var t = document.createElement("strong");
+      t.textContent = "模範解答";
+      var p = document.createElement("p");
+      p.textContent = PROBLEMS[id].answer;
+      box.appendChild(t);
+      box.appendChild(p);
+      box.hidden = false;
+      btn.textContent = "模範解答を閉じる";
+    }
+
+    function updateProgress(){
+      var done = 0, ok = 0;
+      Object.keys(results).forEach(function(k){
+        done++;
+        if (results[k] === "正解") ok++;
+      });
+      document.getElementById("prog-done").textContent = "チェック済み " + done + " / 9";
+      document.getElementById("prog-ok").textContent = "正解 " + ok;
+    }
+
+    /* ---------- 初期化 ---------- */
+    document.querySelectorAll(".q-card").forEach(function(card){
+      var id = card.getAttribute("data-q");
+      var ta = card.querySelector(".q-answer");
+      ta.maxLength = 600;
+      ta.value = loadDraft("q-" + id);
+      ta.addEventListener("input", function(){ saveDraft("q-" + id, ta.value); });
+
+      card.querySelector('[data-act="judge"]').addEventListener("click", function(){ check(card, id); });
+      card.querySelector('[data-act="model"]').addEventListener("click", function(){ showModel(card, id); });
+    });
+
+    updateProgress();
+  })();
+  </script>
+</body>
+</html>
