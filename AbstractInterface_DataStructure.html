@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 抽象クラスとインターフェイス 学習ガイド（共通なデータ構造とアルゴリズム）</title>
+<style>
+:root{
+  --bg:#f5f7fb; --paper:#ffffff; --ink:#1f2937; --sub:#5b6474; --line:#dfe4ee;
+  --primary:#3b5bdb; --primary-soft:#e8edff;
+  --ok:#0f9d58; --ok-soft:#e6f6ee; --ng:#d93025; --ng-soft:#fdecea;
+  --warn:#b26a00; --warn-soft:#fff4e0;
+  --data:#2563eb; --data-soft:#e3ecff;
+  --algo:#0d9488; --algo-soft:#dcf5f2;
+  --form:#ea580c; --form-soft:#ffeadb;
+  --code-bg:#1e2433; --code-ink:#e6e9f0;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;
+  line-height:1.8;font-size:16px}
+code,pre{font-family:"Consolas","Menlo","Source Code Pro",monospace}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(135deg,#2b3a8f 0%,#3b5bdb 55%,#5c7cfa 100%);color:#fff;width:calc(100% - 32px);max-width:928px;margin:28px auto 28px;border-radius:var(--radius);padding:40px 28px 34px;box-shadow:0 4px 16px rgba(30,40,80,.12)}
+.hero .wrap{max-width:none;padding:0}
+.hero h1 .sub{display:block;white-space:nowrap;font-size:clamp(.8rem,2.5vw,1.6rem);margin-top:.25em}
+@media (max-width:720px){.hero h1 .sub{font-size:min(1.4rem,calc((100vw - 64px) / 23))}}
+@media (max-width:720px){.hero{padding:28px 16px 24px}}
+.hero .kicker{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  padding:2px 14px;border-radius:999px;font-size:.85rem;letter-spacing:.08em}
+.hero h1{font-size:clamp(1.6rem,4.2vw,2.4rem);margin:.4em 0 .2em;line-height:1.35}
+.hero p{margin:.4em 0 1em;opacity:.95}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{background:rgba(255,255,255,.95);color:#2b3a8f;font-size:.8rem;font-weight:700;padding:3px 12px;border-radius:999px;font-family:Consolas,Menlo,monospace}
+.tags span.jp{font-family:inherit}
+
+/* ---------- sections ---------- */
+main{padding:28px 0 40px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:28px 28px;margin:0 0 28px;
+  box-shadow:0 2px 10px rgba(30,40,80,.05)}
+.badge-deep{display:inline-block;background:var(--warn-soft);color:var(--warn);font-weight:700;font-size:.8rem;padding:2px 12px;border-radius:999px;margin-bottom:6px}
+.card h2{font-size:1.4rem;margin:.1em 0 .6em;line-height:1.45}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:.6em}
+.sec-head .num{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem}
+.sec-head h2{margin:0}
+.card h3{font-size:1.1rem;margin:1.2em 0 .4em}
+.lead{color:var(--sub)}
+.inline{background:var(--primary-soft);color:#2b3a8f;padding:1px 7px;border-radius:6px;font-family:Consolas,Menlo,monospace;font-size:.92em}
+strong.d{color:var(--data)} strong.a{color:var(--algo)} strong.f{color:var(--form)}
+mark{background:linear-gradient(transparent 60%,#ffe58a 60%);color:inherit;padding:0 2px}
+
+/* ---------- glossary ---------- */
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px}
+.gloss div{border-radius:12px;padding:14px 16px;border:2px solid}
+.gloss .g-d{border-color:var(--data);background:var(--data-soft)}
+.gloss .g-a{border-color:var(--algo);background:var(--algo-soft)}
+.gloss .g-f{border-color:var(--form);background:var(--form-soft)}
+.gloss .g-s{border-color:#8b5cf6;background:#f1ebff}
+.gloss b{display:block;font-size:1.05rem}
+.gloss small{display:block;color:var(--sub);font-size:.85rem;line-height:1.6;margin-top:4px}
+.gloss code{font-size:.85rem}
+
+/* ---------- compare panels ---------- */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+.panel{border-radius:12px;padding:18px;border:2px solid var(--line)}
+.panel.ok{border-color:var(--ok);background:var(--ok-soft)}
+.panel.ng{border-color:var(--ng);background:var(--ng-soft)}
+.panel.ab{border-color:var(--primary);background:var(--primary-soft)}
+.panel.if{border-color:var(--form);background:var(--form-soft)}
+.panel .ph{font-weight:800;margin-bottom:6px}
+.panel ul{margin:.3em 0 0;padding-left:1.2em}
+@media (max-width:720px){.versus{grid-template-columns:1fr}.card{padding:22px 16px}}
+
+/* ---------- diagram ---------- */
+.diagram{margin:16px 0;background:#fbfcff;border:1px dashed var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.diagram svg{display:block;width:100%;min-width:620px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--sub);margin:6px 4px 0}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+
+/* ---------- code ---------- */
+.code{margin:16px 0;border-radius:12px;overflow:hidden;border:1px solid #2c3550}
+.code .label{background:#2c3550;color:#cdd5ea;font-size:.82rem;padding:6px 14px;display:flex;gap:10px;align-items:center}
+.code .label .pill{background:var(--primary);color:#fff;border-radius:999px;padding:0 10px;font-size:.75rem}
+.code .label .pill.ok{background:var(--ok)} .code .label .pill.ng{background:var(--ng)}
+.code pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:16px 18px;overflow-x:auto;font-size:.9rem;line-height:1.65}
+.tok-k{color:#c792ea;font-weight:600} .tok-s{color:#c3e88d} .tok-c{color:#7f8aa8;font-style:italic}
+.tok-t{color:#82aaff} .tok-n{color:#f78c6c}
+.hl-d{background:rgba(37,99,235,.35);border-radius:3px}
+.hl-a{background:rgba(13,148,136,.38);border-radius:3px}
+.hl-f{background:rgba(234,88,12,.42);border-radius:3px}
+.out{background:#0f1320;color:#b8f5c8;border-top:1px solid #2c3550;padding:10px 18px;font-family:Consolas,Menlo,monospace;font-size:.88rem;white-space:pre}
+.out::before{content:"▶ 実行結果";display:block;color:#7f8aa8;font-size:.75rem;margin-bottom:2px}
+
+/* ---------- callouts ---------- */
+.callout{border-left:6px solid var(--primary);background:var(--primary-soft);border-radius:10px;padding:14px 18px;margin:16px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.ng{border-color:var(--ng);background:var(--ng-soft)}
+.callout.ok{border-color:var(--ok);background:var(--ok-soft)}
+.callout b.t{display:inline-block;margin-right:6px}
+
+.points{display:grid;gap:12px;margin-top:12px}
+.point{display:flex;gap:14px;align-items:flex-start;background:#f8f9fd;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.point .ic{font-size:1.6rem;line-height:1}
+.point b{display:block}
+
+/* ---------- flow ---------- */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;margin:18px 0}
+.q{background:#fff;border:2px solid var(--primary);border-radius:14px;padding:12px 18px;text-align:center;font-weight:700;max-width:560px;width:100%}
+.arrow{color:var(--sub);font-size:.85rem;text-align:center;padding:4px 0}
+.arrow::before{content:"▼";display:block;color:var(--primary);font-size:1rem;line-height:1}
+.branch{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:720px}
+.res{border-radius:14px;padding:14px;text-align:center;font-weight:800}
+.res small{display:block;font-weight:400;color:var(--sub);font-size:.85rem}
+.res.ab{background:var(--primary-soft);border:2px solid var(--primary);color:#2b3a8f}
+.res.if{background:var(--form-soft);border:2px solid var(--form);color:#9a3a06}
+.yes{color:var(--ok);font-weight:800} .no{color:var(--ng);font-weight:800}
+
+/* ---------- table ---------- */
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:10px 12px;vertical-align:top}
+thead th{background:#eef1f8}
+td:first-child{font-weight:700;background:#fafbfe;white-space:nowrap}
+.tbl{overflow-x:auto}
+
+/* ---------- quiz ---------- */
+.score{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 4px}
+.score span{background:#eef1f8;border-radius:999px;padding:4px 14px;font-weight:700;font-size:.9rem}
+.score span b{color:var(--primary)}
+.qbox{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;background:#fcfdff}
+.qbox .qt{font-weight:800;color:var(--primary)}
+.choices{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.choices label{border:2px solid var(--line);border-radius:10px;padding:6px 16px;cursor:pointer;background:#fff;user-select:none}
+.choices input{margin-right:6px}
+.choices label:has(input:checked){border-color:var(--primary);background:var(--primary-soft)}
+.btn{border:none;border-radius:10px;padding:8px 18px;font-weight:700;cursor:pointer;font-size:.9rem}
+.btn.check{background:var(--primary);color:#fff}
+.btn.reset{background:#eef1f8;color:var(--ink)}
+.fb{display:none;margin-top:10px;border-radius:10px;padding:12px 14px}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);border-left:5px solid var(--ok)}
+.fb.ng{background:var(--ng-soft);border-left:5px solid var(--ng)}
+
+/* ---------- イラスト ---------- */
+.hero-grid{display:grid;grid-template-columns:1fr 190px;gap:24px;align-items:center}
+.hero-art{width:100%;height:auto}
+@media (max-width:720px){.hero-grid{grid-template-columns:1fr}.hero-art{max-width:160px;margin:0 auto}}
+.illus{display:block;width:100%;max-width:360px;height:auto;margin:8px auto 10px;background:#fff;border-radius:10px;padding:6px}
+
+/* ---------- 発展（折りたたみ） ---------- */
+details.adv{border:2px solid var(--warn);border-radius:12px;background:var(--warn-soft);margin:16px 0;overflow:hidden}
+details.adv summary{cursor:pointer;list-style:none;padding:12px 18px;font-weight:800;color:var(--warn);display:flex;align-items:center;gap:10px;user-select:none}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:"▶";font-size:.8rem;width:1em}
+details.adv[open] summary::before{content:"▼"}
+details.adv summary::after{content:"クリックで表示";margin-left:auto;font-size:.75rem;font-weight:700;background:#fff;border:1px solid var(--warn);border-radius:999px;padding:1px 10px}
+details.adv[open] summary::after{content:"閉じる"}
+details.adv summary:hover{background:#ffeccc}
+.adv-body{background:#fff;padding:4px 18px 14px;border-top:1px solid #f1d9ad}
+
+footer{text-align:center;color:var(--sub);font-size:.85rem;padding:24px 0 40px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+   <div>
+    <span class="kicker">Java基本文法2</span>
+    <h1>共通なデータ構造とアルゴリズム<span class="sub">― 抽象クラスとインターフェイスの使い分け ―</span></h1>
+    <p>「抽象クラスとインターフェイス、結局どっちを使えばいいの？」<br>
+       答えのカギは <b>“何を共通にしたいか”</b> です。図とコードで整理しましょう。</p>
+    <div class="tags">
+      <span>abstract class</span><span>interface</span><span>extends</span><span>implements</span>
+      <span class="jp">データ構造</span><span class="jp">アルゴリズムの形式</span><span class="jp">練習問題つき</span>
+    </div>
+   </div>
+   <svg class="hero-art" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="抽象クラスとインターフェイスのどちらを使うか迷うイラスト" font-family="Hiragino Sans,Meiryo,sans-serif">
+     <g transform="rotate(-6 40 50)">
+       <rect x="4" y="14" width="72" height="66" rx="9" fill="#fff"/>
+       <rect x="4" y="14" width="72" height="18" rx="9" fill="#2b3a8f"/><rect x="4" y="24" width="72" height="8" fill="#2b3a8f"/>
+       <text x="40" y="27" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="700" font-family="Consolas,monospace">abstract</text>
+       <rect x="12" y="38" width="56" height="9" rx="2" fill="#e3ecff"/>
+       <rect x="12" y="51" width="56" height="9" rx="2" fill="#dcf5f2"/>
+       <rect x="12" y="64" width="56" height="10" rx="2" fill="#fff" stroke="#ea580c" stroke-dasharray="3 2"/>
+     </g>
+     <g transform="rotate(6 160 50)">
+       <rect x="124" y="14" width="72" height="66" rx="9" fill="#fff" stroke="#ea580c" stroke-width="2.5" stroke-dasharray="6 3"/>
+       <text x="160" y="29" text-anchor="middle" fill="#ea580c" font-size="8.5" font-weight="700" font-family="Consolas,monospace">interface</text>
+       <rect x="132" y="36" width="56" height="10" rx="2" fill="#ffeadb"/>
+       <rect x="150" y="54" width="20" height="13" rx="2" fill="#ea580c"/>
+       <rect x="154" y="58" width="4" height="4" fill="#fff"/><rect x="162" y="58" width="4" height="4" fill="#fff"/>
+     </g>
+     <circle cx="100" cy="48" r="17" fill="#ffd166"/>
+     <text x="100" y="56" text-anchor="middle" font-size="22" font-weight="800" fill="#2b3a8f">?</text>
+   </svg>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ===== 0 用語 ===== -->
+<section class="card">
+  <span class="badge-deep">まずは言葉の整理</span>
+  <h2>教科書の言葉を、プログラムの言葉に置きかえよう</h2>
+  <p class="lead">p72の文章には少し難しい言葉が出てきます。まずはクラスのどの部分のことなのかを確認しましょう。
+  この資料では、この <b>4色</b> で色分けして説明します。</p>
+  <div class="gloss">
+    <div class="g-d"><b>データ構造</b>＝ フィールド（変数）
+      <small>そのクラスが「どんなデータを持つか」。<br><code>private String _name;</code></small></div>
+    <div class="g-a"><b>アルゴリズム</b>＝ メソッドの中身（処理）
+      <small>「どう処理するか」。<br><code>return _name;</code> など { } の中</small></div>
+    <div class="g-f"><b>アルゴリズムの形式</b>＝ 抽象メソッド
+      <small>名前・引数・戻り値だけの「約束」。中身は各クラスで書く。<br><code>void showProfile();</code></small></div>
+    <div class="g-s"><b>サプライア</b>＝ 機能を提供する側のクラス
+      <small>抽象クラスのサブクラスや、インターフェイスの実装クラスのこと。</small></div>
+  </div>
+</section>
+
+<!-- ===== 深掘り 抽象クラス ===== -->
+<section class="card">
+  <span class="badge-deep">深掘り</span>
+  <h2>抽象クラス：データ構造とアルゴリズムが「受け継がれる」</h2>
+  <p>抽象クラスには、インスタンス変数（<strong class="d">データ構造</strong>）やインスタンスメソッド（<strong class="a">アルゴリズム</strong>）を書くことができます。
+  それらは <mark>サブクラスにそのまま継承</mark> されます。</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 760 390" xmlns="http://www.w3.org/2000/svg" font-family="Hiragino Sans,Meiryo,sans-serif">
+    <defs>
+      <marker id="tri" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#fff" stroke="#3b5bdb" stroke-width="1.2"/></marker>
+    </defs>
+    <!-- super -->
+    <rect x="215" y="8" width="330" height="168" rx="12" fill="#fff" stroke="#3b5bdb" stroke-width="2.5"/>
+    <rect x="215" y="8" width="330" height="40" rx="12" fill="#3b5bdb"/>
+    <rect x="215" y="36" width="330" height="12" fill="#3b5bdb"/>
+    <text x="380" y="34" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">«abstract» Student</text>
+    <rect x="230" y="58" width="300" height="30" rx="6" fill="#e3ecff"/>
+    <text x="242" y="78" font-size="14" fill="#1e3a8a" font-family="Consolas,monospace">_name : String</text>
+    <text x="520" y="78" text-anchor="end" font-size="12" fill="#2563eb">データ構造</text>
+    <rect x="230" y="94" width="300" height="30" rx="6" fill="#dcf5f2"/>
+    <text x="242" y="114" font-size="14" fill="#115e59" font-family="Consolas,monospace">getName() / setName()</text>
+    <text x="520" y="114" text-anchor="end" font-size="12" fill="#0d9488">アルゴリズム</text>
+    <rect x="230" y="130" width="300" height="30" rx="6" fill="#ffeadb"/>
+    <text x="242" y="150" font-size="14" fill="#9a3a06" font-family="Consolas,monospace" font-style="italic">showProfile();</text>
+    <text x="520" y="150" text-anchor="end" font-size="12" fill="#ea580c">形式だけ（抽象）</text>
+    <!-- arrows -->
+    <line x1="190" y1="210" x2="330" y2="180" stroke="#3b5bdb" stroke-width="2" marker-end="url(#tri)"/>
+    <line x1="570" y1="210" x2="430" y2="180" stroke="#3b5bdb" stroke-width="2" marker-end="url(#tri)"/>
+    <text x="380" y="205" text-anchor="middle" font-size="13" fill="#5b6474">extends（継承）</text>
+    <!-- sub1 -->
+    <g>
+    <rect x="20" y="212" width="340" height="168" rx="12" fill="#fff" stroke="#5b6474" stroke-width="2"/>
+    <text x="190" y="238" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">IPStudent</text>
+    <rect x="34" y="250" width="312" height="30" rx="6" fill="#e3ecff" stroke="#2563eb" stroke-dasharray="4 3"/>
+    <text x="46" y="270" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_name</text>
+    <text x="336" y="270" text-anchor="end" font-size="12" fill="#2563eb">↓ 受け継いだ</text>
+    <rect x="34" y="286" width="312" height="30" rx="6" fill="#dcf5f2" stroke="#0d9488" stroke-dasharray="4 3"/>
+    <text x="46" y="306" font-size="13" fill="#115e59" font-family="Consolas,monospace">getName() / setName()</text>
+    <text x="336" y="306" text-anchor="end" font-size="12" fill="#0d9488">↓ 受け継いだ</text>
+    <rect x="34" y="322" width="312" height="44" rx="6" fill="#ffeadb" stroke="#ea580c" stroke-width="2"/>
+    <text x="46" y="341" font-size="13" fill="#9a3a06" font-family="Consolas,monospace">showProfile(){</text>
+    <text x="58" y="359" font-size="13" fill="#9a3a06">「IP科です。」 }</text>
+    <text x="336" y="350" text-anchor="end" font-size="12" fill="#ea580c" font-weight="700">自分で書く</text>
+    </g>
+    <!-- sub2 -->
+    <g>
+    <rect x="400" y="212" width="340" height="168" rx="12" fill="#fff" stroke="#5b6474" stroke-width="2"/>
+    <text x="570" y="238" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">WEBStudent</text>
+    <rect x="414" y="250" width="312" height="30" rx="6" fill="#e3ecff" stroke="#2563eb" stroke-dasharray="4 3"/>
+    <text x="426" y="270" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_name</text>
+    <text x="716" y="270" text-anchor="end" font-size="12" fill="#2563eb">↓ 受け継いだ</text>
+    <rect x="414" y="286" width="312" height="30" rx="6" fill="#dcf5f2" stroke="#0d9488" stroke-dasharray="4 3"/>
+    <text x="426" y="306" font-size="13" fill="#115e59" font-family="Consolas,monospace">getName() / setName()</text>
+    <text x="716" y="306" text-anchor="end" font-size="12" fill="#0d9488">↓ 受け継いだ</text>
+    <rect x="414" y="322" width="312" height="44" rx="6" fill="#ffeadb" stroke="#ea580c" stroke-width="2"/>
+    <text x="426" y="341" font-size="13" fill="#9a3a06" font-family="Consolas,monospace">showProfile(){</text>
+    <text x="438" y="359" font-size="13" fill="#9a3a06">「WEB科です。」 }</text>
+    <text x="716" y="350" text-anchor="end" font-size="12" fill="#ea580c" font-weight="700">自分で書く</text>
+    </g>
+  </svg>
+  <div class="legend"><span><i style="background:#e3ecff;border:1px solid #2563eb"></i>データ構造</span>
+    <span><i style="background:#dcf5f2;border:1px solid #0d9488"></i>アルゴリズム</span>
+    <span><i style="background:#ffeadb;border:1px solid #ea580c"></i>アルゴリズムの形式（中身はサブクラスごと）</span></div>
+  </div>
+
+  <p>IPStudent も WEBStudent も、<b>_name を持ち、getName() / setName() が使える</b>という点でそっくりです。
+  違うのは showProfile() の中身だけ。これが <mark>「サプライア間で、データ構造は類似することになる」</mark> の意味です。</p>
+
+  <div class="code">
+    <div class="label"><span class="pill">コード</span>abstract class / extends（p70の例）</div>
+<pre><code class="java">abstract class Student {
+    <span class="hl-d">private String _name;</span>        // 共通のデータ構造
+
+    public Student(String name){
+        _name = name;
+    }
+    <span class="hl-a">public String getName(){ return _name; }</span>        // 共通のアルゴリズム
+    <span class="hl-a">public void setName(String name){ _name = name; }</span>
+
+    <span class="hl-f">public abstract void showProfile();</span>   // 形式だけ（中身なし）
+}
+
+class IPStudent extends Student {
+    public IPStudent(String name){ super(name); }
+    public void showProfile(){                // 中身を書く
+        System.out.println(getName() + "：IP科です。");
+    }
+}
+
+class WEBStudent extends Student {
+    public WEBStudent(String name){ super(name); }
+    public void showProfile(){                // 中身を書く
+        System.out.println(getName() + "：WEB科です。");
+    }
+}
+
+class Main {
+    public static void main(String[] args){
+        Student[] list = { new IPStudent("山田"), new WEBStudent("佐藤") };
+        for (Student s : list) {
+            s.showProfile();   // 同じ呼び方で、それぞれの処理が動く
+        }
+    }
+}</code></pre>
+    <div class="out">山田：IP科です。
+佐藤：WEB科です。</div>
+  </div>
+
+  <div class="callout warn"><b class="t">注意：</b>
+  裏を返すと、抽象クラスを継承すると <b>共通のデータ構造・アルゴリズムが「必ず」入ってしまいます</b>（いらなくても外せません）。
+  教科書はこれを「抽象クラスの設計上の条件」と言っています。<br>
+  ⇒ <b>サブクラス同士が本当に「同じデータ・同じ処理」を持つ仲間のときだけ</b>使いましょう。</div>
+</section>
+
+<!-- ===== 深掘り インターフェイス ===== -->
+<section class="card">
+  <span class="badge-deep">深掘り</span>
+  <h2>インターフェイス：「形式」だけをそろえる</h2>
+  <p>インターフェイスには、インスタンス変数もインスタンスメソッドもありません。持てるのは
+  <strong class="f">抽象メソッド（形式）</strong>と <span class="inline">public static final</span> の定数だけです。
+  だから実装クラスは <mark>データ構造やアルゴリズムの影響を受けません</mark>。</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" font-family="Hiragino Sans,Meiryo,sans-serif">
+    <defs>
+      <marker id="tri2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#fff" stroke="#ea580c" stroke-width="1.2"/></marker>
+    </defs>
+    <rect x="245" y="10" width="270" height="100" rx="12" fill="#fff" stroke="#ea580c" stroke-width="2.5" stroke-dasharray="8 5"/>
+    <text x="380" y="36" text-anchor="middle" font-size="13" fill="#ea580c">«interface»</text>
+    <text x="380" y="58" text-anchor="middle" font-size="17" font-weight="700" fill="#1f2937">Printable</text>
+    <rect x="262" y="68" width="236" height="30" rx="6" fill="#ffeadb"/>
+    <text x="380" y="88" text-anchor="middle" font-size="14" fill="#9a3a06" font-family="Consolas,monospace" font-style="italic">void print();</text>
+    <text x="530" y="40" font-size="12" fill="#5b6474">データ構造なし</text>
+    <text x="530" y="58" font-size="12" fill="#5b6474">アルゴリズムなし</text>
+    <text x="530" y="76" font-size="12" fill="#ea580c" font-weight="700">形式だけ！</text>
+    <line x1="190" y1="160" x2="320" y2="114" stroke="#ea580c" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#tri2)"/>
+    <line x1="570" y1="160" x2="440" y2="114" stroke="#ea580c" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#tri2)"/>
+    <text x="380" y="150" text-anchor="middle" font-size="13" fill="#5b6474">implements（実装）</text>
+    <!-- Student -->
+    <rect x="20" y="162" width="340" height="176" rx="12" fill="#fff" stroke="#5b6474" stroke-width="2"/>
+    <text x="190" y="188" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Student（学生）</text>
+    <rect x="34" y="200" width="312" height="56" rx="6" fill="#e3ecff"/>
+    <text x="46" y="222" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_name    : String  氏名</text>
+    <text x="46" y="244" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_address : String  住所</text>
+    <rect x="34" y="264" width="312" height="60" rx="6" fill="#ffeadb" stroke="#ea580c" stroke-width="2"/>
+    <text x="46" y="286" font-size="13" fill="#9a3a06" font-family="Consolas,monospace">print(){</text>
+    <text x="58" y="308" font-size="13" fill="#9a3a06">クラス名・氏名・住所を表示 }</text>
+    <!-- Product -->
+    <rect x="400" y="162" width="340" height="176" rx="12" fill="#fff" stroke="#5b6474" stroke-width="2"/>
+    <text x="570" y="188" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Product（商品）</text>
+    <rect x="414" y="200" width="312" height="56" rx="6" fill="#e3ecff"/>
+    <text x="426" y="222" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_name  : String  商品名</text>
+    <text x="426" y="244" font-size="13" fill="#1e3a8a" font-family="Consolas,monospace">_price : int     価格</text>
+    <rect x="414" y="264" width="312" height="60" rx="6" fill="#ffeadb" stroke="#ea580c" stroke-width="2"/>
+    <text x="426" y="286" font-size="13" fill="#9a3a06" font-family="Consolas,monospace">print(){</text>
+    <text x="438" y="308" font-size="13" fill="#9a3a06">クラス名・商品名・価格を表示 }</text>
+    <text x="380" y="368" text-anchor="middle" font-size="14" fill="#1f2937" font-weight="700">データ構造はバラバラ（住所 と 価格）でもOK ― 共通なのは「print() できる」という形式だけ</text>
+  </svg>
+  </div>
+
+  <p>学生と商品は、まったく関係のないクラスです。それでも同じ <span class="inline">Printable</span> を実装すれば、
+  <b>「どちらも print() で表示できる」</b>という共通の形式を持たせられます。
+  これが教科書の <mark>「データ構造の異なるサプライアに共通なアルゴリズムの形式を提供する」</mark> という意味です。</p>
+
+  <div class="code">
+    <div class="label"><span class="pill">コード</span>interface / implements（p71の例）</div>
+<pre><code class="java">interface Printable {
+    <span class="hl-f">void print();</span>                  // 形式だけ（自動で public abstract）
+}
+
+class Student implements Printable {
+    <span class="hl-d">private String _name;</span>        // 学生独自のデータ構造
+    <span class="hl-d">private String _address;</span>
+    public Student(String n, String a){ _name = n; _address = a; }
+
+    public void print(){                // 学生用の中身
+        String name = getClass().getName();   // クラス名を取得
+        System.out.println(name + "\t" + _name + "\t" + _address);
+    }
+}
+
+class Product implements Printable {
+    <span class="hl-d">private String _name;</span>        // 商品独自のデータ構造
+    <span class="hl-d">private int _price;</span>
+    public Product(String n, int p){ _name = n; _price = p; }
+
+    public void print(){                // 商品用の中身
+        String name = getClass().getName();
+        System.out.println(name + "\t" + _name + "\t" + _price);
+    }
+}
+
+class Main {
+    public static void main(String[] args){
+        Printable[] items = { new Student("山田太郎", "東京都"),
+                              new Product("ノートPC", 98000) };
+        for (Printable p : items) {
+            p.print();    // 学生も商品も「同じ呼び方」で表示できる
+        }
+    }
+}</code></pre>
+    <div class="out">Student	山田太郎	東京都
+Product	ノートPC	98000</div>
+  </div>
+
+  <div class="callout"><b class="t">ポイント：</b>
+  Student と Product の <span class="inline">print()</span> は、たまたま書き方が似ていますが、これは<b>それぞれのクラスが自分で書いたもの</b>です。
+  インターフェイスから受け継いだ処理ではありません。</div>
+</section>
+
+<!-- ===== ✕ / ○ ===== -->
+<section class="card">
+  <span class="badge-deep">深掘り</span>
+  <h2>もし Printable を「抽象クラス」で作ったら？</h2>
+  <p>「抽象クラスでも同じことができるのでは？」と思うかもしれません。
+  学生と商品に共通のデータ（例えば <span class="inline">_name</span> と <span class="inline">_address</span>）を抽象クラスに持たせてみると、問題が見えてきます。</p>
+
+  <div class="versus">
+    <div class="panel ng">
+      <div class="ph">✕ 抽象クラスにした場合</div>
+      <div class="code" style="margin:6px 0">
+        <div class="label"><span class="pill ng">問題あり</span></div>
+<pre><code class="java">abstract class Printable {
+    protected String _name;
+    protected String _address; // 住所
+    public abstract void print();
+}
+class Product extends Printable {
+    private int _price;
+    ...
+}</code></pre></div>
+      <ul>
+        <li>商品なのに <b>「住所」</b> を持たされる</li>
+        <li>Product は <b>もう他のクラスを継承できない</b>（extends は1つだけ）</li>
+      </ul>
+    </div>
+    <div class="panel ok">
+      <div class="ph">○ インターフェイスにした場合</div>
+      <div class="code" style="margin:6px 0">
+        <div class="label"><span class="pill ok">OK</span></div>
+<pre><code class="java">interface Printable {
+    void print();
+}
+class Product implements Printable {
+    private String _name;
+    private int _price;
+    public void print(){ ... }
+}</code></pre></div>
+      <ul>
+        <li>必要なデータ <b>だけ</b> を自分で決められる</li>
+        <li>他のクラスの継承や、別のインターフェイスの実装も<b>同時にできる</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout ok"><b class="t">結論：</b>
+  共通の<b>データ</b>がない仲間同士に、共通の<b>形式</b>だけを持たせたいときは、インターフェイスが最適です。</div>
+</section>
+
+<!-- ===== 1 使い分け ===== -->
+<section class="card">
+  <div class="sec-head"><span class="num">1</span><h2>どっちを使う？ 判断フローチャート</h2></div>
+  <p class="lead">教科書 p72 のまとめ（20〜24行目）を、質問の順番に並べかえました。</p>
+
+  <div class="flow">
+    <div class="q">Q1. サブクラスになるクラス同士で、<br>共通の <strong class="d">フィールド</strong> や <strong class="a">メソッドの処理</strong> がある？</div>
+    <div class="branch" style="margin-top:8px">
+      <div style="text-align:center"><div class="arrow"><span class="yes">はい</span></div>
+        <div class="res ab">抽象クラス<small>共通部分を書いて継承させ、<br>違う部分だけ抽象メソッドにする</small></div></div>
+      <div style="text-align:center"><div class="arrow"><span class="no">いいえ</span></div>
+        <div class="q" style="font-size:.95rem">Q2. 共通の <strong class="f">メソッドの形式</strong> だけ<br>そろえたい？／定数の一覧だけ欲しい？</div>
+        <div class="arrow"><span class="yes">はい</span></div>
+        <div class="res if">インターフェイス<small>形式（抽象メソッド）や定数だけを定義し、<br>中身は各クラスが書く</small></div></div>
+    </div>
+  </div>
+
+  <div class="versus">
+    <div class="panel ab"><div class="ph">📝 抽象クラス ＝「一部が印刷済みの申込用紙」のイメージ</div>
+      <svg class="illus" viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ひな形の申込用紙から、IP科とWEB科の記入済み用紙ができるイラスト" font-family="Hiragino Sans,Meiryo,sans-serif">
+        <!-- ひな形 -->
+        <rect x="10" y="16" width="124" height="168" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>
+        <rect x="10" y="16" width="124" height="26" rx="6" fill="#3b5bdb"/><rect x="10" y="32" width="124" height="10" fill="#3b5bdb"/>
+        <text x="72" y="34" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">申込用紙（ひな形）</text>
+        <rect x="20" y="52" width="104" height="24" rx="4" fill="#e3ecff"/>
+        <text x="28" y="69" font-size="11" fill="#1e3a8a">氏名：＿＿＿＿</text>
+        <rect x="20" y="82" width="104" height="24" rx="4" fill="#dcf5f2"/>
+        <text x="28" y="99" font-size="11" fill="#115e59">書き方の説明…</text>
+        <rect x="20" y="114" width="104" height="58" rx="4" fill="#fff" stroke="#ea580c" stroke-width="2" stroke-dasharray="5 3"/>
+        <text x="72" y="134" text-anchor="middle" font-size="11" fill="#ea580c" font-weight="700">自己紹介欄</text>
+        <text x="72" y="154" text-anchor="middle" font-size="11" fill="#ea580c">（空欄）</text>
+        <text x="72" y="196" text-anchor="middle" font-size="10" fill="#5b6474">印刷済み＝共通</text>
+        <!-- 矢印 -->
+        <path d="M138 90 C165 90 168 52 192 52" stroke="#3b5bdb" stroke-width="2.5" fill="none"/>
+        <path d="M186 46 L195 52 L186 58" stroke="#3b5bdb" stroke-width="2.5" fill="none"/>
+        <path d="M138 110 C165 110 168 148 192 148" stroke="#3b5bdb" stroke-width="2.5" fill="none"/>
+        <path d="M186 142 L195 148 L186 154" stroke="#3b5bdb" stroke-width="2.5" fill="none"/>
+        <!-- 記入済み IP -->
+        <g>
+          <rect x="198" y="8" width="132" height="88" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>
+          <rect x="206" y="16" width="116" height="14" rx="3" fill="#e3ecff"/>
+          <text x="211" y="27" font-size="9.5" fill="#1e3a8a">氏名：山田</text>
+          <rect x="206" y="34" width="116" height="12" rx="3" fill="#dcf5f2"/>
+          <rect x="206" y="52" width="116" height="36" rx="3" fill="#ffeadb" stroke="#ea580c" stroke-width="1.5"/>
+          <text x="214" y="75" font-size="13" fill="#9a3a06" font-weight="700" font-family="'Klee One','Yu Mincho',serif">IP科です。</text>
+          <!-- えんぴつ -->
+          <g transform="rotate(35 306 66)"><rect x="300" y="52" width="9" height="26" rx="1" fill="#ffd166" stroke="#b26a00"/><path d="M300 78 L304.5 87 L309 78z" fill="#ffd8b5" stroke="#b26a00"/><path d="M303 84 L304.5 87 L306 84z" fill="#333"/></g>
+        </g>
+        <!-- 記入済み WEB -->
+        <g>
+          <rect x="198" y="104" width="132" height="88" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>
+          <rect x="206" y="112" width="116" height="14" rx="3" fill="#e3ecff"/>
+          <text x="211" y="123" font-size="9.5" fill="#1e3a8a">氏名：佐藤</text>
+          <rect x="206" y="130" width="116" height="12" rx="3" fill="#dcf5f2"/>
+          <rect x="206" y="148" width="116" height="36" rx="3" fill="#ffeadb" stroke="#ea580c" stroke-width="1.5"/>
+          <text x="214" y="171" font-size="13" fill="#9a3a06" font-weight="700" font-family="'Klee One','Yu Mincho',serif">WEB科です。</text>
+        </g>
+      </svg>
+      「氏名欄」や「書き方の説明」は<b>最初から印刷されていて全員共通（データと処理）</b>。空欄の「自己紹介欄」だけを、IP科の人・WEB科の人がそれぞれ<b>自分で書き込みます（抽象メソッド）</b>。</div>
+    <div class="panel if"><div class="ph">🔌 インターフェイス ＝「規格」のイメージ</div>
+      <svg class="illus" viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="マウスとUSBメモリが同じ形のUSB端子でパソコンにつながるイラスト" font-family="Hiragino Sans,Meiryo,sans-serif">
+        <!-- パソコン -->
+        <rect x="118" y="14" width="104" height="70" rx="6" fill="#2b3a8f"/>
+        <rect x="125" y="21" width="90" height="56" rx="3" fill="#cfe0ff"/>
+        <text x="170" y="53" text-anchor="middle" font-size="11" fill="#2b3a8f" font-weight="700">パソコン</text>
+        <path d="M150 84 h40 l8 14 h-56z" fill="#5b6474"/>
+        <rect x="128" y="98" width="84" height="40" rx="5" fill="#e5e7eb" stroke="#5b6474" stroke-width="1.5"/>
+        <!-- 差し込み口 -->
+        <rect x="128" y="111" width="10" height="14" fill="#1f2937"/>
+        <rect x="202" y="111" width="10" height="14" fill="#1f2937"/>
+        <text x="170" y="122" text-anchor="middle" font-size="10" fill="#1f2937">本体</text>
+        <!-- マウス -->
+        <ellipse cx="44" cy="120" rx="26" ry="36" fill="#f3f4f6" stroke="#5b6474" stroke-width="2"/>
+        <line x1="44" y1="84" x2="44" y2="110" stroke="#5b6474" stroke-width="1.5"/>
+        <path d="M18 110 h52" stroke="#5b6474" stroke-width="1.5"/>
+        <path d="M44 84 C44 62 80 62 86 104 L92 118" stroke="#1f2937" stroke-width="2.5" fill="none"/>
+        <!-- 同じ形のプラグ（左） -->
+        <rect x="92" y="110" width="22" height="16" rx="2" fill="#94a3b8"/>
+        <rect x="112" y="111" width="16" height="14" rx="1" fill="#ea580c"/>
+        <!-- USBメモリ -->
+        <rect x="244" y="104" width="76" height="28" rx="7" fill="#3b5bdb"/>
+        <rect x="250" y="112" width="24" height="12" rx="2" fill="#cfe0ff"/>
+        <rect x="228" y="110" width="16" height="16" rx="2" fill="#94a3b8"/>
+        <!-- 同じ形のプラグ（右） -->
+        <rect x="212" y="111" width="16" height="14" rx="1" fill="#ea580c"/>
+        <!-- 同じ形ラベル -->
+        <text x="120" y="152" text-anchor="middle" font-size="10" fill="#ea580c" font-weight="700">同じ形</text>
+        <text x="220" y="152" text-anchor="middle" font-size="10" fill="#ea580c" font-weight="700">同じ形</text>
+        <text x="44" y="168" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="700">マウス</text>
+        <text x="44" y="180" text-anchor="middle" font-size="9.5" fill="#5b6474">中身：光センサー</text>
+        <text x="282" y="150" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="700">USBメモリ</text>
+        <text x="282" y="164" text-anchor="middle" font-size="9.5" fill="#5b6474">中身：記憶チップ</text>
+        <text x="190" y="196" text-anchor="middle" font-size="12" fill="#9a3a06" font-weight="700">差し込み方（形式）だけが同じ！</text>
+      </svg>
+      USB の差し込み口は、マウスにもUSBメモリにもあります。中のしくみは全然違うのに、<b>差し込み方（形式）だけ</b>がそろっている。Student と Product の print() も同じです。</div>
+  </div>
+</section>
+
+<!-- ===== 2 定数リスト ===== -->
+<section class="card">
+  <div class="sec-head"><span class="num">2</span><h2>「定数の一覧」だけならインターフェイス</h2></div>
+  <p>教科書 p72 の24行目「単純に定数リストだけを作成したいような場合はインターフェイスのほうが適します」の例です。
+  インターフェイスのフィールドは自動的に <span class="inline">public static final</span>（定数）になるので、書くのが楽です。</p>
+
+  <div class="code">
+    <div class="label"><span class="pill">コード</span>定数リストのインターフェイス</div>
+<pre><code class="java">interface Rank {
+    int GOLD   = 3;     // 自動的に public static final
+    int SILVER = 2;
+    int BRONZE = 1;
+}
+
+class Main {
+    public static void main(String[] args){
+        int myRank = Rank.GOLD;          // 「インターフェイス名.定数名」で使える
+        if (myRank == Rank.GOLD) {
+            System.out.println("金メダルです！");
+        }
+    }
+}</code></pre>
+    <div class="out">金メダルです！</div>
+  </div>
+  <details class="adv">
+    <summary>発展：定数の一覧には enum（列挙型）もある</summary>
+    <div class="adv-body">
+      <p>現在のJavaでは、決まった選択肢を表すには <span class="inline">enum</span>（列挙型）を使うのが一般的です。まずは「インターフェイスで定数をまとめられる」ことを押さえましょう。</p>
+      <div class="code">
+        <div class="label"><span class="pill">コード</span>enum を使った場合</div>
+<pre><code class="java">enum Medal { GOLD, SILVER, BRONZE }
+
+class Main {
+    public static void main(String[] args){
+        Medal m = Medal.GOLD;
+        if (m == Medal.GOLD) {
+            System.out.println("金メダルです！");
+        }
+    }
+}</code></pre>
+      </div>
+      <p>int の定数だと <code>int myRank = 99;</code> のようなありえない値も入ってしまいますが、enum なら決めた値（GOLD / SILVER / BRONZE）しか入りません。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ===== 3 まとめ表 ===== -->
+<section class="card">
+  <div class="sec-head"><span class="num">3</span><h2>まとめ：共通にできるものの違い</h2></div>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>共通にしたいもの</th><th>抽象クラス</th><th>インターフェイス</th></tr></thead>
+    <tbody>
+      <tr><td><strong class="d">データ構造</strong>（インスタンス変数）</td><td>○ 書ける → サブクラスに継承される</td><td>✕ 書けない（定数だけ）</td></tr>
+      <tr><td><strong class="a">アルゴリズム</strong>（処理の中身）</td><td>○ 書ける → サブクラスに継承される</td><td>✕ 書けない（※下の「発展」参照）</td></tr>
+      <tr><td><strong class="f">アルゴリズムの形式</strong></td><td>○ 抽象メソッドで書ける</td><td>○ 抽象メソッドで書ける</td></tr>
+      <tr><td>定数だけの一覧</td><td>△ 書けるが大げさ</td><td>◎ 向いている</td></tr>
+      <tr><td>受け継ぎ方</td><td>extends は <b>1つだけ</b></td><td>implements は <b>いくつでも</b></td></tr>
+      <tr><td>向いている関係</td><td>データも処理も似ている<b>同じ種類のクラス</b>（学生と学生）</td><td>データはバラバラだが同じ操作をしたい<b>別の種類のクラス</b>（学生と商品）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <details class="adv">
+    <summary>発展：Java 8 以降の default メソッド</summary>
+    <div class="adv-body">
+      <p>この資料は基本ルールで説明していますが、Java 8 以降はインターフェイスにも <span class="inline">default</span> を付けると<b>中身のあるメソッド</b>が書けます。</p>
+      <div class="code">
+        <div class="label"><span class="pill">コード</span>default メソッド（Java 8 以降）</div>
+<pre><code class="java">interface Printable {
+    void print();                 // 従来どおりの抽象メソッド
+
+    default void printTwice(){    // 中身を書ける
+        print();
+        print();
+    }
+}</code></pre>
+      </div>
+      <p>ただし、インターフェイスは今でも<b>インスタンス変数（データ構造）を持てません</b>。共通のデータを持たせたいときは抽象クラス、という使い分けは変わりません。</p>
+    </div>
+  </details>
+  <div class="points">
+    <div class="point"><span class="ic">📝</span><div><b>抽象クラスを使うとき</b>データ構造やアルゴリズムがある程度共通で、さらに共通な形式（中身はサブクラスごとに違う）を持たせたいとき。</div></div>
+    <div class="point"><span class="ic">🔌</span><div><b>インターフェイスを使うとき</b>データ構造やアルゴリズムとはあまり関係なく、共通な形式（中身はクラスごとに違う）だけを持たせたいとき。</div></div>
+    <div class="point"><span class="ic">📋</span><div><b>定数リストだけのとき</b>インターフェイスのほうが適している。</div></div>
+  </div>
+</section>
+
+<!-- ===== 4 練習問題 ===== -->
+<section class="card">
+  <div class="sec-head"><span class="num">4</span><h2>練習問題：抽象クラス？ インターフェイス？</h2></div>
+  <p>次の設計では、どちらを使うのが適切でしょうか。選んで「判定」を押してください。解説も必ず読みましょう。</p>
+  <div class="score"><span>回答済み <b id="done">0</b> / <span id="total">0</span></span><span>正解 <b id="right">0</b></span>
+    <button class="btn reset" id="resetAll" type="button">すべてリセット</button></div>
+  <div id="quiz"></div>
+  <div class="callout"><b class="t">ヒント：</b>
+  「共通の <b>フィールド</b> や <b>処理の中身</b> があるか？」をまず考えましょう。あれば抽象クラス、形式だけならインターフェイスです。</div>
+</section>
+
+</main>
+
+<footer>授業用補助資料 / 情報処理科 Javaプログラミング講座</footer>
+
+<script>
+/* ---------- 簡易シンタックスハイライト（ハイライト用spanはそのまま残す） ---------- */
+(function(){
+  const KW = /\b(abstract|class|interface|extends|implements|public|private|protected|static|final|void|int|double|boolean|return|new|if|else|for|super|this|enum|default)\b/g;
+  const TYPE = /\b(String|System|Student|IPStudent|WEBStudent|Printable|Product|Main|Rank|Medal)\b/g;
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function hlText(t){
+    // t: 生テキスト。コメント・文字列・キーワードを処理
+    let out="", re=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")/g, last=0, m;
+    while((m=re.exec(t))){
+      out+=plain(t.slice(last,m.index));
+      out+= m[1] ? '<span class="tok-c">'+esc(m[1])+'</span>' : '<span class="tok-s">'+esc(m[2])+'</span>';
+      last=re.lastIndex;
+    }
+    return out+plain(t.slice(last));
+  }
+  function plain(s){
+    return esc(s).replace(KW,'<span class="tok-k">$1</span>')
+                 .replace(TYPE,'<span class="tok-t">$1</span>')
+                 .replace(/\b(\d+)\b/g,'<span class="tok-n">$1</span>');
+  }
+  document.querySelectorAll("pre code.java").forEach(code=>{
+    // テキストノードだけを置換（hl-d / hl-a / hl-f のspanは保持）
+    const walk=(node)=>{
+      [...node.childNodes].forEach(ch=>{
+        if(ch.nodeType===3){
+          const span=document.createElement("span");
+          span.innerHTML=hlText(ch.textContent);
+          ch.replaceWith(...span.childNodes);
+        }else if(ch.nodeType===1){ walk(ch); }
+      });
+    };
+    walk(code);
+  });
+})();
+
+/* ---------- 練習問題 ---------- */
+const Q = [
+  {t:"社員クラスを作る。正社員とアルバイトは、どちらも「社員番号」と「氏名」を持ち、それを表示する処理も同じ。ただし「給料の計算方法」だけが違う。",
+   a:"ab", e:"共通のフィールド（社員番号・氏名）と共通の処理（表示）がある ⇒ <b>抽象クラス</b>。給料計算だけを抽象メソッド <code>calcSalary()</code> にして、サブクラスで中身を書きます。"},
+  {t:"画像・音楽データ・ユーザー情報という、まったく別のクラスに「ファイルに保存できる」機能 save() を持たせたい。",
+   a:"if", e:"データ構造はバラバラで、共通なのは「save() できる」という形式だけ ⇒ <b>インターフェイス</b>（例：<code>interface Savable { void save(); }</code>）。"},
+  {t:"曜日を表す定数（SUNDAY = 0, MONDAY = 1, …）の一覧だけを作りたい。",
+   a:"if", e:"定数リストだけなら <b>インターフェイス</b>。フィールドは自動的に public static final になります。（現在のJavaでは enum も使われます）"},
+  {t:"図形クラスを作る。円も四角形も「位置(x, y)」を持ち、移動する処理 move() は同じ。ただし面積の求め方 getArea() は図形ごとに違う。",
+   a:"ab", e:"共通のデータ構造（x, y）と共通のアルゴリズム（move()）がある ⇒ <b>抽象クラス</b>。getArea() だけを抽象メソッドにします。"},
+  {t:"すでに別のクラスを extends しているクラスに、さらに「印刷できる」という共通の形式を追加したい。",
+   a:"if", e:"Javaのクラスは1つしか extends できません。implements はいくつでもできるので ⇒ <b>インターフェイス</b>。"},
+  {t:"商品・学生・日付など、関係のないクラスどうしに「大小を比べられる」という形式 compare() をそろえたい。",
+   a:"if", e:"データ構造は全く違い、共通なのは compare() という形式だけ ⇒ <b>インターフェイス</b>。実際にJavaには <code>Comparable</code> というインターフェイスが用意されています。"}
+];
+const quiz=document.getElementById("quiz");
+document.getElementById("total").textContent=Q.length;
+Q.forEach((q,i)=>{
+  const d=document.createElement("div");d.className="qbox";
+  d.innerHTML=`<div class="qt">問題 ${"①②③④⑤⑥⑦⑧"[i]}</div><div>${q.t}</div>
+   <div class="choices">
+     <label><input type="radio" name="q${i}" value="ab">抽象クラス</label>
+     <label><input type="radio" name="q${i}" value="if">インターフェイス</label>
+   </div>
+   <button class="btn check" type="button">判定</button>
+   <div class="fb"></div>`;
+  d.querySelector(".check").onclick=()=>{
+    const sel=d.querySelector("input:checked"), fb=d.querySelector(".fb");
+    if(!sel){fb.className="fb show ng";fb.innerHTML="どちらかを選んでから判定してください。";return;}
+    const ok=sel.value===q.a;
+    d.dataset.done="1"; d.dataset.ok=ok?"1":"0";
+    fb.className="fb show "+(ok?"ok":"ng");
+    fb.innerHTML=(ok?"<b>✓ 正解！</b> ":"<b>✕ ざんねん。</b> ")+q.e;
+    update();
+  };
+  quiz.appendChild(d);
+});
+function update(){
+  const b=[...quiz.children];
+  document.getElementById("done").textContent=b.filter(x=>x.dataset.done==="1").length;
+  document.getElementById("right").textContent=b.filter(x=>x.dataset.ok==="1").length;
+}
+document.getElementById("resetAll").onclick=()=>{
+  [...quiz.children].forEach(x=>{delete x.dataset.done;delete x.dataset.ok;
+    x.querySelectorAll("input").forEach(r=>r.checked=false);
+    x.querySelector(".fb").className="fb";});
+  update();
+};
+</script>
+</body>
+</html>
