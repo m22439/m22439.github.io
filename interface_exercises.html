@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>インターフェイス演習</title>
+<style>
+  :root{
+    --bg:#f3f6fb; --card:#ffffff; --text:#1e293b; --muted:#64748b; --border:#e2e8f0;
+    --blue:#2563eb; --cyan:#0891b2;
+    --lv1:#059669; --lv2:#d97706; --lv3:#db2777;
+    --lv1-soft:#ecfdf5; --lv2-soft:#fffbeb; --lv3-soft:#fdf2f8;
+    --ok:#059669; --ng:#dc2626;
+    /* editor (dark) */
+    --code-bg:#0f172a; --code-bar:#1e293b; --code-border:#1e293b; --code-text:#d6deeb; --out-text:#86efac;
+    --kw:#c792ea; --type:#82aaff; --str:#c3e88d; --num:#f78c6c; --com:#64748b;
+    --fill:#34d399;
+    --mono:"JetBrains Mono","Consolas","Menlo","Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--text);background-color:var(--bg);
+    background-image:
+      linear-gradient(rgba(37,99,235,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,.06) 1px, transparent 1px);
+    background-size:28px 28px;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;line-height:1.8}
+  main{max-width:900px;margin:0 auto;padding:40px 16px 80px}
+
+  /* ---------- header ---------- */
+  header{margin-bottom:28px;padding:26px 28px;background:var(--card);border:1px solid var(--border);
+    border-radius:16px;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(15,23,42,.06)}
+  header::after{content:"{ }";position:absolute;right:24px;top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:5.5rem;font-weight:bold;color:rgba(37,99,235,.07);pointer-events:none}
+  header::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;
+    background:linear-gradient(180deg,var(--cyan),var(--blue))}
+  .tag{font-family:var(--mono);color:var(--cyan);font-size:.85rem;letter-spacing:.08em;font-weight:bold}
+  .tag::after{content:"_";animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  header h1{font-size:clamp(1.8rem,5vw,2.4rem);margin:4px 0 8px;line-height:1.3;color:#0f172a}
+  header h1 span{color:var(--blue)}
+  header p{color:var(--muted);margin:0;max-width:640px}
+
+  /* ---------- roadmap ---------- */
+  .roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+  .roadmap a{display:block;text-decoration:none;color:var(--text);background:var(--card);
+    border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;
+    transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  .roadmap a:hover{transform:translateY(-2px);border-color:var(--c);box-shadow:0 8px 20px rgba(15,23,42,.08)}
+  .roadmap a::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--c)}
+  .roadmap .step{font-family:var(--mono);font-size:.75rem;color:var(--c);font-weight:bold}
+  .roadmap b{display:block;font-size:1.1rem;margin:2px 0 4px}
+  .roadmap span{font-size:.85rem;color:var(--muted);line-height:1.6;display:block}
+  @media (max-width:640px){.roadmap{grid-template-columns:1fr}}
+
+  /* ---------- points ---------- */
+  .points{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:36px;
+    box-shadow:0 2px 8px rgba(15,23,42,.04)}
+  .points h2{font-size:1rem;margin:0 0 8px;font-family:var(--mono);color:var(--blue)}
+  .points h2::before{content:"// ";color:var(--muted)}
+  .points ul{margin:0;padding-left:1.2em}
+  .points li{margin:2px 0}
+  .points li::marker{color:var(--blue)}
+
+  /* ---------- question card ---------- */
+  section.q{--c:var(--lv1);--cs:var(--lv1-soft);background:var(--card);
+    border:1px solid var(--border);border-radius:16px;padding:26px 26px 22px;margin-bottom:32px;
+    position:relative;box-shadow:0 6px 24px rgba(15,23,42,.07);border-top:5px solid var(--c)}
+  section.lv2{--c:var(--lv2);--cs:var(--lv2-soft)} section.lv3{--c:var(--lv3);--cs:var(--lv3-soft)}
+  .q-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .badge{font-family:var(--mono);font-size:.78rem;font-weight:bold;color:#fff;background:var(--c);
+    padding:3px 12px;border-radius:6px;letter-spacing:.05em}
+  .q-head h2{margin:0;font-size:1.35rem}
+  .goal{display:flex;gap:10px;align-items:flex-start;background:var(--cs);border-left:4px solid var(--c);
+    padding:9px 14px;border-radius:0 8px 8px 0;color:var(--text);font-size:.92rem;margin:10px 0 18px}
+  .goal b{color:var(--c);white-space:nowrap;font-family:var(--mono)}
+  h3{font-size:.85rem;margin:22px 0 8px;font-family:var(--mono);color:var(--muted);letter-spacing:.05em}
+  h3::before{content:"▸ ";color:var(--c)}
+  ul.spec{padding-left:1.2em} ul.spec li::marker{color:var(--c)}
+
+  code.inline{background:#eef2ff;color:#3730a3;border:1px solid #e0e7ff;padding:0 6px;border-radius:5px;
+    font-family:var(--mono);font-size:.88em}
+
+  /* ---------- code windows (dark) ---------- */
+  .win{border:1px solid var(--code-border);border-radius:10px;overflow:hidden;background:var(--code-bg);margin:6px 0;
+    box-shadow:0 8px 20px rgba(15,23,42,.15)}
+  .win-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--code-bar)}
+  .win-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .win-bar i:nth-child(1){background:#ff5f57}.win-bar i:nth-child(2){background:#febc2e}.win-bar i:nth-child(3){background:#28c840}
+  .win-bar span{margin-left:8px;font-family:var(--mono);font-size:.78rem;color:#94a3b8}
+  pre{margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:.9rem;line-height:1.7;color:var(--code-text)}
+  pre.output{color:var(--out-text)}
+  pre.output::before{content:"$ java Main\A";color:#64748b}
+  .kw{color:var(--kw)} .ty{color:var(--type)} .st{color:var(--str)} .nu{color:var(--num)} .cm{color:var(--com);font-style:italic}
+
+  /* ---------- fill-in blanks (inside dark editor) ---------- */
+  .blank{display:inline-flex;align-items:center;gap:4px;vertical-align:baseline}
+  .blank{gap:6px}
+  .blank .no{font-size:1.35rem;font-weight:bold;line-height:1;color:var(--fill)}
+  .blank input{font-family:var(--mono);font-size:.88rem;color:#fff;background:rgba(52,211,153,.08);
+    border:1px dashed var(--fill);border-radius:5px;padding:1px 6px;outline:none;transition:all .15s}
+  .blank input:focus{border-style:solid;background:rgba(52,211,153,.16);box-shadow:0 0 0 3px rgba(52,211,153,.25)}
+  .blank input.ok{border:1px solid #34d399;background:rgba(52,211,153,.22)}
+  .blank input.ng{border:1px solid #f87171;background:rgba(248,113,113,.18)}
+  .blank .mark{font-size:.85rem;width:1em;font-weight:bold}
+  .blank .mark.ok{color:#34d399} .blank .mark.ng{color:#f87171}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+  button{font-family:inherit;font-size:.92rem;font-weight:bold;cursor:pointer;border-radius:8px;padding:9px 20px;
+    border:1px solid var(--border);background:#fff;color:var(--text);transition:all .15s}
+  button:hover{border-color:var(--blue);color:var(--blue)}
+  button.primary{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 4px 12px rgba(37,99,235,.3)}
+  button.primary:hover{background:#1d4ed8;color:#fff}
+  .score{font-family:var(--mono);font-weight:bold;color:var(--blue)}
+  .feedback{margin-top:12px;font-size:.9rem;color:var(--muted)}
+  .feedback div{margin:3px 0}
+  .feedback .ng{color:var(--ng)}
+  .clear{color:var(--ok);font-weight:bold}
+
+  /* ---------- details ---------- */
+  details{margin-top:14px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;overflow:hidden}
+  details summary{cursor:pointer;padding:11px 16px;font-weight:bold;list-style:none;display:flex;align-items:center;gap:8px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▶";font-size:.7rem;transition:transform .2s;color:var(--muted)}
+  details[open] summary::before{transform:rotate(90deg)}
+  details[open] summary{border-bottom:1px solid var(--border)}
+  details.hint summary{color:var(--lv2)}
+  details.ans summary{color:var(--blue)}
+  details .inner{padding:14px 16px;background:#fff}
+  details .inner p{margin:0 0 8px}
+  details .win{margin:0}
+
+  footer{text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;margin-top:40px}
+
+  /* ---------- print ---------- */
+  @media print{
+    body{background:#fff}
+    header,.roadmap a,.points,section.q{box-shadow:none;border-color:#999}
+    header::after{display:none}
+    section.q{break-inside:avoid}
+    details,.actions,.feedback{display:none}
+    .win{background:#f5f5f5;border-color:#bbb;box-shadow:none}
+    .win-bar{background:#e5e5e5}
+    pre,pre.output,.kw,.ty,.st,.nu,.cm,.blank .no{color:#000}
+    .blank input{background:#fff;border:none;border-bottom:1px solid #000;border-radius:0;color:#000}
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="tag">&lt;Java/&gt; INTERFACE DRILL</div>
+  <h1><span>interface</span> 演習</h1>
+  <p>初級 → 中級 → 上級の順に取り組みましょう。インターフェイスを実装したクラスを定義し、要求された実行結果を出力するプログラムを作ります。</p>
+</header>
+
+<nav class="roadmap">
+  <a href="#q1" style="--c:var(--lv1)"><div class="step">STEP 01</div><b>初級</b><span>穴埋めで implements と public の書き方を確認</span></a>
+  <a href="#q2" style="--c:var(--lv2)"><div class="step">STEP 02</div><b>中級</b><span>インターフェイスを実装し、独自のフィールドとメソッドを追加</span></a>
+  <a href="#q3" style="--c:var(--lv3)"><div class="step">STEP 03</div><b>上級</b><span>定数の利用と、複数クラスをインターフェイス型でまとめて扱う</span></a>
+</nav>
+
+<div class="points">
+  <h2>確認ポイント</h2>
+  <ul>
+    <li>クラスでインターフェイスを実装するには <code class="inline">implements</code> を使う</li>
+    <li>インターフェイスのメソッドは自動的に <code class="inline">public abstract</code> になる</li>
+    <li>実装するメソッドには必ず <code class="inline">public</code> を付ける</li>
+    <li>インターフェイスで定義された<strong>すべて</strong>の抽象メソッドを実装する</li>
+    <li>インターフェイスのフィールドは自動的に <code class="inline">public static final</code>（定数）になる</li>
+  </ul>
+</div>
+
+<!-- ===================== 初級 ===================== -->
+<section class="q lv1" id="q1">
+  <div class="q-head"><span class="badge">初級</span><h2>問題1　穴埋め</h2></div>
+  <div class="goal"><b>目標</b>implements の書き方と、実装メソッドに public が必要なことを理解する</div>
+  <p>次のインターフェイス <code class="inline">Animal</code> を実装した <code class="inline">Cat</code> クラスを完成させます。①〜⑤の入力欄に当てはまるコードを入力し、「答え合わせ」を押してください。</p>
+
+  <div class="win">
+    <div class="win-bar"><i></i><i></i><i></i><span>Main.java</span></div>
+<pre id="fillCode"><span class="kw">interface</span> <span class="ty">Animal</span>{
+    <span class="kw">void</span> setName(<span class="ty">String</span> name);
+    <span class="kw">void</span> setAge(<span class="kw">int</span> age);
+    <span class="kw">void</span> show();
+}
+
+<span class="kw">class</span> <span class="ty">Cat</span> <span class="blank" data-id="1"><span class="no">①</span><input size="11" autocomplete="off" spellcheck="false"><span class="mark"></span></span> <span class="ty">Animal</span>{
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">private</span> <span class="kw">int</span> age;
+
+    <span class="blank" data-id="2"><span class="no">②</span><input size="7" autocomplete="off" spellcheck="false"><span class="mark"></span></span> <span class="kw">void</span> setName(<span class="ty">String</span> name){
+        <span class="kw">this</span>.name = name;
+    }
+    <span class="kw">public</span> <span class="kw">void</span> setAge(<span class="kw">int</span> age){
+        <span class="blank" data-id="3"><span class="no">③</span><input size="16" autocomplete="off" spellcheck="false"><span class="mark"></span></span>
+    }
+    <span class="kw">public</span> <span class="kw">void</span> show(){
+        <span class="ty">System</span>.out.println(name + <span class="st">"の年齢は"</span> + age + <span class="st">"歳です。"</span>);
+    }
+}
+
+<span class="kw">public</span> <span class="kw">class</span> <span class="ty">Main</span>{
+    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> main(<span class="ty">String</span>[] args){
+        <span class="ty">Cat</span> c = <span class="blank" data-id="4"><span class="no">④</span><input size="10" autocomplete="off" spellcheck="false"><span class="mark"></span></span>;
+        c.setName(<span class="st">"タマ"</span>);
+        c.setAge(<span class="nu">2</span>);
+        <span class="blank" data-id="5"><span class="no">⑤</span><input size="10" autocomplete="off" spellcheck="false"><span class="mark"></span></span>
+    }
+}</pre>
+  </div>
+
+  <h3>要求されている実行結果</h3>
+  <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+<pre class="output">タマの年齢は2歳です。</pre></div>
+
+  <div class="actions">
+    <button class="primary" id="checkBtn">答え合わせ</button>
+    <button id="resetBtn">リセット</button>
+    <span class="score" id="score"></span>
+  </div>
+  <div class="feedback" id="feedback"></div>
+
+  <details class="hint"><summary>ヒント</summary><div class="inner">
+    <p>② はアクセス修飾子です。インターフェイスのメソッドは自動的に <code class="inline">public abstract</code> になるため、実装するときに選べる修飾子は1つしかありません。</p>
+    <p>③ と ⑤ は1行の文なので、最後にセミコロン <code class="inline">;</code> が必要です。</p>
+  </div></details>
+
+  <details class="ans"><summary>解答を見る</summary><div class="inner">
+    <div class="win"><pre>① implements
+② public
+③ this.age = age;
+④ new Cat()
+⑤ c.show();</pre></div>
+  </div></details>
+</section>
+
+<!-- ===================== 中級 ===================== -->
+<section class="q lv2" id="q2">
+  <div class="q-head"><span class="badge">中級</span><h2>問題2　クラスの定義</h2></div>
+  <div class="goal"><b>目標</b>インターフェイスのメソッドをすべて実装し、さらに独自のフィールドとメソッドを追加できる</div>
+  <p>次のインターフェイス <code class="inline">Book</code> を元に、<code class="inline">Textbook</code> クラスを定義してください。</p>
+  <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Book.java</span></div>
+<pre class="code">interface Book{
+    void setTitle(String title);
+    void setPrice(int price);
+    void setPages(int pages);
+    void show();
+}</pre></div>
+  <p>さらに、<code class="inline">Textbook</code> クラスには、<code class="inline">subject</code>（科目）という文字列型のフィールドと、そのフィールドに値を代入するための <code class="inline">setSubject()</code> メソッドを設けてください。</p>
+  <p>main メソッドでは、書名「Java入門」、価格 2800、ページ数 320、科目「プログラミング」を設定して <code class="inline">show()</code> を呼び出してください。</p>
+
+  <h3>要求されている実行結果</h3>
+  <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+<pre class="output">Java入門の価格は2800円です。
+Java入門のページ数は320ページです。
+Java入門の科目はプログラミングです。</pre></div>
+
+  <details class="hint"><summary>ヒント</summary><div class="inner">
+    <p>インターフェイスのメソッドは4つあります。1つでも実装し忘れるとコンパイルエラーになります。</p>
+    <p><code class="inline">setSubject()</code> はインターフェイスにはない、<code class="inline">Textbook</code> 独自のメソッドとして追加します。</p>
+  </div></details>
+
+  <details class="ans"><summary>解答例を見る</summary><div class="inner">
+  <div class="win">
+<pre class="code">interface Book{
+    void setTitle(String title);
+    void setPrice(int price);
+    void setPages(int pages);
+    void show();
+}
+
+class Textbook implements Book{
+    private String title;
+    private int price;
+    private int pages;
+    private String subject;
+
+    public void setTitle(String title){
+        this.title = title;
+    }
+    public void setPrice(int price){
+        this.price = price;
+    }
+    public void setPages(int pages){
+        this.pages = pages;
+    }
+    public void setSubject(String subject){
+        this.subject = subject;
+    }
+    public void show(){
+        System.out.println(title + "の価格は" + price + "円です。");
+        System.out.println(title + "のページ数は" + pages + "ページです。");
+        System.out.println(title + "の科目は" + subject + "です。");
+    }
+}
+
+public class Main{
+    public static void main(String[] args){
+        Textbook t = new Textbook();
+        t.setTitle("Java入門");
+        t.setPrice(2800);
+        t.setPages(320);
+        t.setSubject("プログラミング");
+        t.show();
+    }
+}</pre></div>
+  </div></details>
+</section>
+
+<!-- ===================== 上級 ===================== -->
+<section class="q lv3" id="q3">
+  <div class="q-head"><span class="badge">上級</span><h2>問題3　複数クラスの実装</h2></div>
+  <div class="goal"><b>目標</b>インターフェイスの定数を利用し、複数の実装クラスをインターフェイス型の配列でまとめて扱える</div>
+  <p>次のインターフェイス <code class="inline">Product</code> を実装した、<code class="inline">Food</code> クラスと <code class="inline">Drink</code> クラスを定義してください。</p>
+  <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Product.java</span></div>
+<pre class="code">interface Product{
+    double TAX = 0.1;
+    void setName(String name);
+    void setPrice(int price);
+    void setStock(int stock);
+    void show();
+}</pre></div>
+  <p>それぞれのクラスには、次の独自フィールドとメソッドを設けてください。</p>
+  <ul class="spec">
+    <li><code class="inline">Food</code> クラス：文字列型のフィールド <code class="inline">expiry</code>（賞味期限）と <code class="inline">setExpiry()</code> メソッド</li>
+    <li><code class="inline">Drink</code> クラス：int 型のフィールド <code class="inline">volume</code>（容量）と <code class="inline">setVolume()</code> メソッド</li>
+  </ul>
+  <p><code class="inline">show()</code> では、定数 <code class="inline">TAX</code> を使って税込価格（小数点以下切り捨て）も表示してください。</p>
+  <p>main メソッドでは、次の2つの商品を作成し、<strong><code class="inline">Product</code> 型の配列</strong>に格納してから、for 文で順に <code class="inline">show()</code> を呼び出してください。</p>
+  <ul class="spec">
+    <li>Food：おにぎり、価格 150、在庫数 20、賞味期限「2026-12-31」</li>
+    <li>Drink：お茶、価格 120、在庫数 30、容量 500</li>
+  </ul>
+
+  <h3>要求されている実行結果</h3>
+  <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+<pre class="output">おにぎりの価格は150円です。
+おにぎりの税込価格は165円です。
+おにぎりの在庫数は20個です。
+おにぎりの賞味期限は2026-12-31です。
+お茶の価格は120円です。
+お茶の税込価格は132円です。
+お茶の在庫数は30個です。
+お茶の容量は500mlです。</pre></div>
+
+  <details class="hint"><summary>ヒント</summary><div class="inner">
+    <p>税込価格は <code class="inline">(int)(price * (1 + TAX))</code> で求められます。</p>
+    <p><code class="inline">setExpiry()</code> や <code class="inline">setVolume()</code> はインターフェイスにないメソッドなので、<code class="inline">Product</code> 型の変数からは呼び出せません。まず <code class="inline">Food</code> 型・<code class="inline">Drink</code> 型の変数で値を設定してから、配列に格納しましょう。</p>
+  </div></details>
+
+  <details class="ans"><summary>解答例を見る</summary><div class="inner">
+  <div class="win">
+<pre class="code">interface Product{
+    double TAX = 0.1;   // 自動的に public static final
+    void setName(String name);
+    void setPrice(int price);
+    void setStock(int stock);
+    void show();
+}
+
+class Food implements Product{
+    private String name;
+    private int price;
+    private int stock;
+    private String expiry;
+
+    public void setName(String name){
+        this.name = name;
+    }
+    public void setPrice(int price){
+        this.price = price;
+    }
+    public void setStock(int stock){
+        this.stock = stock;
+    }
+    public void setExpiry(String expiry){
+        this.expiry = expiry;
+    }
+    public void show(){
+        int taxIncluded = (int)(price * (1 + TAX));
+        System.out.println(name + "の価格は" + price + "円です。");
+        System.out.println(name + "の税込価格は" + taxIncluded + "円です。");
+        System.out.println(name + "の在庫数は" + stock + "個です。");
+        System.out.println(name + "の賞味期限は" + expiry + "です。");
+    }
+}
+
+class Drink implements Product{
+    private String name;
+    private int price;
+    private int stock;
+    private int volume;
+
+    public void setName(String name){
+        this.name = name;
+    }
+    public void setPrice(int price){
+        this.price = price;
+    }
+    public void setStock(int stock){
+        this.stock = stock;
+    }
+    public void setVolume(int volume){
+        this.volume = volume;
+    }
+    public void show(){
+        int taxIncluded = (int)(price * (1 + TAX));
+        System.out.println(name + "の価格は" + price + "円です。");
+        System.out.println(name + "の税込価格は" + taxIncluded + "円です。");
+        System.out.println(name + "の在庫数は" + stock + "個です。");
+        System.out.println(name + "の容量は" + volume + "mlです。");
+    }
+}
+
+public class Main{
+    public static void main(String[] args){
+        Food f = new Food();
+        f.setName("おにぎり");
+        f.setPrice(150);
+        f.setStock(20);
+        f.setExpiry("2026-12-31");
+
+        Drink d = new Drink();
+        d.setName("お茶");
+        d.setPrice(120);
+        d.setStock(30);
+        d.setVolume(500);
+
+        Product[] products = { f, d };
+        for(int i = 0; i &lt; products.length; i++){
+            products[i].show();
+        }
+    }
+}</pre></div>
+  </div></details>
+</section>
+
+<footer>// end of drill — お疲れさまでした</footer>
+</main>
+
+<script>
+/* ---------- シンタックスハイライト（pre.code） ---------- */
+(function(){
+  var kw = /^(interface|class|implements|public|private|protected|static|final|void|int|double|return|new|for|this)$/;
+  var re = /(\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*")|\b([A-Za-z_]\w*)\b|\b(\d+(?:\.\d+)?)\b/g;
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  document.querySelectorAll("pre.code").forEach(function(pre){
+    var src = pre.textContent, out = "", last = 0, m;
+    while((m = re.exec(src)) !== null){
+      out += esc(src.slice(last, m.index));
+      if(m[1]) out += '<span class="cm">'+esc(m[1])+'</span>';
+      else if(m[2]) out += '<span class="st">'+esc(m[2])+'</span>';
+      else if(m[3]){
+        if(kw.test(m[3])) out += '<span class="kw">'+m[3]+'</span>';
+        else if(/^[A-Z]/.test(m[3])) out += '<span class="ty">'+m[3]+'</span>';
+        else out += m[3];
+      }
+      else if(m[4]) out += '<span class="nu">'+m[4]+'</span>';
+      last = re.lastIndex;
+    }
+    out += esc(src.slice(last));
+    pre.innerHTML = out;
+  });
+})();
+
+/* ---------- 穴埋めの採点 ---------- */
+(function(){
+  // 空白を除いて比較する
+  var answers = {
+    1: ["implements"],
+    2: ["public"],
+    3: ["this.age=age;"],
+    4: ["newCat()"],
+    5: ["c.show();"]
+  };
+  var labels = {1:"①",2:"②",3:"③",4:"④",5:"⑤"};
+  function norm(s){return s.replace(/[\s\u3000]/g,"");}
+
+  document.getElementById("checkBtn").addEventListener("click", function(){
+    var blanks = document.querySelectorAll("#fillCode .blank");
+    var correct = 0, msgs = [];
+    blanks.forEach(function(b){
+      var id = b.dataset.id, input = b.querySelector("input"), mark = b.querySelector(".mark");
+      var v = norm(input.value);
+      var ok = answers[id].indexOf(v) !== -1;
+      input.classList.remove("ok","ng"); mark.classList.remove("ok","ng");
+      if(ok){
+        correct++; input.classList.add("ok"); mark.classList.add("ok"); mark.textContent = "○";
+      }else{
+        input.classList.add("ng"); mark.classList.add("ng"); mark.textContent = "×";
+        if(v === ""){ msgs.push(labels[id]+"：まだ入力されていません"); }
+        else if(answers[id].indexOf(v + ";") !== -1){ msgs.push(labels[id]+"：おしい！文の最後に必要な記号を忘れていませんか？"); }
+        else if(answers[id].some(function(a){return a.toLowerCase() === v.toLowerCase();})){ msgs.push(labels[id]+"：おしい！Javaは大文字・小文字を区別します"); }
+      }
+    });
+    var total = blanks.length;
+    document.getElementById("score").textContent = correct + " / " + total + " 正解";
+    var fb = document.getElementById("feedback");
+    if(correct === total){
+      fb.innerHTML = '<div class="clear">全問正解！ 中級に進みましょう →</div>';
+    }else{
+      fb.innerHTML = msgs.map(function(m){return '<div class="ng">'+m+'</div>';}).join("");
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    document.querySelectorAll("#fillCode .blank").forEach(function(b){
+      var input = b.querySelector("input"), mark = b.querySelector(".mark");
+      input.value = ""; input.classList.remove("ok","ng");
+      mark.textContent = ""; mark.classList.remove("ok","ng");
+    });
+    document.getElementById("score").textContent = "";
+    document.getElementById("feedback").innerHTML = "";
+  });
+})();
+</script>
+</body>
+</html>
