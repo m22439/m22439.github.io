@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>練習問題8・9 解答</title>
+<style>
+  :root{
+    --bg:#f7f7f4; --card:#ffffff; --ink:#1f2328; --muted:#5b6370;
+    --accent:#2f6f5e; --accent-soft:#e3f0eb; --warn:#a8551f; --warn-soft:#fbeee3;
+    --code-bg:#1e2430; --code-ink:#e6e9ef; --line:#dcdfe3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15181d; --card:#1d2128; --ink:#e6e9ef; --muted:#9aa3ae;
+      --accent:#6cc3a8; --accent-soft:#1f3530; --warn:#f0a36b; --warn-soft:#3a2a1e;
+      --code-bg:#0f1216; --code-ink:#e6e9ef; --line:#2c323b;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.8}
+  main{max-width:880px;margin:0 auto;padding:32px 16px 64px}
+  h1{font-size:1.6rem;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 28px}
+  nav{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 18px;margin-bottom:32px}
+  nav a{color:var(--accent);text-decoration:none;margin-right:20px;font-weight:600}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 24px 8px;margin-bottom:36px}
+  h2{font-size:1.35rem;margin:0 0 12px;padding-bottom:8px;border-bottom:3px solid var(--accent)}
+  h3{font-size:1.08rem;margin:28px 0 8px;color:var(--accent)}
+  pre{background:var(--code-bg);color:var(--code-ink);padding:16px;border-radius:8px;overflow-x:auto;
+    font-family:"Consolas","Menlo",monospace;font-size:.88rem;line-height:1.6}
+  code{font-family:"Consolas","Menlo",monospace}
+  p code, li code, td code{background:var(--accent-soft);padding:1px 6px;border-radius:4px;font-size:.9em}
+  .cm{color:#8fb39c}
+  .kw{color:#82aaff}
+  .hl{background:rgba(255,214,102,.18);display:inline-block;width:100%}
+  .point{background:var(--accent-soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:6px;margin:16px 0}
+  .caution{background:var(--warn-soft);border-left:4px solid var(--warn);padding:12px 16px;border-radius:6px;margin:16px 0}
+  .point strong,.caution strong{display:block;margin-bottom:4px}
+  table{border-collapse:collapse;width:100%;margin:12px 0 20px;font-size:.95rem}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--accent-soft)}
+  .out{background:var(--card);color:var(--ink);border:1px dashed var(--muted)}
+  @media print{
+    body{background:#fff} section{break-inside:avoid-page;border-color:#ccc}
+    pre{background:#f4f4f4;color:#000;border:1px solid #ccc} .cm{color:#2a7a4a} .kw{color:#1a4fbf}
+    nav{display:none}
+  }
+</style>
+</head>
+<body>
+<main>
+<h1>Java 抽象クラスとインターフェイス 解答</h1>
+<p class="sub">練習問題８・練習問題９</p>
+
+<nav><a href="#q8">練習問題８</a><a href="#q9">練習問題９</a><a href="#summary">まとめ</a></nav>
+
+<!-- ===================== 練習問題８ ===================== -->
+<section id="q8">
+<h2>練習問題８　Printable インターフェイス</h2>
+
+<h3>考え方</h3>
+<p>3つのサプライア（<code>Student</code>・<code>Product</code>・<code>Sales</code>）はインスタンス変数の構成がばらばらです。しかし「クラス名とインスタンス変数の値を出力する」という<strong>やりたいこと（アルゴリズムの形式）は共通</strong>です。</p>
+<ul>
+  <li>共通の形式 → インターフェイスの抽象メソッド <code>print()</code> として定義する</li>
+  <li>具体的な中身（どの変数をどう出すか） → 各クラスがそれぞれ実装する</li>
+</ul>
+<p>こうしておけば、クライアントは相手が何のクラスかを気にせず <code>Printable</code> 型として扱い、<code>print()</code> を呼ぶだけで済みます。</p>
+
+<h3>① インターフェイス</h3>
+<pre><span class="kw">interface</span> Printable {
+    <span class="cm">// クラス名とインスタンス変数の値を出力する（抽象メソッド）</span>
+    <span class="kw">void</span> print();
+}</pre>
+<div class="point"><strong>ポイント</strong>インターフェイスのメソッドは自動的に <code>public abstract</code> になるため、ここでは書かなくても構いません。</div>
+
+<h3>② サプライア（インターフェイスを実装するよう修正）</h3>
+<pre><span class="kw">class</span> Student <span class="hl"><span class="kw">implements</span> Printable</span> {
+    <span class="kw">private</span> String _name;
+    <span class="kw">private</span> String _address;
+    <span class="kw">public</span> Student(String n, String a) {
+        _name = n;
+        _address = a;
+    }
+    <span class="cm">// Printable の抽象メソッドを実装</span>
+    <span class="kw">public void</span> print() {
+        Class c = getClass();
+        String name = c.getName();
+        System.out.println("クラス名：" + name);
+        System.out.println("  _name    = " + _name);
+        System.out.println("  _address = " + _address);
+    }
+}
+
+<span class="kw">class</span> Product <span class="kw">implements</span> Printable {
+    <span class="kw">private</span> String _name;
+    <span class="kw">private int</span> _price;
+    <span class="kw">public</span> Product(String n, <span class="kw">int</span> p) {
+        _name = n;
+        _price = p;
+    }
+    <span class="kw">public void</span> print() {
+        Class c = getClass();
+        String name = c.getName();
+        System.out.println("クラス名：" + name);
+        System.out.println("  _name  = " + _name);
+        System.out.println("  _price = " + _price);
+    }
+}
+
+<span class="kw">class</span> Sales <span class="kw">implements</span> Printable {
+    <span class="kw">private int</span> _sale;
+    <span class="kw">private int</span> _count;
+    <span class="kw">public void</span> addSale(<span class="kw">int</span> s) {
+        _sale += s;
+    }
+    <span class="kw">public void</span> addCount(<span class="kw">int</span> c) {
+        _count += c;
+    }
+    <span class="kw">public void</span> print() {
+        Class c = getClass();
+        String name = c.getName();
+        System.out.println("クラス名：" + name);
+        System.out.println("  _sale  = " + _sale);
+        System.out.println("  _count = " + _count);
+    }
+}</pre>
+<div class="caution"><strong>注意</strong>実装するメソッドには必ず <code>public</code> を付けます。付け忘れると「アクセス権を弱めようとしています」というコンパイルエラーになります（インターフェイス側のメソッドが <code>public</code> のため）。</div>
+
+<h3>③ クライアント</h3>
+<pre><span class="cm">// クライアント：相手の具体的なクラスを知らなくてよい</span>
+<span class="kw">class</span> PrintClient {
+    <span class="kw">public void</span> output(Printable p) {
+        p.print();   <span class="cm">// 動的束縛による多態性</span>
+    }
+}
+
+<span class="kw">class</span> Test8 {
+    <span class="kw">public static void</span> main(String[] args) {
+        Student s  = <span class="kw">new</span> Student("山田太郎", "東京都新宿区");
+        Product p  = <span class="kw">new</span> Product("ノートPC", 98000);
+        Sales   sa = <span class="kw">new</span> Sales();
+        sa.addSale(5000);
+        sa.addSale(3000);
+        sa.addCount(1);
+        sa.addCount(2);
+
+        PrintClient client = <span class="kw">new</span> PrintClient();
+
+        <span class="cm">// 異なるクラスのオブジェクトを Printable 型の配列にまとめられる</span>
+        Printable[] list = { s, p, sa };
+        <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; list.length; i++) {
+            client.output(list[i]);
+        }
+    }
+}</pre>
+
+<h3>実行結果</h3>
+<pre class="out">クラス名：Student
+  _name    = 山田太郎
+  _address = 東京都新宿区
+クラス名：Product
+  _name  = ノートPC
+  _price = 98000
+クラス名：Sales
+  _sale  = 8000
+  _count = 3</pre>
+
+<div class="point"><strong>ポイント</strong><code>getClass()</code> は <code>Object</code> クラスのメソッドなので、すべてのクラスで使えます。また、実行時の実際のクラスを返すため、各クラスでクラス名を文字列で書き込む必要がありません。</div>
+</section>
+
+<!-- ===================== 練習問題９ ===================== -->
+<section id="q9">
+<h2>練習問題９　Bank インターフェイスへの書き換え</h2>
+
+<h3>考え方</h3>
+<p>元のプログラムは <code>Bank</code> クラスを親とする<strong>継承</strong>で多態性を実現していました。これを<strong>インターフェイス</strong>に置き換えます。</p>
+<table>
+  <tr><th></th><th>変更前</th><th>変更後</th></tr>
+  <tr><td>Bank</td><td>具象クラス（利息1%の処理を持つ）</td><td>インターフェイス（抽象メソッド <code>calculate</code> のみ）</td></tr>
+  <tr><td>利息1%の銀行</td><td>Bank</td><td>NihonBank（<code>implements Bank</code>）</td></tr>
+  <tr><td>MizuhoBank / RisonaBank</td><td><code>extends Bank</code></td><td><code>implements Bank</code></td></tr>
+  <tr><td>Printer（クライアント）</td><td colspan="2">変更なし（引数の型 <code>Bank</code> がそのまま使える）</td></tr>
+</table>
+
+<h3>解答プログラム</h3>
+<pre><span class="kw">class</span> Test {
+    <span class="kw">public static void</span> main(String[] args) {
+<span class="hl">        Bank b = <span class="kw">new</span> NihonBank();   <span class="cm">// インターフェイスは new できないので実装クラスを生成</span></span>
+        Bank m = <span class="kw">new</span> MizuhoBank();
+        Bank r = <span class="kw">new</span> RisonaBank();
+
+        Printer p = <span class="kw">new</span> Printer();
+
+        p.print(b, 10000, 5);
+        p.print(m, 10000, 5);
+        p.print(r, 10000, 5);
+    }
+}
+
+<span class="cm">//クライアント（変更なし）</span>
+<span class="kw">class</span> Printer {
+    <span class="cm">//再利用性の高いメソッド</span>
+    <span class="kw">public void</span> print(Bank b, <span class="kw">int</span> money, <span class="kw">int</span> months) {
+        <span class="cm">//動的束縛による多態性</span>
+        <span class="kw">int</span> sum = b.calculate(money, months);
+        System.out.println(sum);
+    }
+}
+
+<span class="cm">//インターフェイス</span>
+<span class="hl"><span class="kw">interface</span> Bank {</span>
+<span class="hl">    <span class="kw">int</span> calculate(<span class="kw">int</span> money, <span class="kw">int</span> months);   <span class="cm">// 抽象メソッド</span></span>
+<span class="hl">}</span>
+
+<span class="cm">//サプライア（元の Bank クラスを名称変更）</span>
+<span class="kw">class</span> <span class="hl">NihonBank <span class="kw">implements</span> Bank</span> {
+    <span class="kw">public int</span> calculate(<span class="kw">int</span> money, <span class="kw">int</span> months) {
+        <span class="cm">// 利息 1%</span>
+        <span class="kw">return</span> (<span class="kw">int</span>)(money * months * 1.01);
+    }
+}
+
+<span class="cm">//サプライア</span>
+<span class="kw">class</span> MizuhoBank <span class="hl"><span class="kw">implements</span> Bank</span> {
+    <span class="kw">public int</span> calculate(<span class="kw">int</span> money, <span class="kw">int</span> months) {
+        <span class="cm">// 利息 2%</span>
+        <span class="kw">return</span> (<span class="kw">int</span>)(money * months * 1.02);
+    }
+}
+
+<span class="cm">//サプライア</span>
+<span class="kw">class</span> RisonaBank <span class="hl"><span class="kw">implements</span> Bank</span> {
+    <span class="kw">public int</span> calculate(<span class="kw">int</span> money, <span class="kw">int</span> months) {
+        <span class="cm">// 利息 10%</span>
+        <span class="kw">return</span> (<span class="kw">int</span>)(money * months * 1.10);
+    }
+}</pre>
+
+<h3>実行結果</h3>
+<pre class="out">50500
+51000
+55000</pre>
+
+<div class="caution"><strong>よくある間違い</strong>
+<code>Bank b = new Bank();</code> のまま残すと「Bank は abstract です。インスタンスを生成することはできません」というエラーになります。インターフェイスは型として変数宣言には使えますが、<code>new</code> はできません。</div>
+
+<div class="point"><strong>ポイント</strong>変数の型を <code>Bank</code>（インターフェイス）にしておくと、<code>Printer</code> クラスは一切修正せずに済みます。新しい銀行を追加するときも <code>implements Bank</code> したクラスを作るだけで、クライアント側は変わりません。</div>
+</section>
+
+<!-- ===================== まとめ ===================== -->
+<section id="summary">
+<h2>まとめ</h2>
+<table>
+  <tr><th>項目</th><th>内容</th></tr>
+  <tr><td>インターフェイスの役割</td><td>「何ができるか」という共通の形式（抽象メソッド）だけを決める</td></tr>
+  <tr><td>実装クラスの役割</td><td><code>implements</code> して、抽象メソッドの具体的な処理を書く（<code>public</code> 必須）</td></tr>
+  <tr><td>クライアントの利点</td><td>インターフェイス型で受け取れば、相手の具体的なクラスに依存しない</td></tr>
+  <tr><td>継承との違い</td><td>クラスの継承（<code>extends</code>）は1つだけだが、インターフェイスは複数実装できる</td></tr>
+</table>
+</section>
+</main>
+</body>
+</html>
