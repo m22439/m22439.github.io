@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>インターフェイスと多態性</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#ffffff; --text:#1f2937; --sub:#5b6474;
+    --accent:#2563eb; --accent-soft:#e8f0ff; --ok:#15803d; --ok-soft:#e7f6ec;
+    --warn:#b45309; --warn-soft:#fff4e0; --code-bg:#1e2533; --code-text:#e6e9ef;
+    --line:#e3e6ec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171d; --card:#1c2029; --text:#e6e9ef; --sub:#a3abb8;
+      --accent:#7aa7ff; --accent-soft:#1f2a40; --ok:#5fd38a; --ok-soft:#18301f;
+      --warn:#f0b35a; --warn-soft:#33281a; --code-bg:#0f1218; --code-text:#e6e9ef;
+      --line:#2c3240;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.8}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+  header{border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:24px}
+  header .tag{display:inline-block;background:var(--accent);color:#fff;font-size:.8rem;padding:2px 10px;border-radius:999px}
+  h1{font-size:1.6rem;margin:8px 0 4px}
+  header p{margin:0;color:var(--sub)}
+  h2{font-size:1.25rem;margin:40px 0 12px;padding-left:10px;border-left:6px solid var(--accent)}
+  h3{font-size:1.05rem;margin:20px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  .goal li{margin:4px 0}
+  pre{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:10px;
+    overflow-x:auto;font-size:.88rem;line-height:1.6;margin:10px 0}
+  code{font-family:Consolas,"Courier New",monospace}
+  p code, li code, td code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;font-size:.9em}
+  .cm{color:#8fa0b8}
+  .kw{color:#ff9d6e}
+  .hl{background:rgba(255,220,90,.18);display:inline-block;width:100%}
+  .out{background:var(--card);border:1px dashed var(--line);color:var(--text);font-size:.88rem}
+  .point{background:var(--accent-soft);border-left:5px solid var(--accent);padding:12px 16px;border-radius:8px;margin:14px 0}
+  .warn{background:var(--warn-soft);border-left:5px solid var(--warn);padding:12px 16px;border-radius:8px;margin:14px 0}
+  .warn strong{color:var(--warn)}
+  .diagram{display:flex;flex-direction:column;align-items:center;gap:8px;margin:16px 0}
+  .box{border:2px solid var(--accent);border-radius:10px;padding:8px 16px;background:var(--card);text-align:center;font-size:.92rem}
+  .box.if{border-style:dashed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .arrow{color:var(--sub);font-size:.85rem}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  th{background:var(--accent-soft)}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:640px){.compare{grid-template-columns:1fr}}
+  .step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.9rem}
+  .check li{list-style:none;margin:6px 0}
+  .check li::before{content:"☐ ";color:var(--accent)}
+  footer{margin-top:48px;color:var(--sub);font-size:.85rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="tag">p.77〜81</span>
+  <h1>インターフェイスと多態性 ― クライアントクラスの書き方</h1>
+  <p>Java 抽象クラスとインターフェイス／まとめプリント</p>
+</header>
+
+<div class="card goal">
+  <strong>この範囲で学ぶこと</strong>
+  <ul>
+    <li>インターフェイス <code>Hero</code> を使って、違うクラスを<strong>同じ呼び方</strong>で動かす（多態性）</li>
+    <li>クライアントクラス <code>DoHero</code> に<strong>オブジェクトを持たせる</strong>書き方</li>
+    <li><strong>コンストラクタ</strong>と<strong>setter</strong>の違いと、それぞれのメリット</li>
+  </ul>
+</div>
+
+<!-- ===================== 1 ===================== -->
+<h2>1. 全体の構造をつかもう</h2>
+<p>「ヒーローは何かしら <code>action()</code> できる」という<strong>約束（インターフェイス）</strong>を決め、3つのクラスがそれぞれ自分なりの中身を書きます。</p>
+
+<div class="diagram">
+  <div class="box if">«interface» <strong>Hero</strong><br><code>void action();</code></div>
+  <div class="arrow">▲ implements（実装する）</div>
+  <div class="row">
+    <div class="box"><strong>UltraMan</strong><br>変身 → 光線</div>
+    <div class="box"><strong>KamenRider</strong><br>変身 → キック</div>
+    <div class="box"><strong>Sailor</strong><br>変身 → お仕置き</div>
+  </div>
+  <div class="arrow">▲ Hero型として受け取る</div>
+  <div class="box"><strong>DoHero</strong>（クライアント）<br>中身を知らずに <code>action()</code> を呼ぶだけ</div>
+</div>
+
+<div class="point">
+  <strong>ポイント：</strong>クライアント（<code>DoHero</code>）は相手が UltraMan なのか KamenRider なのかを<strong>知らなくてよい</strong>。<br>
+  <code>Hero</code> 型でさえあれば <code>action()</code> を呼べる。これが<strong>多態性（ポリモーフィズム）</strong>です。
+</div>
+
+<!-- ===================== 2 ===================== -->
+<h2>2. インターフェイスと実装クラス（p.77〜78）</h2>
+
+<h3>インターフェイス</h3>
+<pre><code><span class="kw">interface</span> Hero{
+    <span class="kw">void</span> action();   <span class="cm">// 中身は書かない（約束だけ）</span>
+}</code></pre>
+
+<h3>実装クラス（例：UltraMan）</h3>
+<pre><code><span class="kw">class</span> UltraMan <span class="kw">implements</span> Hero{
+    String _name;
+    <span class="kw">public</span> UltraMan(String name){
+        _name = name;
+    }
+<span class="hl">    <span class="kw">public void</span> action(){      <span class="cm">// Hero の約束を守って action() を書く</span></span>
+        transForm();
+        shootBeam();
+    }
+    <span class="kw">public void</span> transForm(){
+        System.out.println(_name + "は変身して体が５０メートルくらいになります。");
+    }
+    <span class="kw">public void</span> shootBeam(){
+        System.out.println(_name + "は腕から光線を発射します！");
+    }
+}</code></pre>
+<p><code>KamenRider</code>・<code>Sailor</code> も同じ形です。<code>action()</code> の中で呼ぶメソッドだけが違います。</p>
+
+<table>
+  <tr><th>クラス</th><th>action() の中身</th></tr>
+  <tr><td>UltraMan</td><td><code>transForm()</code> → <code>shootBeam()</code></td></tr>
+  <tr><td>KamenRider</td><td><code>transForm()</code> → <code>kick()</code></td></tr>
+  <tr><td>Sailor</td><td><code>transForm()</code> → <code>finish()</code></td></tr>
+</table>
+
+<h3>最初のクライアント（引数で受け取る版）</h3>
+<pre><code><span class="kw">class</span> DoHero{
+    <span class="kw">public void</span> doAction(Hero h){   <span class="cm">// 毎回、引数でヒーローを渡す</span>
+        h.action();
+    }
+}
+
+<span class="cm">// main の中</span>
+DoHero dh = <span class="kw">new</span> DoHero();
+dh.doAction(<span class="kw">new</span> UltraMan("ウルトラマン"));
+dh.doAction(<span class="kw">new</span> KamenRider("仮面ライダー"));
+dh.doAction(<span class="kw">new</span> Sailor("セーラームーン"));</code></pre>
+
+<pre class="out"><code>ウルトラマンは変身して体が５０メートルくらいになります。
+ウルトラマンは腕から光線を発射します！
+仮面ライダーは変身のときはベルトを使います。。
+仮面ライダーの必殺技はライダーキックです。
+セーラームーンは変身しても、あんまり変わった気がしません。
+セーラームーンは月に変わってお仕置きします。</code></pre>
+
+<!-- ===================== 3 ===================== -->
+<h2>3. クライアントに「オブジェクトを持たせる」書き方（p.79）</h2>
+<p>次に <code>DoHero</code> を書き換えて、ヒーローを<strong>インスタンス変数に保存</strong>しておく形にします。</p>
+
+<pre><code><span class="kw">class</span> DoHero{
+<span class="hl">    <span class="kw">private</span> Hero _hero;              <span class="cm">// ① ヒーローをしまっておく変数</span></span>
+
+<span class="hl">    <span class="kw">public</span> DoHero(Hero h){            <span class="cm">// ② コンストラクタでセット</span></span>
+        _hero = h;
+    }
+
+<span class="hl">    <span class="kw">public void</span> setHero(Hero h){      <span class="cm">// ③ setter でもセットできる</span></span>
+        _hero = h;
+    }
+
+<span class="hl">    <span class="kw">public void</span> doAction(){           <span class="cm">// ④ 引数なし！しまったヒーローを動かす</span></span>
+        _hero.action();
+    }
+}</code></pre>
+
+<div class="compare">
+  <div class="card">
+    <strong>前（引数で受け取る）</strong>
+    <pre><code>dh.doAction(um);</code></pre>
+    呼ぶたびに相手を渡す
+  </div>
+  <div class="card">
+    <strong>後（中に持っている）</strong>
+    <pre><code>d1.doAction();</code></pre>
+    相手は先にセット済み
+  </div>
+</div>
+
+<!-- ===================== 4 ===================== -->
+<h2>4. main メソッドの書き換え（p.80）</h2>
+
+<pre><code><span class="kw">class</span> Test{
+    <span class="kw">public static void</span> main(String[] args){
+        <span class="cm">// 各クラスのインスタンスを生成</span>
+        UltraMan   um = <span class="kw">new</span> UltraMan("ウルトラマン");
+        KamenRider kr = <span class="kw">new</span> KamenRider("仮面ライダー");
+        Sailor     s  = <span class="kw">new</span> Sailor("セーラームーン");
+
+        <span class="cm">// 作ったオブジェクトをコンストラクタに渡す</span>
+        DoHero d1 = <span class="kw">new</span> DoHero(um);
+        DoHero d2 = <span class="kw">new</span> DoHero(kr);
+        DoHero d3 = <span class="kw">new</span> DoHero(s);
+
+        <span class="cm">// 同じ doAction() なのに、動きはそれぞれ違う → 多態性</span>
+        d1.doAction();
+        d2.doAction();
+        d3.doAction();
+    }
+}</code></pre>
+
+<div class="step"><div class="num">1</div><div>ヒーローのオブジェクトを作る</div></div>
+<div class="step"><div class="num">2</div><div><code>DoHero</code> のコンストラクタに渡して、中にしまう</div></div>
+<div class="step"><div class="num">3</div><div><code>doAction()</code> を呼ぶと、しまってあるヒーローの <code>action()</code> が動く<br>
+  <small>（実行時に「本当の型」のメソッドが選ばれる＝<strong>動的束縛</strong>）</small></div></div>
+
+<h3>短く書くこともできる</h3>
+<pre><code>DoHero d1 = <span class="kw">new</span> DoHero(<span class="kw">new</span> UltraMan("ウルトラマン"));
+DoHero d2 = <span class="kw">new</span> DoHero(<span class="kw">new</span> KamenRider("仮面ライダー"));
+DoHero d3 = <span class="kw">new</span> DoHero(<span class="kw">new</span> Sailor("セーラームーン"));</code></pre>
+
+<div class="point">
+  <strong>どちらを使う？</strong><br>
+  ・すっきり書きたいだけ → 短い書き方でOK<br>
+  ・<code>um.shootBeam()</code> のように <code>doAction()</code> <strong>以外のメソッドも呼びたい</strong> → 変数（<code>um</code> など）に入れておく必要あり<br>
+  → <strong>ケースバイケース</strong>で選ぶ
+</div>
+
+<!-- ===================== 5 ===================== -->
+<h2>5. コンストラクタと setter の違い（p.81）</h2>
+<p>今回の main ではコンストラクタしか使っていませんが、setter を用意しておくと便利な場面があります。</p>
+
+<h3>setter を使うと… DoHero ひとつで全員を動かせる</h3>
+<pre><code>DoHero d = <span class="kw">new</span> DoHero(<span class="kw">new</span> UltraMan("ウルトラマン"));
+d.doAction();                               <span class="cm">// ウルトラマンが動く</span>
+
+<span class="hl">d.setHero(<span class="kw">new</span> KamenRider("仮面ライダー"));     <span class="cm">// 中身だけ入れ替え</span></span>
+d.doAction();                               <span class="cm">// 仮面ライダーが動く</span>
+
+<span class="hl">d.setHero(<span class="kw">new</span> Sailor("セーラームーン"));</span>
+d.doAction();                               <span class="cm">// セーラームーンが動く</span></code></pre>
+
+<table>
+  <tr><th></th><th>コンストラクタ</th><th>setter</th></tr>
+  <tr>
+    <td><strong>セットできるタイミング</strong></td>
+    <td><code>new</code> するときの<strong>1回だけ</strong></td>
+    <td><strong>後から何度でも</strong></td>
+  </tr>
+  <tr>
+    <td><strong>メリット</strong></td>
+    <td>
+      ・後から勝手に書き換えられない（安全）<br>
+      ・最初に必ず値が入るので、setter を呼び忘れても<br>
+      &nbsp;&nbsp;<code>NullPointerException</code> が出ない
+    </td>
+    <td>
+      ・中身を自由に入れ替えられる（融通が利く）<br>
+      ・オブジェクトを使い回せる
+    </td>
+  </tr>
+  <tr>
+    <td><strong>注意点</strong></td>
+    <td>中身を変えたいときは新しく <code>new</code> が必要</td>
+    <td>セットし忘れると <code>_hero</code> が <code>null</code> のまま → エラー</td>
+  </tr>
+</table>
+
+<div class="point">
+  <strong>まとめ：</strong>「どちらか一方が正解」ではない。<br>
+  コンストラクタで<strong>初期値を必ずセット</strong>し、必要なら setter で<strong>入れ替えられる</strong>ようにする ― という両方用意する形がよく使われます。
+</div>
+
+<!-- ===================== 6 ===================== -->
+<h2>6. 確認チェック</h2>
+<div class="card">
+  <ul class="check">
+    <li>インターフェイスには「メソッドの名前（約束）」だけを書き、中身は実装クラスで書く</li>
+    <li><code>Hero</code> 型の変数には、<code>Hero</code> を implements したどのクラスのオブジェクトも入る</li>
+    <li>同じ <code>doAction()</code> を呼んでも、中のオブジェクトによって動きが変わる（多態性・動的束縛）</li>
+    <li>コンストラクタ：生成時に1回セット／setter：後から何度でもセット</li>
+    <li>setter には戻り値の型 <code>void</code> を書くことを忘れない</li>
+  </ul>
+</div>
+
+<footer>Java 抽象クラスとインターフェイス p.77〜81 まとめ</footer>
+</div>
+</body>
+</html>
