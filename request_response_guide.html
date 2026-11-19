@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaEE入門｜Request と Response を確認しよう 学習ガイド</title>
+<style>
+:root{
+  --ink:#1f2933; --sub:#52606d; --line:#d9e2ec; --bg:#f7f9fb; --card:#fff;
+  --navy:#102a43;
+  --client:#2563eb; --client-bg:#e8f0fe;
+  --web:#475569;    --web-bg:#eef1f5;
+  --res:#be123c;    --res-bg:#fde8ee;
+  --biz:#059669;    --biz-bg:#e3f6ef;
+  --req:#2563eb; --req-bg:#e8f0fe;
+  --resp:#ea580c; --resp-bg:#fff1e6;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75}
+header{background:var(--navy);color:#fff;padding:36px 20px 28px}
+header .inner,main{max-width:980px;margin:0 auto}
+header .inner{display:flex;align-items:center;gap:20px;justify-content:space-between}
+header .kicker{font-size:13px;letter-spacing:.15em;opacity:.75}
+header h1{margin:6px 0 8px;font-size:30px;line-height:1.35}
+header p{margin:0;opacity:.85;font-size:15px}
+header .hero{flex:none;width:300px;height:110px}
+nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+nav .inner{max-width:980px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 12px}
+nav a{white-space:nowrap;padding:12px 12px;font-size:14px;color:var(--sub);text-decoration:none;border-bottom:3px solid transparent}
+nav a:hover{color:var(--ink);border-color:#9fb3c8}
+nav a.home{color:var(--navy);font-weight:bold}
+main{padding:12px 20px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 28px 30px;margin:26px 0}
+h2{margin:0 0 4px;font-size:23px;display:flex;align-items:center;gap:10px}
+h2 .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-size:15px;flex:none}
+.lead{color:var(--sub);margin:4px 0 20px}
+h3{font-size:17px;margin:26px 0 10px;padding-left:10px;border-left:4px solid var(--navy);line-height:1.4}
+p{margin:8px 0}
+.point{background:#fffbea;border-left:5px solid #f0b429;padding:12px 16px;border-radius:6px;margin:18px 0;font-size:15px}
+.point b{color:#8d2b0b}
+.caution{background:var(--res-bg);border-left:5px solid var(--res);padding:12px 16px;border-radius:6px;margin:18px 0;font-size:15px}
+.caution b{color:var(--res)}
+.note{font-size:14px;color:var(--sub);background:#f0f4f8;padding:12px 16px;border-radius:8px;margin:16px 0}
+.note b{color:var(--ink)}
+.point p,.caution p,.note p{margin:6px 0 0}
+.word{background:linear-gradient(transparent 60%,#ffe58a 60%);font-weight:bold}
+
+/* goals */
+.goals{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.goals li{border:1px solid var(--line);border-radius:12px;padding:14px 14px 14px;font-size:14.5px;background:#fbfcfd}
+.goals li .gi{font-size:26px;line-height:1;display:block;margin-bottom:6px}
+
+/* steps */
+ol.steps{margin:8px 0 12px;padding:0;list-style:none;counter-reset:st}
+ol.steps>li{counter-increment:st;position:relative;padding:4px 0 4px 40px;margin:4px 0}
+ol.steps>li::before{content:counter(st);position:absolute;left:0;top:5px;width:26px;height:26px;border-radius:50%;background:var(--web-bg);color:var(--navy);font-weight:bold;font-size:13px;display:grid;place-items:center;border:1.5px solid #9fb3c8}
+
+/* code */
+code{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:#f0f4f8;padding:1px 6px;border-radius:4px;font-size:.92em}
+pre{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:var(--navy);color:#e2e8f0;padding:16px 18px;border-radius:10px;overflow-x:auto;line-height:1.6;font-size:14px;margin:10px 0 14px}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .c-req{color:#93c5fd}
+pre .c-res{color:#fdba74}
+pre .c-dim{color:#8296ab}
+pre .c-key{color:#fde68a}
+pre .c-cmt{color:#86efac}
+
+/* tree */
+.tree{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:14px 18px;white-space:pre;line-height:1.65;overflow-x:auto;font-size:14px}
+.tree .c{color:var(--sub)}
+.tree .new{color:var(--biz);font-weight:bold}
+
+/* tables */
+table{border-collapse:collapse;width:100%;margin:10px 0 16px;font-size:14.5px;background:#fff}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f0f4f8;white-space:nowrap;font-size:14px}
+td.mark{text-align:center;font-family:Consolas,monospace;font-size:18px;font-weight:bold;width:90px}
+td.mark.req{color:var(--req);background:var(--req-bg)}
+td.mark.resp{color:var(--resp);background:var(--resp-bg)}
+td.mark.dim{color:var(--sub);font-size:14px;white-space:nowrap}
+
+/* format diagram */
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0 6px}
+.fcard{border-radius:12px;padding:16px 18px;border:2px solid}
+.fcard.req{border-color:var(--req);background:var(--req-bg)}
+.fcard.resp{border-color:var(--resp);background:var(--resp-bg)}
+.fcard .hd{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:16px}
+.fcard.req .hd{color:var(--req)} .fcard.resp .hd{color:var(--resp)}
+.fcard .hd svg{width:110px;height:40px;flex:none}
+.fcard .dirtx{font-size:12.5px;color:var(--sub);margin:2px 0 10px}
+.fcard ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.fcard ol li{background:#fff;border-radius:8px;padding:8px 12px;font-size:14.5px;border:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.fcard ol li .en{font-size:12px;color:var(--sub);font-family:Consolas,monospace;white-space:nowrap}
+
+.part{display:flex;gap:10px;align-items:baseline;margin:14px 0 6px}
+.part .tag{flex:none;font-size:13px;font-weight:bold;padding:2px 10px;border-radius:999px}
+.part .tag.req{background:var(--req-bg);color:var(--req)}
+.part .tag.resp{background:var(--resp-bg);color:var(--resp)}
+
+/* quiz */
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.q .qt{font-weight:bold}
+.q details{margin-top:8px}
+.q summary{display:inline-block;cursor:pointer;font-size:13.5px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--sub);list-style:none}
+.q summary::-webkit-details-marker{display:none}
+.q details[open] summary{background:var(--biz-bg);border-color:var(--biz);color:var(--biz);font-weight:bold}
+.q .ans{margin-top:8px;font-size:14.5px;background:#f6fbf9;border-left:4px solid var(--biz);padding:8px 12px;border-radius:6px}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.check label{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;transition:.15s}
+.check input{width:20px;height:20px;margin-top:3px;accent-color:var(--biz);flex:none}
+.check label:has(input:checked){background:var(--biz-bg);border-color:var(--biz)}
+.check label:has(input:checked) span{color:var(--sub)}
+.progress{font-size:13px;color:var(--sub);margin:10px 0 0;text-align:right}
+
+footer{text-align:center;font-size:12px;color:var(--sub);padding:0 0 30px}
+
+@media (max-width:760px){
+  header .hero{display:none}
+  .goals,.flow{grid-template-columns:1fr}
+  section{padding:20px 16px}
+  .fcard .hd svg{display:none}
+}
+@media print{
+  nav{display:none}
+  body{background:#fff}
+  section{break-inside:avoid;border-color:#ccc}
+  pre,table,.point,.caution,.note,.q{break-inside:avoid}
+  .q details>summary{display:none}
+  .q details>.ans{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== イラスト部品 ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pc" viewBox="0 0 120 100">
+      <rect x="10" y="6" width="100" height="66" rx="8" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="19" y="14" width="82" height="50" rx="4" fill="currentColor"/>
+      <path d="M25 20 L56 20 L30 56 L25 56 Z" fill="#fff" opacity=".25"/>
+      <rect x="22" y="22" width="40" height="6" rx="3" fill="#fff" opacity=".7"/>
+      <rect x="22" y="33" width="56" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="22" y="41" width="48" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="50" y="72" width="20" height="12" fill="#b7c3d0" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="28" y="84" width="64" height="9" rx="4.5" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+    </symbol>
+    <symbol id="i-server" viewBox="0 0 100 120">
+      <rect x="18" y="6" width="64" height="108" rx="10" fill="#eef2f7" stroke="#243b53" stroke-width="3.5"/>
+      <path d="M18 26 V16 a10 10 0 0 1 10 -10 h44 a10 10 0 0 1 10 10 V26 Z" fill="currentColor" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="29" y="36" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="51" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="66" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <circle cx="34" cy="90" r="4.5" fill="#3ebd93" stroke="#243b53" stroke-width="2"/>
+      <circle cx="48" cy="90" r="4.5" fill="currentColor" stroke="#243b53" stroke-width="2"/>
+      <path d="M30 103 h40" stroke="#9aa5b1" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-term" viewBox="0 0 120 100">
+      <rect x="6" y="10" width="108" height="80" rx="8" fill="#102a43" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="6" y="10" width="108" height="16" rx="8" fill="#334e68"/>
+      <circle cx="18" cy="18" r="3" fill="#f87171"/><circle cx="28" cy="18" r="3" fill="#fbbf24"/><circle cx="38" cy="18" r="3" fill="#34d399"/>
+      <path d="M18 42 l10 8 l-10 8" fill="none" stroke="#86efac" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="34" y="55" width="26" height="4" rx="2" fill="#e2e8f0"/>
+      <rect x="18" y="68" width="60" height="4" rx="2" fill="#93c5fd" opacity=".8"/>
+      <rect x="18" y="77" width="44" height="4" rx="2" fill="#fdba74" opacity=".8"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header><div class="inner">
+  <div>
+    <div class="kicker">JavaEE入門｜補助資料</div>
+    <h1>Request と Response を確認しよう</h1>
+    <p>ブラウザとWebサーバは、裏側で何をやりとりしているのか？ ― curl で中身をのぞいてみよう</p>
+  </div>
+  <svg class="hero" viewBox="0 0 300 110" aria-hidden="true">
+    <use href="#i-pc" x="0" y="18" width="88" height="74" color="#60a5fa"/>
+    <path d="M96 40 h104" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/>
+    <path d="M192 32 l12 8 l-12 8" fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="148" y="30" text-anchor="middle" font-size="12" font-weight="bold" fill="#93c5fd">Request</text>
+    <path d="M200 72 h-104" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M104 64 l-12 8 l12 8" fill="none" stroke="#fb923c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="148" y="94" text-anchor="middle" font-size="12" font-weight="bold" fill="#fdba74">Response</text>
+    <use href="#i-server" x="212" y="6" width="80" height="96" color="#94a3b8"/>
+  </svg>
+</div></header>
+
+<nav><div class="inner">
+  <a href="index.html" class="home">← 一覧</a>
+  <a href="#s1">1. 準備</a>
+  <a href="#s2">2. curl で確認</a>
+  <a href="#s3">3. 中身を読もう</a>
+  <a href="#s4">4. テキストと比較</a>
+  <a href="#s5">5. 困ったとき</a>
+  <a href="#s6">6. 確認問題</a>
+  <a href="#s7">7. チェックリスト</a>
+</div></nav>
+
+<main>
+
+<!-- ================= ゴール ================= -->
+<section id="s0">
+  <h2><span class="no">★</span>この実習のゴール</h2>
+  <p class="lead">テキスト p.8〜9「Request と Response の確認」を、自分のパソコンで実際にやってみます。</p>
+  <ul class="goals">
+    <li><span class="gi">📁</span>Tomcat に自分でフォルダと HTML ファイルを作って、ブラウザで表示できる</li>
+    <li><span class="gi">⌨️</span><b>curl（カール）コマンド</b>で Request と Response を確認できる</li>
+    <li><span class="gi">🔍</span>Request と Response が「<b>リクエスト行／ステータス行・ヘッダ・空行・メッセージボディ</b>」でできていることを説明できる</li>
+  </ul>
+</section>
+
+<!-- ================= 1 ================= -->
+<section id="s1">
+  <h2><span class="no">1</span>準備：HTMLファイルを作って配置する</h2>
+  <p class="lead">まずは Tomcat に、確認用の HTML ファイルを置きます。</p>
+
+  <h3>1-1. フォルダを作成する</h3>
+  <p>最終的に、次のようなフォルダ構成を作ります。</p>
+<div class="tree">C:\tomcat10
+ ├ bin
+ │  ├ startup.bat     <span class="c">← Tomcat を起動する</span>
+ │  └ shutdown.bat    <span class="c">← Tomcat を停止する</span>
+ └ webapps
+     └ <span class="new">it01</span>            <span class="c">← URL の /it01/ にあたる（これから作る）</span>
+         ├ <span class="new">WEB-INF</span>     <span class="c">← 空のフォルダ（これから作る）</span>
+         └ <span class="new">time1.html</span>  <span class="c">← これから作る</span></div>
+
+  <ol class="steps">
+    <li>エクスプローラーで <code>C:\tomcat10\webapps</code> フォルダを開きます。</li>
+    <li>何もないところで右クリックし、「新規作成」→「フォルダー」を選びます。</li>
+    <li>フォルダ名を <code>it01</code> にします。</li>
+    <li>作った <code>it01</code> フォルダの中に入り、同じようにして <code>WEB-INF</code> フォルダを作ります。中身は空のままでかまいません。</li>
+  </ol>
+
+  <div class="caution">⚠️ <b>注意：フォルダ名は正確に</b>
+    <p><code>it01</code> は「アイ・ティー・ゼロ・イチ」です（英字のオーではなく数字のゼロ）。<code>WEB-INF</code> は<b>すべて大文字</b>で、間は<b>ハイフン（-）</b>です。アンダーバー（_）にしないよう気をつけましょう。</p>
+  </div>
+
+  <div class="point">💡 <b>ここがポイント：フォルダと URL の対応</b>
+    <p><code>C:\tomcat10\webapps\it01\time1.html</code> に置いたファイルは、<code>http://localhost:8080/it01/time1.html</code> でアクセスできます。<br>
+    <span class="word">webapps より後ろのフォルダ名・ファイル名が、そのまま URL になります。</span></p>
+  </div>
+
+  <h3>1-2. time1.html を作成する</h3>
+  <p><code>C:\tomcat10\webapps\it01</code> に、次の内容で <code>time1.html</code> を作成します。</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+<span class="c-key">&lt;meta charset="UTF-8"&gt;</span>
+&lt;title&gt;現在日時の表示&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;現在の日時&lt;/h1&gt;
+  &lt;p&gt;2006-09-08 6:47:10&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+  <div class="caution">⚠️ <b>注意：文字化けを防ぐために</b>
+    <p><code>&lt;meta charset="UTF-8"&gt;</code> の1行は<b>必ず書いて</b>ください。ファイルの文字コード（UTF-8）と、HTML の中の指定をそろえることが大切です。どちらかが違うと、ブラウザで日本語が文字化けします。</p>
+    <p>VS Code は最初から UTF-8 で保存します。画面の<b>右下</b>に「<b>UTF-8</b>」と表示されていることを確認しましょう。もし「Shift JIS」などになっていたら、そこをクリック →「エンコード付きで保存」→「UTF-8」を選びます。</p>
+  </div>
+
+  <div class="note">📝 <b>テキストとの違い</b>
+    <p>テキストではファイル名が <code>time1.htm</code> ですが、この実習では <code>time1.html</code> で作成します。<code>.htm</code> は <code>.html</code> の古い書き方で、中身も働きも同じです（昔の Windows では拡張子を3文字までしか付けられなかったためです）。</p>
+    <p>また、テキストの例ではアクセスするたびに現在の日時が変わりますが、今回は普通の HTML ファイルなので日時は固定です。Request と Response の確認にはこれで十分です。</p>
+  </div>
+
+  <h3>1-3. Tomcat を起動する</h3>
+  <ol class="steps">
+    <li><code>C:\tomcat10\bin</code> フォルダを開きます。</li>
+    <li><code>startup.bat</code> をダブルクリックします。</li>
+    <li>黒い画面（コマンドプロンプト）が開いてログが流れ、止まったら起動完了です。</li>
+  </ol>
+  <div class="caution">⚠️ <b>注意</b>
+    <p>Tomcat が開いた黒い画面は、実習中は<b>閉じないでください</b>。閉じると Tomcat が止まります。終わったら <code>shutdown.bat</code> で停止します。</p>
+  </div>
+
+  <h3>1-4. ブラウザで表示する</h3>
+  <p>ブラウザ（Chrome または Edge）のアドレス欄に次の URL を入力します。</p>
+<pre><code>http://localhost:8080/it01/time1.html</code></pre>
+  <p>「現在の日時」と日時が表示されれば成功です。</p>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="s2">
+  <h2><span class="no">2</span>curl（カール）コマンドで確認する</h2>
+  <p class="lead"><b>curl</b> は、URL を指定して Web サーバとデータをやりとりするコマンドです。ブラウザの代わりに curl で Request を送り、返ってきた Response を文字で表示させます。Windows 10 以降には最初から入っています。</p>
+
+  <h3>2-1. コマンドプロンプトを開く</h3>
+  <ol class="steps">
+    <li>スタートメニューの検索欄に「<code>cmd</code>」と入力し、「コマンドプロンプト」を開きます。<br>（Tomcat の黒い画面とは<b>別に</b>、新しく開きます）</li>
+    <li>日本語の文字化けを防ぐため、最初に次のコマンドを入力して Enter を押します。
+<pre><code>chcp 65001</code></pre>
+    「Active code page: 65001」と表示されれば OK です。これで画面の文字コードが UTF-8 になります。</li>
+  </ol>
+
+  <h3>2-2. curl を実行する</h3>
+  <p>次のコマンドを入力して Enter を押します。</p>
+<pre><code>curl -v http://localhost:8080/it01/time1.html</code></pre>
+  <p><code>-v</code> は「詳しく表示する（verbose）」という意味のオプションです。これを付けると、Request と Response のヘッダも表示されます。</p>
+
+  <h3>2-3. 表示結果の見方</h3>
+  <p>次のような結果が表示されます（細かい値は環境によって違います）。</p>
+<pre><code><span class="c-dim">*   Trying [::1]:8080...
+* Connected to localhost (::1) port 8080</span>
+<span class="c-req">&gt; GET /it01/time1.html HTTP/1.1
+&gt; Host: localhost:8080
+&gt; User-Agent: curl/8.22.0
+&gt; Accept: */*
+&gt;</span>
+<span class="c-res">&lt; HTTP/1.1 200
+&lt; Accept-Ranges: bytes
+&lt; ETag: W/"203-1763270000000"
+&lt; Last-Modified: Mon, 16 Nov 2026 04:30:00 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 203
+&lt; Date: Mon, 16 Nov 2026 05:00:00 GMT
+&lt;</span>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;title&gt;現在日時の表示&lt;/title&gt;
+  …（以下、time1.html の中身）</code></pre>
+
+  <table>
+    <tr><th>行の始まり</th><th>意味</th></tr>
+    <tr><td class="mark req">&gt;</td><td><b>Request</b>（curl が Web サーバに<b>送った</b>内容）</td></tr>
+    <tr><td class="mark resp">&lt;</td><td><b>Response のヘッダ</b>（Web サーバから<b>返ってきた</b>内容）</td></tr>
+    <tr><td class="mark dim">記号なし</td><td><b>Response のメッセージボディ</b>（HTML の本体）</td></tr>
+    <tr><td class="mark dim">*</td><td>接続の状況メモ。今回は気にしなくてよい</td></tr>
+  </table>
+
+  <div class="point">💡 <b>覚え方：</b><code>&gt;</code> は矢印が <b>Web サーバに向かって出ていく</b>向き、<code>&lt;</code> は<b>こちらに入ってくる</b>向き。</div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="s3">
+  <h2><span class="no">3</span>Request と Response の中身を読もう</h2>
+  <p class="lead">テキスト p.5〜7 で学んだ言葉を使って、curl の結果を読んでみましょう。HTTP プロトコルでは、クライアントから Web サーバへのアクセスを <b>Request</b>、Web サーバからクライアントへのアクセスを <b>Response</b> といいます。</p>
+
+  <div class="flow">
+    <div class="fcard req">
+      <div class="hd"><svg viewBox="0 0 220 80" aria-hidden="true"><use href="#i-pc" x="0" y="8" width="76" height="64" color="#3b82f6"/><path d="M84 40 h50" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/><path d="M128 31 l12 9 l-12 9" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-server" x="150" y="2" width="64" height="76" color="#64748b"/></svg>Request</div>
+      <div class="dirtx">クライアント → Web サーバ</div>
+      <ol>
+        <li><span><b>リクエスト行</b></span><span class="en">Request-Line</span></li>
+        <li><span><b>ヘッダ</b></span></li>
+        <li><span><b>空行</b></span><span class="en">CRLF</span></li>
+        <li><span><b>メッセージボディ</b></span><span class="en">Message body</span></li>
+      </ol>
+    </div>
+    <div class="fcard resp">
+      <div class="hd"><svg viewBox="0 0 220 80" aria-hidden="true"><use href="#i-pc" x="0" y="8" width="76" height="64" color="#3b82f6"/><path d="M138 40 h-50" stroke="#ea580c" stroke-width="5" stroke-linecap="round"/><path d="M94 31 l-12 9 l12 9" fill="none" stroke="#ea580c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-server" x="150" y="2" width="64" height="76" color="#64748b"/></svg>Response</div>
+      <div class="dirtx">Web サーバ → クライアント</div>
+      <ol>
+        <li><span><b>ステータス行</b></span><span class="en">Status-Line</span></li>
+        <li><span><b>ヘッダ</b></span></li>
+        <li><span><b>空行</b></span></li>
+        <li><span><b>メッセージボディ</b></span></li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>3-1. Request を読む</h3>
+<pre><code><span class="c-req">GET /it01/time1.html HTTP/1.1</span>      <span class="c-cmt">← リクエスト行</span>
+<span class="c-req">Host: localhost:8080</span>               <span class="c-cmt">← ヘッダ</span>
+<span class="c-req">User-Agent: curl/8.22.0</span>            <span class="c-cmt">← ヘッダ</span>
+<span class="c-req">Accept: */*</span>                        <span class="c-cmt">← ヘッダ</span>
+                                   <span class="c-cmt">← 空行（CRLF）</span></code></pre>
+
+  <div class="part"><span class="tag req">リクエスト行</span></div>
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>GET</code></td><td>データの要求を意味します。Web サーバに保存されているファイルを要求します。</td></tr>
+    <tr><td><code>/it01/time1.html</code></td><td>クライアントが要求したデータのファイル名です（URL の <code>localhost:8080</code> より後ろの部分）。</td></tr>
+    <tr><td><code>HTTP/1.1</code></td><td>HTTP プロトコルのバージョンです。</td></tr>
+  </table>
+
+  <div class="part"><span class="tag req">ヘッダ</span><span>データを取得するために必要な情報や、補助的な情報を含みます。一つの Request に複数のヘッダを加えることができます。</span></div>
+  <table>
+    <tr><th>ヘッダ</th><th>意味</th></tr>
+    <tr><td><code>Host: localhost:8080</code></td><td>接続先の Web サーバ名とポート番号（HTTP/1.1 では<b>必須</b>）</td></tr>
+    <tr><td><code>User-Agent: curl/8.22.0</code></td><td>クライアントに関する情報（今回は curl）</td></tr>
+    <tr><td><code>Accept: */*</code></td><td>クライアントが受け取れるデータの種類。<code>*/*</code> は「何でもよい」という意味</td></tr>
+  </table>
+
+  <div class="part"><span class="tag req">空行（CRLF）</span><span>ヘッダの終わりを表します。curl の結果では <code>&gt;</code> だけの行がこれにあたります。</span></div>
+  <div class="part"><span class="tag req">メッセージボディ</span><span>クライアントから Web サーバにデータを送信するときに、そのデータを入れる部分です。今回はファイルを要求するだけなので、メッセージボディはありません。</span></div>
+
+  <h3>3-2. Response を読む</h3>
+<pre><code><span class="c-res">HTTP/1.1 200</span>                       <span class="c-cmt">← ステータス行</span>
+<span class="c-res">Content-Type: text/html</span>            <span class="c-cmt">← ヘッダ</span>
+<span class="c-res">Content-Length: 203</span>                <span class="c-cmt">← ヘッダ</span>
+<span class="c-res">Date: Mon, 16 Nov 2026 05:00:00 GMT</span><span class="c-cmt">← ヘッダ</span>
+                                   <span class="c-cmt">← 空行</span>
+&lt;!DOCTYPE html&gt;                    <span class="c-cmt">← メッセージボディ</span>
+&lt;html&gt;
+  …</code></pre>
+
+  <div class="part"><span class="tag resp">ステータス行</span><span>HTTP プロトコルのバージョン、ステータスコード（Status-Code）、テキスト（Reason-Phrase）から構成されます。</span></div>
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>HTTP/1.1</code></td><td>HTTP プロトコルのバージョン</td></tr>
+    <tr><td><code>200</code></td><td><b>ステータスコード</b>。受信した Request の処理結果を 3 桁の数字で表したもの</td></tr>
+    <tr><td>（<code>OK</code>）</td><td><b>テキスト</b>（Reason-Phrase）。テキストの例では <code>200 OK</code> となっていますが、今の Tomcat はこの部分を省略して送ります。</td></tr>
+  </table>
+
+  <p>主なステータスコード：</p>
+  <table>
+    <tr><th>ステータスコード</th><th>意味</th><th>よくある原因</th></tr>
+    <tr><td><code>200</code></td><td>処理が正常に終了し、この Response にクライアントが要求したファイルが含まれている</td><td>—</td></tr>
+    <tr><td><code>404</code></td><td>Request で要求されたファイルが Web サーバに存在しなかった</td><td>URL やファイル名の間違い、置き場所の間違い</td></tr>
+    <tr><td><code>500</code></td><td>Web サーバ内部でエラーが起きた</td><td>サーブレットや JSP のプログラムの誤り（後の単元で登場）</td></tr>
+  </table>
+
+  <div class="part"><span class="tag resp">ヘッダ</span></div>
+  <table>
+    <tr><th>ヘッダ</th><th>意味</th></tr>
+    <tr><td><code>Content-Type: text/html</code></td><td>メッセージボディのデータの種類（HTML であること）</td></tr>
+    <tr><td><code>Content-Length: 203</code></td><td>メッセージボディの大きさ（バイト数）</td></tr>
+    <tr><td><code>Date: …</code></td><td>Web サーバが Response を送った日時（世界標準時 GMT。日本時間は +9 時間）</td></tr>
+    <tr><td><code>Last-Modified: …</code></td><td>ファイルが最後に更新された日時</td></tr>
+  </table>
+
+  <div class="part"><span class="tag resp">空行</span><span>ヘッダの終わりを表します。curl の結果では <code>&lt;</code> だけの行がこれにあたります。</span></div>
+  <div class="part"><span class="tag resp">メッセージボディ</span><span>Web サーバからクライアントに、要求されたファイル（今回は <code>time1.html</code> の中身）を入れて送る部分です。</span></div>
+
+  <div class="point">💡 <b>ここがポイント：</b><b>このメッセージボディの内容がブラウザ上で表示されます。</b></div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="s4">
+  <h2><span class="no">4</span>テキスト（p.8〜9）の例と比べてみよう</h2>
+  <p class="lead">テキストの例は 2006 年ごろの Firefox と Tomcat で取ったものです。今の環境で確認すると、次のような違いがあります。</p>
+  <table>
+    <tr><th>項目</th><th>テキストの例</th><th>今回の実習</th></tr>
+    <tr><td>User-Agent</td><td>Firefox 1.5</td><td>curl</td></tr>
+    <tr><td>Accept</td><td>受け取りたい種類を細かく指定</td><td>curl は <code>*/*</code>（何でもよい）だけ</td></tr>
+    <tr><td>Accept-Language など</td><td>あり</td><td>curl では送られない</td></tr>
+    <tr><td>ステータス行</td><td><code>200 OK</code></td><td><code>200</code>（今の Tomcat は「OK」を省略）</td></tr>
+    <tr><td>Content-Type</td><td><code>text/html;charset=Windows-31J</code></td><td><code>text/html</code>（文字コードの指定なし）</td></tr>
+    <tr><td>Server</td><td><code>Apache-Coyote/1.1</code></td><td>表示されないことが多い</td></tr>
+  </table>
+
+  <div class="point">💡 <b>大事なこと：</b>ヘッダの項目や値は、使うソフトや環境によって変わります。でも、<b>「リクエスト行／ステータス行 → ヘッダ → 空行 → メッセージボディ」という形は、いつでも同じ</b>です。これが HTTP の決まりです。
+    <p>curl は必要最小限のヘッダしか送りません。<b>最低限必要なのはリクエスト行と Host ヘッダ</b>で、ブラウザはそれ以外の情報を気を利かせて付け足しています。</p>
+  </div>
+
+  <div class="note">📝 <b>なぜ <code>&lt;meta charset="UTF-8"&gt;</code> が必要だったのか</b>
+    <p>今回の Response の <code>Content-Type</code> は <code>text/html</code> だけで、文字コードが書かれていません。Web サーバが文字コードを教えてくれないので、ブラウザは HTML の中の <code>&lt;meta charset&gt;</code> を見て判断します。これが無いとブラウザが推測を間違え、文字化けが起きます。</p>
+  </div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="s5">
+  <h2><span class="no">5</span>うまくいかないときは</h2>
+  <p class="lead">困ったときは、症状に合わせて次の点を確認しましょう。</p>
+  <table>
+    <tr><th>症状</th><th>確認すること</th></tr>
+    <tr>
+      <td>ブラウザに「このサイトにアクセスできません」と出る<br>curl で「Failed to connect」と出る</td>
+      <td>Tomcat が起動していません。<code>C:\tomcat10\bin\startup.bat</code> を実行し、黒い画面を閉じずにおきましょう。</td>
+    </tr>
+    <tr>
+      <td>404 エラーが出る</td>
+      <td>
+        ・フォルダ名が <code>it01</code>、<code>WEB-INF</code> になっているか（つづり・大文字）<br>
+        ・ファイルの場所が <code>C:\tomcat10\webapps\it01</code> になっているか<br>
+        ・ファイル名が <code>time1.html</code> になっているか（<code>time1.htm</code> や <code>Time1.html</code> などになっていないか）<br>
+        ・URL のつづりがファイル名と同じか（1文字違っても 404 になります）<br>
+        ・それでもダメなら、Tomcat を一度停止（<code>shutdown.bat</code>）して再起動
+      </td>
+    </tr>
+    <tr>
+      <td>ブラウザで日本語が文字化けする</td>
+      <td><code>&lt;meta charset="UTF-8"&gt;</code> が書かれているか、VS Code の右下が「UTF-8」になっているか、Ctrl + S で保存したかを確認。直したら <b>Ctrl + F5</b> で再読み込み。</td>
+    </tr>
+    <tr>
+      <td>curl の結果で日本語が文字化けする</td>
+      <td>先に <code>chcp 65001</code> を実行したか確認。ヘッダは英数字だけなので、メッセージボディが化けていても確認には困りません。</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="s6">
+  <h2><span class="no">6</span>確認問題</h2>
+  <p class="lead">自分で答えを考えてから、ボタンを押して確かめましょう。</p>
+
+  <div class="q">
+    <div class="qt">Q1. <code>C:\tomcat10\webapps\it01\sample.html</code> に置いたファイルにアクセスする URL を書きなさい。</div>
+    <details><summary>答えを見る</summary><div class="ans"><code>http://localhost:8080/it01/sample.html</code></div></details>
+  </div>
+
+  <div class="q">
+    <div class="qt">Q2. curl の結果で、<code>&gt;</code> で始まる行と <code>&lt;</code> で始まる行は、それぞれ何を表していますか。</div>
+    <details><summary>答えを見る</summary><div class="ans"><code>&gt;</code> は Request（curl が Web サーバに送った内容）、<code>&lt;</code> は Response のヘッダ（Web サーバから返ってきた内容）。</div></details>
+  </div>
+
+  <div class="q">
+    <div class="qt">Q3. リクエスト行 <code>GET /it01/time1.html HTTP/1.1</code> の <code>GET</code> は何を表していますか。</div>
+    <details><summary>答えを見る</summary><div class="ans">データの要求。Web サーバに保存されているファイルを要求することを意味する。</div></details>
+  </div>
+
+  <div class="q">
+    <div class="qt">Q4. ステータスコード <code>200</code> と <code>404</code> の意味をそれぞれ答えなさい。</div>
+    <details><summary>答えを見る</summary><div class="ans">200 は処理が正常に終了し、要求したファイルが Response に含まれていること。404 は要求されたファイルが Web サーバに存在しなかったこと。</div></details>
+  </div>
+
+  <div class="q">
+    <div class="qt">Q5. Request と Response に共通する「形」を、4つの部分の順番で答えなさい。</div>
+    <details><summary>答えを見る</summary><div class="ans">リクエスト行（Response ではステータス行）→ ヘッダ → 空行 → メッセージボディ</div></details>
+  </div>
+
+  <div class="q">
+    <div class="qt">Q6. テキスト p.8 の Request（Firefox）と、curl の Request を比べて、違いを2つ書きなさい。</div>
+    <details><summary>答えの例を見る</summary><div class="ans">・User-Agent が Firefox ではなく curl になっている<br>・Accept が <code>*/*</code> だけになっている<br>・Accept-Language や Accept-Encoding などのヘッダが送られていない　など</div></details>
+  </div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="s7">
+  <h2><span class="no">7</span>チェックリスト</h2>
+  <p class="lead">できたものにチェックを入れましょう。</p>
+  <ul class="check" id="check">
+    <li><label><input type="checkbox"><span><code>C:\tomcat10\webapps</code> に <code>it01</code> フォルダと <code>WEB-INF</code> フォルダを作成できた</span></label></li>
+    <li><label><input type="checkbox"><span>VS Code で <code>C:\tomcat10\webapps\it01\time1.html</code> を作成し、UTF-8 で保存できた</span></label></li>
+    <li><label><input type="checkbox"><span>Tomcat を起動して、ブラウザで <code>time1.html</code> を表示できた</span></label></li>
+    <li><label><input type="checkbox"><span>コマンドプロンプトで <code>curl -v</code> を実行し、Request と Response を確認できた</span></label></li>
+    <li><label><input type="checkbox"><span>リクエスト行・ステータス行・ヘッダ・空行・メッセージボディの違いを説明できる</span></label></li>
+    <li><label><input type="checkbox"><span>実習が終わったら <code>shutdown.bat</code> で Tomcat を停止した</span></label></li>
+  </ul>
+  <p class="progress" id="progress"></p>
+</section>
+
+</main>
+<footer>JavaEE入門 補助資料 ― テキスト p.8〜9「Request と Response の確認」より</footer>
+
+<script>
+(function(){
+  const boxes=[...document.querySelectorAll('#check input')];
+  const out=document.getElementById('progress');
+  function update(){
+    const n=boxes.filter(b=>b.checked).length;
+    out.textContent=n===boxes.length?'🎉 すべてできました！':`${n} / ${boxes.length} 完了`;
+  }
+  boxes.forEach(b=>b.addEventListener('change',update));
+  update();
+})();
+</script>
+</body>
+</html>
