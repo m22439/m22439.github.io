@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaEE入門｜J2EEシステムのアーキテクチャ 学習ガイド</title>
+<style>
+:root{
+  --ink:#1f2933; --sub:#52606d; --line:#d9e2ec; --bg:#f7f9fb; --card:#fff;
+  --client:#2563eb; --client-bg:#e8f0fe;
+  --web:#475569;    --web-bg:#eef1f5;
+  --pres:#7c3aed;   --pres-bg:#f1eafe;
+  --biz:#059669;    --biz-bg:#e3f6ef;
+  --integ:#c2410c;  --integ-bg:#fdeee4;
+  --res:#be123c;    --res-bg:#fde8ee;
+  --req:#2563eb; --resp:#ea580c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75}
+header{background:#102a43;color:#fff;padding:36px 20px 28px}
+header .inner,main{max-width:980px;margin:0 auto}
+header .kicker{font-size:13px;letter-spacing:.15em;opacity:.75}
+header h1{margin:6px 0 8px;font-size:30px;line-height:1.35}
+header p{margin:0;opacity:.85;font-size:15px}
+nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+nav .inner{max-width:980px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 12px}
+nav a{white-space:nowrap;padding:12px 12px;font-size:14px;color:var(--sub);text-decoration:none;border-bottom:3px solid transparent}
+nav a:hover{color:var(--ink);border-color:#9fb3c8}
+main{padding:12px 20px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 28px 30px;margin:26px 0}
+h2{margin:0 0 4px;font-size:23px;display:flex;align-items:center;gap:10px}
+h2 .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#102a43;color:#fff;font-size:15px;flex:none}
+.lead{color:var(--sub);margin:4px 0 20px}
+h3{font-size:17px;margin:24px 0 10px}
+.point{background:#fffbea;border-left:5px solid #f0b429;padding:12px 16px;border-radius:6px;margin:18px 0;font-size:15px}
+.point b{color:#8d2b0b}
+.note{font-size:13px;color:var(--sub);background:#f0f4f8;padding:10px 14px;border-radius:8px;margin-top:16px}
+.word{background:linear-gradient(transparent 60%,#ffe58a 60%);font-weight:bold}
+
+/* ---- 1. 一般的な形態 ---- */
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:stretch;margin-top:10px}
+.four .item{text-align:center;padding:16px 8px;border-radius:12px;position:relative}
+.four .item .ic{font-size:34px;line-height:1}
+.four .item .nm{font-weight:bold;margin-top:6px}
+.four .item .ds{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.5}
+
+
+/* ---- 2. アーキテクチャ図 ---- */
+.arch svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin:6px 0 0}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:26px;height:4px;border-radius:2px}
+
+/* ---- 3. 層構造 ---- */
+.layers{display:grid;grid-template-columns:1fr 1.15fr;gap:26px;align-items:start}
+.phys{display:flex;flex-direction:column;gap:10px}
+.box{border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;transition:.2s}
+.box .t{font-weight:bold;display:flex;align-items:center;gap:8px}
+.box .s{font-size:12.5px;color:var(--sub)}
+.box.dim{opacity:.3}
+.box.hl{box-shadow:0 0 0 4px rgba(16,42,67,.12);transform:scale(1.02)}
+.appsrv{border:2px dashed #9fb3c8;border-radius:12px;padding:10px 12px 12px;background:#fafcfe}
+.appsrv > .t{font-weight:bold;font-size:14px;margin-bottom:8px}
+.appsrv .java{font-size:12px;color:var(--sub);margin:-4px 0 8px}
+.appsrv .box{padding:8px 12px}
+.arrow-v{text-align:center;color:#9fb3c8;font-size:18px;line-height:1;margin:-4px 0}
+.roles{display:flex;flex-direction:column;gap:10px}
+.role{border-radius:12px;padding:12px 16px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.role:hover,.role.on{border-color:currentColor}
+.role .n{font-weight:bold;font-size:16px}
+.role .w{font-size:12px;opacity:.85}
+.role p{margin:4px 0 0;color:var(--ink);font-size:14px}
+.hint{font-size:13px;color:var(--sub);margin:0 0 10px}
+
+.c-client{color:var(--client);background:var(--client-bg)}
+.c-web{color:var(--web);background:var(--web-bg)}
+.c-pres{color:var(--pres);background:var(--pres-bg)}
+.c-biz{color:var(--biz);background:var(--biz-bg)}
+.c-integ{color:var(--integ);background:var(--integ-bg)}
+.c-res{color:var(--res);background:var(--res-bg)}
+.band.c-client{--bc:var(--client)} .band.c-web{--bc:var(--web)} .band.c-pres{--bc:var(--pres)} .band.c-biz{--bc:var(--biz)} .band.c-integ{--bc:var(--integ)} .band.c-res{--bc:var(--res)}
+.b-client{border-color:var(--client)} .b-web{border-color:var(--web)} .b-pres{border-color:var(--pres)}
+.b-biz{border-color:var(--biz)} .b-integ{border-color:var(--integ)} .b-res{border-color:var(--res)}
+
+/* ---- 4. シナリオ ---- */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{font:inherit;font-size:14px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--sub)}
+.tabs button.on{background:#102a43;color:#fff;border-color:#102a43}
+.stage{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:6px;position:relative}
+.band{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;border-radius:10px;padding:10px 12px;border:2px solid transparent;transition:.25s;min-height:52px}
+.band .ln{font-weight:bold;font-size:14px}
+.band .ph{font-size:12px;color:var(--sub)}
+.band .badge{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:bold;font-size:16px;background:var(--bc);opacity:0;transform:scale(.5);transition:.25s}
+.band .badge span{color:#fff}
+.band.active{border-color:currentColor;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.band.active .badge{opacity:1;transform:scale(1)}
+.band.done{opacity:.75}
+.band.idle{opacity:.45}
+.panel{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fbfcfd;position:sticky;top:70px}
+.panel .phase{font-size:13px;color:var(--sub)}
+.panel .dir{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;margin-top:6px;font-weight:bold}
+.panel .dir.down{background:#e8f0fe;color:var(--req)}
+.panel .dir.up{background:#fff1e6;color:var(--resp)}
+.panel .snum{font-size:40px;font-weight:bold;line-height:1.1;margin-top:10px}
+.panel .slayer{font-weight:bold;font-size:15px}
+.panel .stext{font-size:17px;margin:8px 0 14px;min-height:84px}
+.panel .ctrl{display:flex;gap:8px;flex-wrap:wrap}
+.panel button{font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1.5px solid #102a43;background:#fff;color:#102a43;cursor:pointer}
+.panel button.pri{background:#102a43;color:#fff}
+.panel button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:5px;margin-top:14px;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;background:#d9e2ec}
+.dots i.on{background:#102a43}
+.steplist{margin:22px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.steplist li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px}
+.steplist li h4{margin:0 0 6px;font-size:14.5px}
+.steplist ol{margin:0;padding-left:1.4em}
+.steplist ol li{border:none;padding:0;margin:2px 0}
+
+/* ---- 5. 確認問題 ---- */
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.q .qt{font-weight:bold}
+.q .opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.q button{font:inherit;font-size:13.5px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+.q button.ok{background:#e3f6ef;border-color:var(--biz);color:var(--biz);font-weight:bold}
+.q button.ng{background:#fde8ee;border-color:var(--res);color:var(--res)}
+.q .fb{font-size:13.5px;margin-top:8px;min-height:1.2em}
+
+/* ---- イラスト ---- */
+.ill{display:block;margin:0 auto;overflow:visible}
+header .inner{display:flex;align-items:center;gap:20px;justify-content:space-between}
+header .hero{flex:none;width:300px;height:110px}
+.four .item .ill{width:92px;height:80px}
+.box .t svg{width:34px;height:34px;flex:none}
+.appsrv > .t svg{width:30px;height:30px}
+.appsrv > .t{display:flex;align-items:center;gap:6px}
+.band .ph{display:flex;align-items:center;gap:8px}
+.band .ph svg{width:38px;height:34px;flex:none}
+.token{position:absolute;right:58px;top:0;width:46px;height:54px;transition:top .55s cubic-bezier(.5,0,.2,1);pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.token svg{width:46px;height:54px}
+.token span{position:absolute;left:0;right:6px;top:22px;text-align:center;font-size:10px;font-weight:bold;color:#102a43;letter-spacing:-.02em}
+.token.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.25) rotate(-6deg)}}
+@media (max-width:760px){header .hero{display:none}}
+
+footer{text-align:center;font-size:12px;color:var(--sub);padding:0 0 30px}
+
+@media (max-width:760px){
+  .four{grid-template-columns:repeat(2,1fr);gap:10px}
+  .four .item::after{display:none}
+  .layers,.stage{grid-template-columns:1fr}
+  .band{grid-template-columns:120px 1fr 36px}
+  .steplist{grid-template-columns:1fr}
+  section{padding:20px 16px}
+  .panel{position:static}
+}
+@media print{
+  nav,.tabs,.panel .ctrl{display:none}
+  body{background:#fff}
+  section{break-inside:avoid;border-color:#ccc}
+  .band{opacity:1!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== イラスト部品 ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pc" viewBox="0 0 120 100">
+      <rect x="10" y="6" width="100" height="66" rx="8" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="19" y="14" width="82" height="50" rx="4" fill="currentColor"/>
+      <path d="M25 20 L56 20 L30 56 L25 56 Z" fill="#fff" opacity=".25"/>
+      <rect x="22" y="22" width="40" height="6" rx="3" fill="#fff" opacity=".7"/>
+      <rect x="22" y="33" width="56" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="22" y="41" width="48" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="50" y="72" width="20" height="12" fill="#b7c3d0" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="28" y="84" width="64" height="9" rx="4.5" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+    </symbol>
+    <symbol id="i-server" viewBox="0 0 100 120">
+      <rect x="18" y="6" width="64" height="108" rx="10" fill="#eef2f7" stroke="#243b53" stroke-width="3.5"/>
+      <path d="M18 26 V16 a10 10 0 0 1 10 -10 h44 a10 10 0 0 1 10 10 V26 Z" fill="currentColor" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="29" y="36" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="51" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="66" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <circle cx="34" cy="90" r="4.5" fill="#3ebd93" stroke="#243b53" stroke-width="2"/>
+      <circle cx="48" cy="90" r="4.5" fill="currentColor" stroke="#243b53" stroke-width="2"/>
+      <path d="M30 103 h40" stroke="#9aa5b1" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-db" viewBox="0 0 100 110">
+      <path d="M12 20 V88 A38 14 0 0 0 88 88 V20" fill="currentColor" stroke="#243b53" stroke-width="3.5"/>
+      <path d="M12 43 A38 14 0 0 0 88 43 M12 66 A38 14 0 0 0 88 66" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>
+      <ellipse cx="50" cy="20" rx="38" ry="14" fill="#fff" stroke="#243b53" stroke-width="3.5"/>
+      <ellipse cx="50" cy="20" rx="38" ry="14" fill="currentColor" opacity=".35"/>
+    </symbol>
+    <symbol id="i-java" viewBox="0 0 64 64">
+      <path d="M24 4 q-6 6 0 12 q6 6 0 12 M36 6 q-5 5 0 10 q5 5 0 10" fill="none" stroke="#b45309" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+      <path d="M8 30 H46 V38 a15 15 0 0 1 -15 15 H23 a15 15 0 0 1 -15 -15 Z" fill="#fff" stroke="#243b53" stroke-width="3.5"/>
+      <path d="M46 33 a8 8 0 0 1 0 15" fill="none" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="3" y="54" width="50" height="6" rx="3" fill="#dfe6ee" stroke="#243b53" stroke-width="3"/>
+      <text x="27" y="46" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309">Java</text>
+    </symbol>
+    <symbol id="i-doc" viewBox="0 0 60 70">
+      <path d="M6 4 H40 L54 18 V66 H6 Z" fill="#fff" stroke="#243b53" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M40 4 V18 H54" fill="#dfe6ee" stroke="#243b53" stroke-width="3" stroke-linejoin="round"/>
+      <rect x="13" y="12" width="20" height="5" rx="2.5" fill="currentColor"/>
+      <rect x="13" y="48" width="34" height="4" rx="2" fill="#c5d0dc"/>
+      <rect x="13" y="56" width="26" height="4" rx="2" fill="#c5d0dc"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header><div class="inner">
+  <div>
+    <div class="kicker">JavaEE入門｜補助資料</div>
+    <h1>J2EE システムのアーキテクチャ</h1>
+    <p>Webアプリは「どこで」「何を」処理しているのか？ ― 図で整理しよう</p>
+  </div>
+  <svg class="hero" viewBox="0 0 300 110" aria-hidden="true">
+    <use href="#i-pc" x="0" y="20" width="84" height="70" color="#60a5fa"/>
+    <path d="M86 58 h22" stroke="#9fb3c8" stroke-width="3" stroke-dasharray="4 4"/>
+    <use href="#i-server" x="104" y="12" width="72" height="86" color="#94a3b8"/>
+    <use href="#i-java" x="158" y="2" width="34" height="34"/>
+    <path d="M178 58 h22" stroke="#9fb3c8" stroke-width="3" stroke-dasharray="4 4"/>
+    <use href="#i-server" x="196" y="12" width="72" height="86" color="#a78bfa"/>
+    <use href="#i-db" x="252" y="44" width="48" height="54" color="#fb7185"/>
+  </svg>
+</div></header>
+
+<nav><div class="inner">
+  <a href="#s1">1. 一般的な形態</a>
+  <a href="#s2">2. 処理の流れ</a>
+  <a href="#s3">3. 層（レイヤ）構造</a>
+  <a href="#s4">4. 注文シナリオ</a>
+  <a href="#s5">5. 確認問題</a>
+</div></nav>
+
+<main>
+
+<!-- ================= 1 ================= -->
+<section id="s1">
+  <h2><span class="no">1</span>Webアプリケーションの一般的な形態</h2>
+  <p class="lead">Webアプリでシステムを作るとき、一般的には次の4つを組み合わせて使います。</p>
+  <div class="four">
+    <div class="item c-client"><svg class="ill" viewBox="0 0 120 100"><use href="#i-pc" width="120" height="100"/></svg><div class="nm">ブラウザ</div><div class="ds">利用者が操作する画面</div></div>
+    <div class="item c-web"><svg class="ill" viewBox="0 0 120 100"><use href="#i-server" x="20" y="0" width="80" height="100"/></svg><div class="nm">Webサーバ</div><div class="ds">リクエストの受付と<br>レスポンスの返送</div></div>
+    <div class="item c-pres"><svg class="ill" viewBox="0 0 120 100"><use href="#i-server" x="12" y="0" width="80" height="100"/><use href="#i-java" x="72" y="44" width="46" height="46"/></svg><div class="nm">アプリケーション<br>サーバ</div><div class="ds">Javaのプログラムが<br>動く場所</div></div>
+    <div class="item c-res"><svg class="ill" viewBox="0 0 120 100"><use href="#i-server" x="0" y="0" width="70" height="90" color="#be123c"/><use href="#i-db" x="58" y="28" width="62" height="70"/></svg><div class="nm">RDBMS ＋<br>データベース</div><div class="ds">データを保存・管理</div></div>
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="s2" class="arch">
+  <h2><span class="no">2</span>J2EE システムのアーキテクチャ（処理の流れ）</h2>
+  <p class="lead">アプリケーションサーバ上で動く <b>Javaのプログラム</b> が、RDBMS などの <span class="word">永続化</span> システムにアクセスして処理を行います。</p>
+
+  <svg viewBox="0 0 860 640" role="img" aria-label="ブラウザ、Webサーバ、アプリケーションサーバ、RDBMSのイラストと、RequestとResponseの流れ">
+    <defs>
+      <marker id="ar-b" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+      <marker id="ar-o" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker>
+      <marker id="ar-g" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#be123c"/></marker>
+    </defs>
+    <style>
+      .nm{font-size:16px;font-weight:bold}
+      .tx{font-size:13.5px;fill:#334e68}
+      .lb{font-size:14px;font-weight:bold}
+      .bub{fill:#fff;stroke-width:2}
+    </style>
+
+    <!-- クライアント -->
+    <use href="#i-pc" x="300" y="8" width="110" height="92" color="#3b82f6"/>
+    <use href="#i-pc" x="400" y="20" width="110" height="92" color="#60a5fa"/>
+    <text x="292" y="58" text-anchor="end" class="nm" fill="#2563eb">クライアント</text><text x="292" y="80" text-anchor="end" class="nm" fill="#2563eb">（ブラウザ）</text>
+    <path d="M560 34 h270 a10 10 0 0 1 10 10 v44 a10 10 0 0 1 -10 10 h-270 a10 10 0 0 1 -10 -10 v-14 l-14 -8 l14 -8 v-14 a10 10 0 0 1 10 -10 z" class="bub" stroke="#2563eb"/>
+    <text x="695" y="60" text-anchor="middle" class="tx">HTTPプロトコルに基づいて、</text>
+    <text x="695" y="82" text-anchor="middle" class="tx">要求（Request）を行う</text>
+
+    <!-- Webサーバ -->
+    <use href="#i-server" x="370" y="160" width="100" height="120" color="#64748b"/>
+    <text x="420" y="300" text-anchor="middle" class="nm" fill="#475569">Webサーバ</text>
+    <path d="M40 186 h232 a10 10 0 0 1 10 10 v14 l14 8 l-14 8 v14 a10 10 0 0 1 -10 10 h-232 a10 10 0 0 1 -10 -10 v-44 a10 10 0 0 1 10 -10 z" class="bub" stroke="#2563eb"/>
+    <text x="156" y="212" text-anchor="middle" class="tx">アプリケーションサーバに</text>
+    <text x="156" y="234" text-anchor="middle" class="tx">Request を送る</text>
+    <path d="M574 172 h256 a10 10 0 0 1 10 10 v70 a10 10 0 0 1 -10 10 h-256 a10 10 0 0 1 -10 -10 v-27 l-14 -8 l14 -8 v-27 a10 10 0 0 1 10 -10 z" class="bub" stroke="#ea580c"/>
+    <text x="702" y="198" text-anchor="middle" class="tx">HTMLを受け取り、Responseの</text>
+    <text x="702" y="220" text-anchor="middle" class="tx">メッセージボディに格納して</text>
+    <text x="702" y="242" text-anchor="middle" class="tx">クライアントに返す</text>
+
+    <!-- アプリケーションサーバ -->
+    <use href="#i-server" x="370" y="330" width="100" height="120" color="#7c3aed"/>
+    <use href="#i-java" x="440" y="392" width="54" height="54"/>
+    <text x="372" y="438" text-anchor="end" class="nm" fill="#7c3aed">アプリケーションサーバ</text>
+    <path d="M574 324 h256 a10 10 0 0 1 10 10 v116 a10 10 0 0 1 -10 10 h-256 a10 10 0 0 1 -10 -10 v-50 l-14 -8 l14 -8 v-50 a10 10 0 0 1 10 -10 z" class="bub" stroke="#7c3aed"/>
+    <text x="588" y="350" class="tx">① Javaのクラスからインスタンスを</text>
+    <text x="588" y="370" class="tx">　 生成し、メソッドを呼び出す</text>
+    <text x="588" y="396" class="tx">② RDBMSにアクセスし SQL を発行</text>
+    <text x="588" y="422" class="tx">③ HTMLを生成してWebサーバへ</text>
+    <text x="588" y="442" class="tx">　（＝プログラムにHTMLを書かせる）</text>
+
+    <!-- RDBMS / DB -->
+    <use href="#i-server" x="430" y="508" width="90" height="108" color="#be123c"/>
+    <use href="#i-db" x="300" y="528" width="80" height="88" color="#fb7185"/>
+    <path d="M384 574 h50" stroke="#be123c" stroke-width="3" marker-start="url(#ar-g)" marker-end="url(#ar-g)"/>
+    <text x="475" y="634" text-anchor="middle" class="nm" fill="#be123c">RDBMS</text>
+    <text x="340" y="634" text-anchor="middle" class="nm" fill="#be123c">データベース</text>
+    <path d="M574 520 h256 a10 10 0 0 1 10 10 v54 a10 10 0 0 1 -10 10 h-256 a10 10 0 0 1 -10 -10 v-19 l-14 -8 l14 -8 v-19 a10 10 0 0 1 10 -10 z" class="bub" stroke="#be123c"/>
+    <text x="702" y="546" text-anchor="middle" class="tx">文字・数値・画像など、あらゆる</text>
+    <text x="702" y="568" text-anchor="middle" class="tx">データを格納し管理する（永続化）</text>
+
+    <!-- Request（青・左側を下へ） -->
+    <path d="M318 96 Q270 150 372 214" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" marker-end="url(#ar-b)"/>
+    <text x="250" y="150" class="lb" fill="#2563eb" text-anchor="end">① Request</text>
+    <path d="M376 262 Q300 330 376 392" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" marker-end="url(#ar-b)"/>
+    <text x="320" y="340" class="lb" fill="#2563eb" text-anchor="end">② Request を渡す</text>
+
+    <!-- Response（橙・右側を上へ） -->
+    <path d="M464 360 Q520 316 462 256" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round" marker-end="url(#ar-o)"/>
+    <text x="508" y="306" class="lb" fill="#ea580c">HTML</text>
+    <path d="M462 182 Q530 150 492 116" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round" marker-end="url(#ar-o)"/>
+    <text x="516" y="150" class="lb" fill="#ea580c">Response</text>
+
+    <!-- アプリ⇔RDBMS -->
+    <path d="M430 456 L452 506" stroke="#be123c" stroke-width="4" marker-start="url(#ar-g)" marker-end="url(#ar-g)"/>
+    <text x="472" y="486" class="lb" fill="#be123c">SQL／結果</text>
+  </svg>
+
+  <div class="legend">
+    <span><i style="background:var(--req)"></i>Request（行き）</span>
+    <span><i style="background:var(--resp)"></i>Response（帰り）</span>
+    <span><i style="background:var(--res)"></i>データベースとのやりとり</span>
+  </div>
+
+  <div class="point">💡 <b>ここがポイント：</b>ブラウザに表示される HTML は、あらかじめ用意されたファイルではなく、
+  アプリケーションサーバ上の <b>Javaプログラムがその場で作ったもの</b>です。</div>
+  <p class="note">📝 <b>永続化</b>：プログラムが終了しても消えないように、データを保存しておくこと。</p>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="s3">
+  <h2><span class="no">3</span>J2EE システムの層（レイヤ：Layer）構造</h2>
+  <p class="lead">システムを役割ごとに「層」に分けて考えます。アプリケーションサーバ上の Javaプログラムの中は、さらに <b>3つの層</b> に分かれます。</p>
+  <p class="hint">👉 右の層をクリックすると、左の図のどこにあたるかが光ります。</p>
+
+  <div class="layers">
+    <div class="phys" id="phys">
+      <div class="box b-client" data-l="client"><div class="t" style="color:var(--client)"><svg viewBox="0 0 120 100"><use href="#i-pc" width="120" height="100" color="#3b82f6"/></svg>ブラウザ（クライアント）</div></div>
+      <div class="arrow-v">⇅</div>
+      <div class="box b-web" data-l="web"><div class="t" style="color:var(--web)"><svg viewBox="0 0 120 100"><use href="#i-server" x="20" width="80" height="100" color="#64748b"/></svg>Webサーバ</div></div>
+      <div class="arrow-v">⇅</div>
+      <div class="appsrv">
+        <div class="t"><svg viewBox="0 0 120 100"><use href="#i-server" x="10" width="80" height="100" color="#7c3aed"/><use href="#i-java" x="66" y="46" width="50" height="50"/></svg>アプリケーションサーバ</div>
+        <div class="java">Java によるプログラム</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="box b-pres" data-l="pres"><div class="t" style="color:var(--pres)">プレゼンテーション層</div></div>
+          <div class="box b-biz" data-l="biz"><div class="t" style="color:var(--biz)">ビジネスロジック層</div></div>
+          <div class="box b-integ" data-l="integ"><div class="t" style="color:var(--integ)">インテグレーション層</div></div>
+        </div>
+      </div>
+      <div class="arrow-v">⇅</div>
+      <div class="box b-res" data-l="res"><div class="t" style="color:var(--res)"><svg viewBox="0 0 120 100"><use href="#i-server" width="66" height="84" color="#be123c"/><use href="#i-db" x="56" y="30" width="60" height="68" color="#fb7185"/></svg>RDBMS ⇄ データベース</div></div>
+    </div>
+
+    <div class="roles" id="roles">
+      <div class="role c-client" data-l="client"><div class="n">クライアント層</div>
+        <p>ブラウザなどのクライアントで構成されます。</p></div>
+      <div class="role c-pres" data-l="pres"><div class="n">プレゼンテーション層 <span class="w">（Javaプログラム内部）</span></div>
+        <p>Request の受付、セッションの制御、HTML を生成して Response のメッセージボディに格納し出力します。<br><b>＝ 画面とのやりとり担当</b></p></div>
+      <div class="role c-biz" data-l="biz"><div class="n">ビジネスロジック層 <span class="w">（Javaプログラム内部）</span></div>
+        <p>業務処理を実現するための処理を行います。<br><b>＝ 判断・計算担当</b></p></div>
+      <div class="role c-integ" data-l="integ"><div class="n">インテグレーション層 <span class="w">（Javaプログラム内部）</span></div>
+        <p>RDBMS などの永続化システムとやりとりします。内部で <b>JDBC</b> を使ってデータベースに接続します。<br><b>＝ データベースとの窓口</b></p></div>
+      <div class="role c-res" data-l="res"><div class="n">リソース層</div>
+        <p>RDBMS とデータベース、XML などの永続化システムで構成されます。</p></div>
+    </div>
+  </div>
+
+  <div class="point">💡 <b>覚え方：</b>上から「<b>見せる</b>（プレゼンテーション）→ <b>考える</b>（ビジネスロジック）→ <b>取りに行く</b>（インテグレーション）」。
+  Webサーバは層の名前には入っていませんが、クライアント層とアプリケーションサーバの間を中継しています。</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="s4">
+  <h2><span class="no">4</span>実際のシナリオ：ネットショップの注文</h2>
+  <p class="lead">「注文ボタンを押してから『注文完了』が表示されるまで」に、各層で何が起きているかを順番に見てみましょう。</p>
+
+  <div class="tabs" id="tabs">
+    <button data-p="0" class="on">A. 注文の受付と在庫の取得</button>
+    <button data-p="1">B. 注文の記録</button>
+    <button data-p="2">C. 注文完了処理</button>
+    <button data-p="all">▶ 通しで見る（A→B→C）</button>
+  </div>
+
+  <div class="stage">
+    <div class="stack" id="stack">
+      <div class="band c-client" data-l="client"><div><div class="ln">クライアント層</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-pc" width="120" height="100" color="#3b82f6"/></svg>ブラウザ</div><div class="badge"><span></span></div></div>
+      <div class="band c-web" data-l="web"><div><div class="ln">（中継）</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-server" x="20" width="80" height="100" color="#64748b"/></svg>Webサーバ</div><div class="badge"><span></span></div></div>
+      <div class="band c-pres" data-l="pres"><div><div class="ln">プレゼンテーション層</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-server" x="10" width="80" height="100" color="#7c3aed"/><use href="#i-java" x="66" y="46" width="50" height="50"/></svg>アプリケーションサーバ</div><div class="badge"><span></span></div></div>
+      <div class="band c-biz" data-l="biz"><div><div class="ln">ビジネスロジック層</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-server" x="10" width="80" height="100" color="#7c3aed"/><use href="#i-java" x="66" y="46" width="50" height="50"/></svg>アプリケーションサーバ</div><div class="badge"><span></span></div></div>
+      <div class="band c-integ" data-l="integ"><div><div class="ln">インテグレーション層</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-server" x="10" width="80" height="100" color="#7c3aed"/><use href="#i-java" x="66" y="46" width="50" height="50"/></svg>アプリケーションサーバ</div><div class="badge"><span></span></div></div>
+      <div class="token" id="token"><svg viewBox="0 0 60 70"><use href="#i-doc" width="60" height="70" color="#f0b429"/></svg><span id="tokLabel"></span></div>
+      <div class="band c-res" data-l="res"><div><div class="ln">リソース層</div></div><div class="ph"><svg viewBox="0 0 120 100"><use href="#i-server" width="66" height="84" color="#be123c"/><use href="#i-db" x="56" y="30" width="60" height="68" color="#fb7185"/></svg>RDBMS ／ データベース</div><div class="badge"><span></span></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="phase" id="pPhase"></div>
+      <span class="dir" id="pDir"></span>
+      <div class="snum" id="pNum"></div>
+      <div class="slayer" id="pLayer"></div>
+      <div class="stext" id="pText"></div>
+      <div class="ctrl">
+        <button id="bPrev">◀ 前へ</button>
+        <button id="bNext" class="pri">次へ ▶</button>
+        <button id="bPlay">自動再生</button>
+      </div>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <ul class="steplist">
+    <li><h4>A. 注文の受付と在庫の取得 <span style="color:var(--req)">↓</span></h4><ol>
+      <li>注文内容を画面で入力し送信</li><li>Webサーバが受信し、アプリケーションサーバに渡す</li>
+      <li>注文内容を受け取る</li><li>在庫のチェックを行う</li>
+      <li>在庫数を取得するため SELECT 文を RDBMS に送信</li><li>SELECT 文の処理を行う</li></ol></li>
+    <li><h4>B. 注文の記録 <span style="color:var(--req)">↓</span></h4><ol>
+      <li>注文個数と在庫数を比較し、足りていれば注文処理</li>
+      <li>注文内容を UPDATE / INSERT 文として RDBMS に送信</li>
+      <li>UPDATE / INSERT 文の処理を行う</li></ol></li>
+    <li><h4>C. 注文完了処理 <span style="color:var(--resp)">↑</span></h4><ol>
+      <li>書き込み完了</li><li>UPDATE / INSERT 文を実行完了</li>
+      <li>インテグレーション層の結果を判定</li><li>結果を確認し「注文完了」の HTML を生成</li>
+      <li>HTML を Webサーバに渡す</li><li>「注文完了」の HTML をブラウザに送信</li></ol></li>
+  </ul>
+
+  <div class="point">💡 <b>流れの形に注目：</b>A・B は上から下へ（<span style="color:var(--req)">要求が奥へ進む</span>）、
+  C は下から上へ（<span style="color:var(--resp)">結果が戻ってくる</span>）。データベースに触るのは必ず <b>インテグレーション層</b> を通してです。</div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="s5">
+  <h2><span class="no">5</span>確認問題：これはどの層の仕事？</h2>
+  <p class="lead">ボタンを押して答えてみましょう。</p>
+  <div id="quiz"></div>
+</section>
+
+<p class="note" style="max-width:980px;margin:0 auto 20px">📌 補足：「J2EE」は古い名前で、その後「Java EE」、現在は「Jakarta EE」と呼ばれています。名前は変わっても、ここで学んだ層の考え方はそのまま使えます。</p>
+</main>
+<footer>JavaEE入門 補助資料 ― テキスト p.13〜19「J2EE システムのアーキテクチャ」より</footer>
+
+<script>
+/* ---------- 3. 層の対応ハイライト ---------- */
+(function(){
+  const roles=document.querySelectorAll('#roles .role');
+  const boxes=document.querySelectorAll('#phys .box');
+  roles.forEach(r=>r.addEventListener('click',()=>{
+    const on=r.classList.contains('on');
+    roles.forEach(x=>x.classList.remove('on'));
+    boxes.forEach(b=>b.classList.remove('dim','hl'));
+    if(on) return;
+    r.classList.add('on');
+    boxes.forEach(b=>{ if(b.dataset.l===r.dataset.l) b.classList.add('hl'); else b.classList.add('dim'); });
+  }));
+})();
+
+/* ---------- 4. シナリオ ---------- */
+const LNAME={client:'クライアント層',web:'Webサーバ',pres:'プレゼンテーション層',biz:'ビジネスロジック層',integ:'インテグレーション層',res:'リソース層'};
+const PH=[
+  {name:'A. 注文の受付と在庫の取得',dir:'down',steps:[
+    ['client','注文内容を画面で入力し、送信する。','注文'],
+    ['web','注文内容を受信して、アプリケーションサーバに渡す。','注文'],
+    ['pres','注文内容を受け取る。','注文'],
+    ['biz','在庫のチェックを行う。','注文'],
+    ['integ','商品の在庫数を取得するために、SELECT 文を RDBMS に送信する。','SELECT'],
+    ['res','SELECT 文の処理を行う。','SELECT'],
+  ]},
+  {name:'B. 注文の記録',dir:'down',steps:[
+    ['biz','注文された個数と在庫の数値を比較する。在庫が足りていた場合、注文処理を行う。','注文'],
+    ['integ','注文内容を UPDATE 文や INSERT 文として RDBMS に送信する。','INSERT'],
+    ['res','UPDATE 文や INSERT 文の処理を行う。','INSERT'],
+  ]},
+  {name:'C. 注文完了処理',dir:'up',steps:[
+    ['res','書き込み完了。','完了'],
+    ['integ','UPDATE 文や INSERT 文を実行完了。','完了'],
+    ['biz','インテグレーション層の結果を判定する。','OK'],
+    ['pres','書き込み完了の結果を確認し、「注文完了」というメッセージを持った HTML を生成する。','HTML'],
+    ['web','生成された HTML を Webサーバに渡す。','HTML'],
+    ['client','「注文完了」という内容の HTML がブラウザに送信される。','HTML'],
+  ]},
+];
+const NUM='①②③④⑤⑥';
+let seq=[],idx=0,timer=null;
+const bands=[...document.querySelectorAll('#stack .band')];
+const $=id=>document.getElementById(id);
+
+function build(p){
+  seq=[];
+  const list=p==='all'?[0,1,2]:[+p];
+  list.forEach(i=>PH[i].steps.forEach((s,k)=>seq.push({ph:PH[i],k,l:s[0],t:s[1],tok:s[2]})));
+  idx=0; stop(); render();
+}
+function render(){
+  const s=seq[idx];
+  const ab=bands.find(b=>b.dataset.l===s.l), tk=$('token');
+  tk.style.top=(ab.offsetTop+(ab.offsetHeight-54)/2)+'px';
+  $('tokLabel').textContent=s.tok;
+  tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop');
+  bands.forEach(b=>{
+    b.classList.remove('active','done','idle');
+    const visited=seq.slice(0,idx).some(x=>x.l===b.dataset.l && x.ph===s.ph);
+    if(b.dataset.l===s.l){b.classList.add('active');b.querySelector('.badge span').textContent=NUM[s.k];}
+    else b.classList.add(visited?'done':'idle');
+  });
+  $('pPhase').textContent=s.ph.name;
+  const d=$('pDir'); d.className='dir '+s.ph.dir; d.textContent=s.ph.dir==='down'?'↓ 要求が奥へ進む':'↑ 結果が戻ってくる';
+  $('pNum').textContent=NUM[s.k]; $('pNum').style.color=getComputedStyle(bands.find(b=>b.dataset.l===s.l)).color;
+  $('pLayer').textContent=LNAME[s.l];
+  $('pText').textContent=s.t;
+  $('bPrev').disabled=idx===0; $('bNext').disabled=idx===seq.length-1;
+  $('dots').innerHTML=seq.map((_,i)=>`<i class="${i<=idx?'on':''}"></i>`).join('');
+}
+function stop(){clearInterval(timer);timer=null;$('bPlay').textContent='自動再生';}
+$('bPrev').onclick=()=>{stop();if(idx>0){idx--;render();}};
+$('bNext').onclick=()=>{stop();if(idx<seq.length-1){idx++;render();}};
+$('bPlay').onclick=()=>{
+  if(timer){stop();return;}
+  if(idx===seq.length-1) idx=0;
+  render(); $('bPlay').textContent='停止';
+  timer=setInterval(()=>{ if(idx<seq.length-1){idx++;render();} else stop(); },2200);
+};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); build(b.dataset.p);
+});
+build(0);
+
+/* ---------- 5. 確認問題 ---------- */
+const Q=[
+  ['JDBC を使ってデータベースに接続する。','integ'],
+  ['「注文完了」というメッセージを持った HTML を生成する。','pres'],
+  ['注文された個数と在庫数を比較して、注文できるか判断する。','biz'],
+  ['SELECT 文を実際に処理して、データを取り出す。','res'],
+  ['利用者が画面で注文内容を入力して送信する。','client'],
+];
+const OPT=['client','pres','biz','integ','res'];
+$('quiz').innerHTML=Q.map((q,i)=>`<div class="q"><div class="qt">Q${i+1}. ${q[0]}</div>
+  <div class="opts">${OPT.map(o=>`<button data-q="${i}" data-o="${o}">${LNAME[o]}</button>`).join('')}</div>
+  <div class="fb" id="fb${i}"></div></div>`).join('');
+$('quiz').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const i=+b.dataset.q, ok=Q[i][1]===b.dataset.o;
+  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('ok','ng'));
+  b.classList.add(ok?'ok':'ng');
+  $('fb'+i).innerHTML=ok?'⭕ 正解！':'❌ もう一度考えてみよう（ヒント：3章の役割表を見直そう）';
+});
+</script>
+</body>
+</html>
