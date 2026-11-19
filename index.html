@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaEE入門｜補助資料 一覧</title>
+<style>
+:root{
+  --ink:#1f2933; --sub:#52606d; --line:#d9e2ec; --bg:#f7f9fb; --card:#fff;
+  --navy:#102a43;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75}
+header{background:var(--navy);color:#fff;padding:36px 20px 28px}
+header .inner,main{max-width:980px;margin:0 auto}
+header .inner{display:flex;align-items:center;gap:20px;justify-content:space-between}
+header .kicker{font-size:13px;letter-spacing:.15em;opacity:.75}
+header h1{margin:6px 0 8px;font-size:30px;line-height:1.35}
+header p{margin:0;opacity:.85;font-size:15px}
+header .hero{flex:none;width:260px;height:110px}
+main{padding:12px 20px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 28px 30px;margin:26px 0}
+h2{margin:0 0 4px;font-size:23px;display:flex;align-items:center;gap:10px}
+h2 .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-size:15px;flex:none}
+.lead{color:var(--sub);margin:4px 0 20px}
+code{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:#f0f4f8;padding:1px 6px;border-radius:4px;font-size:.92em}
+
+/* 資料カード */
+.guides{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;counter-reset:g}
+.guides li{counter-increment:g}
+.guides a{display:grid;grid-template-columns:56px 1fr auto;gap:4px 16px;align-items:center;padding:16px 18px;border:2px solid var(--line);border-radius:12px;text-decoration:none;color:inherit;background:#fff;transition:.15s}
+.guides a:hover{border-color:var(--navy);box-shadow:0 4px 14px rgba(16,42,67,.10);transform:translateY(-1px)}
+.guides a::before{content:counter(g,decimal-leading-zero);grid-row:1 / span 2;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;font-weight:bold;font-size:18px}
+.guides .ttl{font-weight:bold;font-size:17px}
+.guides .desc{font-size:14px;color:var(--sub);grid-column:2}
+.guides .meta{grid-row:1 / span 2;grid-column:3;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.tag{font-size:12px;font-weight:bold;padding:2px 10px;border-radius:999px;white-space:nowrap}
+.tag.page{background:#f0f4f8;color:var(--navy)}
+.tag.jisshu{background:#e3f6ef;color:#059669}
+.tag.kaisetsu{background:#e8f0fe;color:#2563eb}
+
+.env{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.env div{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfd;font-size:14.5px}
+.env .ic{font-size:26px;line-height:1;display:block;margin-bottom:6px}
+.env b{display:block}
+
+.note{font-size:13px;color:var(--sub);background:#f0f4f8;padding:10px 14px;border-radius:8px;margin-top:16px}
+footer{text-align:center;font-size:12px;color:var(--sub);padding:0 0 30px}
+
+@media (max-width:760px){
+  header .hero{display:none}
+  section{padding:20px 16px}
+  .guides a{grid-template-columns:44px 1fr}
+  .guides a::before{width:42px;height:42px;font-size:15px}
+  .guides .meta{grid-row:auto;grid-column:2;flex-direction:row;align-items:center}
+  .env{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  section{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+
+<header><div class="inner">
+  <div>
+    <div class="kicker">情報処理科 1年</div>
+    <h1>JavaEE入門 補助資料 一覧</h1>
+    <p>授業で使う補助資料のまとめページです。見たい資料をクリックしてください。</p>
+  </div>
+  <svg class="hero" viewBox="0 0 260 110" aria-hidden="true">
+    <g stroke="#243b53" stroke-width="3" stroke-linejoin="round">
+      <path d="M40 24 h70 l18 18 v60 h-88 z" fill="#fff" transform="rotate(-8 84 63)"/>
+      <path d="M90 14 h70 l18 18 v64 h-88 z" fill="#eef2f7"/>
+      <path d="M160 14 v18 h18" fill="#dfe6ee"/>
+      <path d="M140 22 h70 l18 18 v62 h-88 z" fill="#fff" transform="rotate(7 184 62)"/>
+    </g>
+    <rect x="102" y="30" width="34" height="7" rx="3.5" fill="#60a5fa"/>
+    <rect x="102" y="46" width="52" height="5" rx="2.5" fill="#c5d0dc"/>
+    <rect x="102" y="57" width="44" height="5" rx="2.5" fill="#c5d0dc"/>
+    <rect x="102" y="68" width="48" height="5" rx="2.5" fill="#c5d0dc"/>
+    <rect x="102" y="79" width="30" height="5" rx="2.5" fill="#c5d0dc"/>
+  </svg>
+</div></header>
+
+<main>
+
+<section>
+  <h2><span class="no">📚</span>補助資料</h2>
+  <p class="lead">テキストの順番に並んでいます。</p>
+
+  <ol class="guides">
+
+    <!-- ▼ 資料 01 -->
+    <li><a href="request_response_guide.html">
+      <span class="ttl">Request と Response を確認しよう</span>
+      <span class="desc">Tomcat に HTML ファイルを置き、curl コマンドで Request と Response の中身を確認します。</span>
+      <span class="meta"><span class="tag page">p.8〜9</span><span class="tag jisshu">実習</span></span>
+    </a></li>
+
+    <!-- ▼ 資料 02 -->
+    <li><a href="j2ee_architecture.html">
+      <span class="ttl">J2EE システムのアーキテクチャ</span>
+      <span class="desc">Webアプリは「どこで」「何を」処理しているのか？ 層（レイヤ）構造を図とシナリオで整理します。</span>
+      <span class="meta"><span class="tag page">p.13〜19</span><span class="tag kaisetsu">解説</span></span>
+    </a></li>
+
+    <!--
+    ▼ 新しい資料を追加するときは、下の5行をコピーして、この位置（一覧の一番下）に貼り付けます。
+       番号（03、04…）は自動で付きます。
+       種類のタグは「実習」なら class="tag jisshu"、「解説」なら class="tag kaisetsu" を使います。
+
+    <li><a href="ファイル名.html">
+      <span class="ttl">資料のタイトル</span>
+      <span class="desc">資料の説明（1〜2行）</span>
+      <span class="meta"><span class="tag page">p.○〜○</span><span class="tag jisshu">実習</span></span>
+    </a></li>
+    -->
+
+  </ol>
+</section>
+
+<section>
+  <h2><span class="no">🛠</span>実習環境</h2>
+  <p class="lead">この授業の実習では、次の環境を使います。</p>
+  <div class="env">
+    <div><span class="ic">🐱</span><b>Tomcat 10</b><code>C:\tomcat10</code></div>
+    <div><span class="ic">📝</span><b>VS Code</b>HTML などの作成</div>
+    <div><span class="ic">⌨️</span><b>コマンドプロンプト</b>curl などのコマンド実行</div>
+  </div>
+  <p class="note">📌 テキストは Tomcat 8 向けに書かれています。実習では Tomcat 10 を使うため、一部の手順や表示がテキストと異なります。違いは各補助資料で説明しています。</p>
+</section>
+
+</main>
+<footer>JavaEE入門 補助資料 ― 資料はこのページと同じフォルダに置いてください</footer>
+
+</body>
+</html>
