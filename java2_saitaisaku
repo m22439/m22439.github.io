@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java基本文法2 再試験 対策資料</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #5f6b7a;
+    --line: #d9dee5;
+    --bg: #ffffff;
+    --soft: #f4f6f9;
+    --accent: #1d5fa8;
+    --accent-soft: #e8f0fa;
+    --ok: #1e7b4a;
+    --ng: #b3261e;
+    --code-bg: #f6f8fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { font-size: 1.7rem; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); }
+  nav.toc {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 20px; margin: 24px 0 8px;
+  }
+  nav.toc strong { display: block; margin-bottom: 4px; }
+  nav.toc ol { margin: 0; padding-left: 1.4em; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h2 {
+    font-size: 1.3rem; margin: 48px 0 12px; padding: 6px 12px;
+    border-left: 6px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0;
+  }
+  h3 { font-size: 1.05rem; margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 16px; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; vertical-align: top; text-align: left; }
+  th { background: var(--soft); font-weight: bold; }
+  td.c { text-align: center; font-weight: bold; }
+  .o { color: var(--ok); }
+  .x { color: var(--ng); }
+  code { font-family: Consolas, "Courier New", monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px 14px; overflow-x: auto; font-size: 0.9rem; line-height: 1.55; margin: 10px 0 14px;
+  }
+  pre code { background: none; padding: 0; }
+  .cm { color: #6a737d; }
+  .key {
+    background: #fff8e1; border: 1px solid #f0d78c; border-radius: 6px; padding: 10px 14px; margin: 12px 0;
+  }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { margin: 4px 0; }
+  ul.check label { cursor: pointer; }
+  ul.check input { transform: scale(1.2); margin-right: 8px; }
+  .q { margin: 22px 0 6px; padding-top: 6px; border-top: 1px dashed var(--line); }
+  .q-title { font-weight: bold; color: var(--accent); margin-right: 6px; }
+  .opts { margin: 4px 0 0 1.2em; }
+  .opts span { display: inline-block; margin-right: 1.4em; }
+  .opts.block span { display: block; }
+  details.answer {
+    margin-top: 16px; border: 1px solid var(--line); border-radius: 8px; padding: 0 14px;
+  }
+  details.answer summary {
+    cursor: pointer; padding: 10px 0; font-weight: bold; color: var(--accent);
+  }
+  details.answer[open] { padding-bottom: 12px; }
+  .note { color: var(--muted); font-size: 0.92rem; }
+  footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 12px; }
+  @media print {
+    body { font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; }
+    nav.toc { display: none; }
+    h2 { break-after: avoid; }
+    pre, table, .q { break-inside: avoid; }
+    details.answer summary { color: var(--ink); }
+    #answers { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Java基本文法2 再試験 対策資料</h1>
+  <p>情報処理科1年　再試験を受ける人向け</p>
+</header>
+
+<nav class="toc">
+  <strong>目次</strong>
+  <ol start="0">
+    <li><a href="#s0">再試験の形式と勉強の進め方</a></li>
+    <li><a href="#s1">用語・概念のまとめ</a></li>
+    <li><a href="#s2">抽象クラスとインターフェイスの文法</a></li>
+    <li><a href="#s3">オーバーライドの規則</a></li>
+    <li><a href="#s4">隠蔽とオーバーライド、コードの読み方</a></li>
+    <li><a href="#s5">インターフェイスとオブジェクトコンポジション</a></li>
+    <li><a href="#s6">練習問題</a></li>
+    <li><a href="#answers">練習問題の解答と解説</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== 0 ===================== -->
+<h2 id="s0">再試験の形式と勉強の進め方</h2>
+<p>再試験は100点満点で、60点以上で合格です。出題範囲は本試験と同じで、問題のほとんどは選択式です。この資料の1〜5で要点を確認し、6の練習問題を解いてから、7で答え合わせをしてください。</p>
+
+<table>
+  <tr><th>大問</th><th>内容</th><th>配点</th><th>この資料</th><th>テキスト「Java 抽象クラスとインターフェイス」</th></tr>
+  <tr><td>I</td><td>用語・概念</td><td>20点</td><td>1</td><td>23頁、36〜39頁、72頁</td></tr>
+  <tr><td>II</td><td>文法規則（修飾子、オーバーライド、抽象クラスとインターフェイス）</td><td>40点</td><td>2・3</td><td>5頁、21〜25頁、33〜34頁、49頁、68頁</td></tr>
+  <tr><td>III</td><td>コード読解（実行結果、コンパイルエラーの原因）</td><td>25点</td><td>4</td><td>21頁、49〜52頁</td></tr>
+  <tr><td>IV</td><td>コードの穴埋め（インターフェイスとオブジェクトコンポジション）</td><td>15点</td><td>5</td><td>75〜79頁</td></tr>
+</table>
+
+<h3>解答の注意</h3>
+<ul>
+  <li>「2つ選びなさい」のように数が指定されている問題は、その数だけ選ぶ。多く選ぶと0点になる。</li>
+  <li>空欄のままにしない。選択式は、わからなくても消去法で絞り込んで答える。</li>
+  <li>コードの問題は、丸暗記した答えを書かずに、問題のコードを1行ずつ読んで判断する。本試験では、カルテやテキストの答えをそのまま書いて失点した人が多かった。</li>
+</ul>
+
+<h3>勉強の進め方（チェックリスト）</h3>
+<ul class="check">
+  <li><label><input type="checkbox">この資料の1〜5を読み、表を何も見ずに書けるようにする</label></li>
+  <li><label><input type="checkbox">テキスト72頁「共通なデータ構造とアルゴリズム」を読む</label></li>
+  <li><label><input type="checkbox">テキスト21頁のまとめ表、68頁の比較表、49頁のインターフェイスの文法を読む</label></li>
+  <li><label><input type="checkbox">6の練習問題を、この資料を見ずに解く</label></li>
+  <li><label><input type="checkbox">7で答え合わせをし、間違えた問題の解説と対応する節を読み直す</label></li>
+  <li><label><input type="checkbox">間違えた問題だけをもう一度解く</label></li>
+</ul>
+
+<!-- ===================== 1 ===================== -->
+<h2 id="s1">1. 用語・概念のまとめ</h2>
+<p>まず下の用語を、自分の言葉で説明できるようにします。</p>
+<table>
+  <tr><th>用語</th><th>意味</th><th>例・ポイント</th></tr>
+  <tr><td>is-a</td><td>継承の関係。「○○は△△の一種である」</td><td>Dog extends Animal → 「犬は動物である」</td></tr>
+  <tr><td>has-a</td><td>オブジェクトコンポジションの関係。「○○は△△を持っている」</td><td>SchoolクラスがTeacher型のインスタンス変数を持つ → 「学校は先生を持っている」</td></tr>
+  <tr><td>オブジェクトコンポジション</td><td>他のクラスのオブジェクトをインスタンス変数として持ち、その機能を使う手法</td><td>継承（is-a）との違いを区別する</td></tr>
+  <tr><td>クライアント（client）</td><td>あるクラスの機能を利用する側。日本語で「依頼人」</td><td>「使う側」と覚える</td></tr>
+  <tr><td>サプライア（supplier）</td><td>機能を提供する側。日本語で「供給者」</td><td>「使われる側」と覚える（テ36頁）</td></tr>
+  <tr><td>脆弱（ぜいじゃく）</td><td>要求される仕様や条件の変化に対して、対応が困難なプログラム設計</td><td>サプライアを増やすたびにクライアントも書き直す必要がある状態（テ37〜38頁）</td></tr>
+  <tr><td>脆弱性の解決</td><td>クライアントとサプライアの間に抽象クラスやインターフェイスを入れる</td><td>サプライアが増えても、クライアントを修正しなくてよくなる（テ39頁）</td></tr>
+  <tr><td>シグネチャ</td><td>メソッド名と引数リスト（引数の型・数・順番）</td><td>戻り値の型とアクセス修飾子は含まない</td></tr>
+  <tr><td>抽象メソッド</td><td>処理の内容（{ }）を持たず、形式だけを定めたメソッド</td><td><code>public abstract void run();</code> のように「;」で終わる（テ23頁）</td></tr>
+  <tr><td>具象クラス</td><td>抽象メソッドを持たない、newできる普通のクラス</td><td>抽象クラスの反対</td></tr>
+</table>
+
+<h3>抽象クラスとインターフェイスの使い分け（テキスト72頁）</h3>
+<ul>
+  <li><strong>抽象クラス</strong>：サプライアのデータ構造（インスタンス変数）やアルゴリズム（メソッドの中身）がある程度共通していて、さらに共通なアルゴリズムの形式（抽象メソッド）を持たせたいときに使う。</li>
+  <li><strong>インターフェイス</strong>：データ構造やアルゴリズムとはあまり関係なく、共通なアルゴリズムの形式だけを持たせたいときに使う。定数リストだけを作りたいときにも向いている。</li>
+</ul>
+<div class="key">覚え方：「中身も共通にしたい → 抽象クラス」「形（メソッド名）だけ揃えたい → インターフェイス」。</div>
+
+<!-- ===================== 2 ===================== -->
+<h2 id="s2">2. 抽象クラスとインターフェイスの文法</h2>
+<p>下の比較表は、何も見ずに○×を書けるようにしてください（テキスト68頁）。</p>
+<table>
+  <tr><th>できること</th><th>抽象クラス</th><th>インターフェイス</th></tr>
+  <tr><td>newでインスタンス化する</td><td class="c x">×</td><td class="c x">×</td></tr>
+  <tr><td>コンストラクタを作る</td><td class="c o">○</td><td class="c x">×</td></tr>
+  <tr><td>インスタンス変数を宣言する</td><td class="c o">○</td><td class="c x">×</td></tr>
+  <tr><td>定数（public static final）を宣言する</td><td class="c o">○</td><td class="c o">○</td></tr>
+  <tr><td>抽象メソッドを宣言する</td><td class="c o">○</td><td class="c o">○</td></tr>
+  <tr><td>1つのクラスが2つ以上を同時に使う</td><td class="c x">×（多重継承はできない）</td><td class="c o">○（多重実装ができる）</td></tr>
+  <tr><td>使うときのキーワード</td><td class="c">extends</td><td class="c">implements</td></tr>
+</table>
+
+<h3>抽象クラスの規則（テキスト24頁）</h3>
+<ul>
+  <li>abstract と final は同時に付けられない（abstractは「継承してもらう前提」、finalは「継承禁止」で矛盾する）。</li>
+  <li>抽象メソッドは { } を持てない。<code>{ }</code> が空でもエラーになる。</li>
+  <li>抽象メソッドに private は付けられない（オーバーライドできなくなるため）。</li>
+  <li>抽象メソッドが1つもない抽象クラスも作れる。mainメソッドやクラスメソッドも作れる。</li>
+  <li>具象クラスで継承したら、すべての抽象メソッドをオーバーライドしなければならない。抽象クラスで継承する場合は、オーバーライドしなくてもよい。</li>
+</ul>
+
+<h3>インターフェイスの規則（テキスト49頁）</h3>
+<ul>
+  <li>変数には自動的に <code>public static final</code> が付く。つまり定数なので、宣言と同時に必ず初期化する（<code>int MAX;</code> だけではエラー）。</li>
+  <li>{ } を持たないメソッドには自動的に <code>public abstract</code> が付く。</li>
+  <li>抽象メソッドに private、protected、static、final は付けられない。</li>
+  <li>実装するクラスでは、すべての抽象メソッドを実装しなければならない。</li>
+  <li>実装するメソッドには必ず public を付ける。付け忘れると「修飾子なし」になり、publicより狭くなるのでエラーになる。</li>
+</ul>
+<pre><code>interface Printable {
+    int COPIES = 1;        <span class="cm">// 自動的に public static final</span>
+    void print();          <span class="cm">// 自動的に public abstract</span>
+}
+class Report implements Printable {
+    public void print() {  <span class="cm">// public が必要</span>
+        System.out.println("レポートを" + COPIES + "部印刷");
+    }
+}</code></pre>
+
+<!-- ===================== 3 ===================== -->
+<h2 id="s3">3. オーバーライドの規則</h2>
+<p>オーバーライドの規則は次の5つです（テキスト5頁、33〜34頁）。</p>
+<ol>
+  <li><strong>戻り値の型、メソッド名、引数リストをすべて同じにする。</strong> 引数リストが違うと、オーバーライドではなく別のメソッドになる。</li>
+  <li><strong>アクセス修飾子は「同じ」か「より緩い」ものにする。</strong> 狭くするとエラー。</li>
+  <li><strong>final が付いたメソッドはオーバーライドできない。</strong> 呼び出すことはできる。なお、クラスに final を付けると継承そのものができなくなる。</li>
+  <li><strong>private のメソッドは継承されないので、オーバーライドもできない。</strong></li>
+  <li><strong>throws の規則：例外は「減らす」のはよいが「増やす・広げる」のはダメ。</strong>
+    <ul>
+      <li>throws を取り除いてもよい。</li>
+      <li>元と同じ例外を throws してもよい。</li>
+      <li>元の例外より広い例外（そのスーパークラス、たとえば Exception）を throws するとエラー。</li>
+      <li>元にないチェック例外を新しく throws するとエラー。</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>アクセス修飾子の広さ（左ほど緩い）</h3>
+<table>
+  <tr><th>public</th><th>protected</th><th>修飾子なし</th><th>private</th></tr>
+  <tr><td>どこからでも</td><td>同じパッケージとサブクラス</td><td>同じパッケージ</td><td>そのクラスの中だけ</td></tr>
+</table>
+<p>オーバーライドする側では、元の修飾子と同じか、それより左のものを使います。元が「修飾子なし」なら、public・protected・修飾子なしの3つが使えます。元が public なら public しか使えません。</p>
+<pre><code>class Shop {
+    public void open() throws IOException { }
+}
+class Cafe extends Shop {
+    public void open() { }                        <span class="cm">// OK：throws を取り除いた</span>
+    <span class="cm">// void open() throws IOException { }         // エラー：public より狭い</span>
+    <span class="cm">// public void open() throws Exception { }    // エラー：例外が広い</span>
+    <span class="cm">// public int open() { return 0; }            // エラー：戻り値の型が違う</span>
+}</code></pre>
+<p><strong>super でできること</strong>：サブクラスの中から、スーパークラスのメソッド（<code>super.show()</code>）、フィールド（<code>super.name</code>）、コンストラクタ（<code>super(引数)</code>）を使えます。</p>
+
+<!-- ===================== 4 ===================== -->
+<h2 id="s4">4. 隠蔽とオーバーライド、コードの読み方</h2>
+<p><code>スーパークラス型 変数 = new サブクラス();</code> のとき、どちらのクラスのものが使われるかは、メンバの種類で決まります（テキスト21頁のまとめ表）。</p>
+<table>
+  <tr><th>サブクラスで再定義したもの</th><th>隠蔽かオーバーライドか</th><th>使われるのは</th><th>束縛</th></tr>
+  <tr><td>インスタンス変数</td><td>隠蔽</td><td>変数の型（= の左側）のクラス</td><td>静的束縛</td></tr>
+  <tr><td>クラス変数</td><td>隠蔽</td><td>変数の型（= の左側）のクラス</td><td>静的束縛</td></tr>
+  <tr><td>クラスメソッド（static）</td><td>隠蔽</td><td>変数の型（= の左側）のクラス</td><td>静的束縛</td></tr>
+  <tr><td>インスタンスメソッド</td><td>オーバーライド</td><td>newしたオブジェクト（= の右側）のクラス</td><td>動的束縛</td></tr>
+</table>
+<div class="key">覚え方：<strong>「オーバーライドできるのはインスタンスメソッドだけ。それだけが右側（中身）を見る。他は全部左側（型）を見る。」</strong></div>
+
+<h3>例題</h3>
+<pre><code>class Animal {
+    String type = "動物";
+    String getType() { return type; }
+    static String kind() { return "Animal"; }
+}
+class Cat extends Animal {
+    String type = "猫";
+    String getType() { return type; }
+    static String kind() { return "Cat"; }
+    void meow() { System.out.println("にゃー"); }
+}
+class Test {
+    public static void main(String[] args) {
+        Animal a = new Cat();
+        System.out.println(a.type);       <span class="cm">// 動物：変数なので左側（Animal）</span>
+        System.out.println(a.getType());  <span class="cm">// 猫　：インスタンスメソッドなので右側（Cat）</span>
+        System.out.println(a.kind());     <span class="cm">// Animal：クラスメソッドなので左側</span>
+        <span class="cm">// a.meow();                      // コンパイルエラー：Animalにmeow()はない</span>
+    }
+}</code></pre>
+
+<h3>読み方の手順</h3>
+<ol>
+  <li>変数の宣言を見て、「= の左側の型」と「new したクラス」をメモする（例：左 Animal、右 Cat）。</li>
+  <li>式の中のメンバが、変数・クラスメソッド・インスタンスメソッドのどれかを確かめる。</li>
+  <li>上の表で、左側と右側のどちらのクラスを見るかを決める。</li>
+  <li>メソッドの中で変数を使っているときは、そのメソッドが書かれているクラスの変数を使う（上の例では、CatのgetType()が返すのはCatのtype）。</li>
+</ol>
+<p><strong>呼び出せるメソッド</strong>：変数の型（左側）のクラスにあるメソッドだけです。サブクラスにしかないメソッドは、スーパークラス型の変数からは呼べません。</p>
+
+<!-- ===================== 5 ===================== -->
+<h2 id="s5">5. インターフェイスとオブジェクトコンポジション</h2>
+<p>テキスト77〜79頁のHeroの例と同じ形です。題材が変わっても、書く場所と書き方は同じなので、下の「型」を覚えましょう。</p>
+<pre><code>interface Light {                         <span class="cm">// ① インターフェイス：共通のメソッドの形だけ</span>
+    void turnOn();
+}
+class LedLight implements Light {         <span class="cm">// ② サプライア：implements で実装</span>
+    public void turnOn() {                <span class="cm">//    public を忘れない</span>
+        System.out.println("LEDが点きました");
+    }
+}
+class Lamp implements Light {
+    public void turnOn() {
+        System.out.println("電球が点きました");
+    }
+}
+class Room {                              <span class="cm">// ③ クライアント</span>
+    private Light _light;                 <span class="cm">//    インターフェイス型のインスタンス変数</span>
+    public Room(Light l) {                <span class="cm">//    コンストラクタで格納</span>
+        _light = l;
+    }
+    public void setLight(Light l) {       <span class="cm">//    setterで入れ替え</span>
+        _light = l;
+    }
+    public void switchOn() {
+        _light.turnOn();                  <span class="cm">//    格納したオブジェクトを通して呼ぶ</span>
+    }
+}
+class Test {
+    public static void main(String[] args) {
+        Room r = new Room(new LedLight());
+        r.switchOn();                     <span class="cm">// LEDが点きました</span>
+        r.setLight(new Lamp());
+        r.switchOn();                     <span class="cm">// 電球が点きました</span>
+    }
+}</code></pre>
+
+<h3>ポイント</h3>
+<ul>
+  <li>Roomは、インターフェイス型（Light）の変数を持つ。LedLight型やLamp型ではないので、どちらのオブジェクトも入れられる。</li>
+  <li>インターフェイスは new できない。<code>new Light()</code> はエラー。</li>
+  <li>メソッドは <code>_light.turnOn();</code> のように、格納した変数を通して呼ぶ。<code>Light.turnOn();</code> のように型名では呼べない。</li>
+  <li>実際に動くのは、そのとき格納されているオブジェクトのメソッド（動的束縛）。setterで入れ替えると、動きも変わる。</li>
+  <li>関係の言い方：RoomはLedLightの<strong>クライアント</strong>、LedLightはRoomの<strong>サプライア</strong>。RoomがLightを持つのは<strong>オブジェクトコンポジション</strong>（has-a）。</li>
+  <li>問題文のクラスにないメソッドを書かない。テキストのHeroの例のように transForm() を呼ぶなど、丸暗記したコードをそのまま書くと減点される。</li>
+</ul>
+
+<!-- ===================== 6 ===================== -->
+<h2 id="s6">6. 練習問題</h2>
+<p>再試験と同じ形式の問題です。この資料の1〜5を見ずに解き、終わったら「7. 解答と解説」で答え合わせをしてください。</p>
+
+<div class="q"><span class="q-title">練習1</span>Libraryクラスが、インスタンス変数としてBook型のオブジェクトを持っている。この関係を表すものを選びなさい。
+  <div class="opts"><span>a. is-a</span><span>b. has-a</span><span>c. uses-a</span><span>d. part-of</span></div></div>
+
+<div class="q"><span class="q-title">練習2</span>「サプライア」の日本語の意味として正しいものを選びなさい。
+  <div class="opts"><span>a. 依頼人</span><span>b. 利用者</span><span>c. 供給者</span><span>d. 管理者</span></div></div>
+
+<div class="q"><span class="q-title">練習3</span>データ構造がまったく異なるStudentクラスとProductクラスに、共通のメソッド print() の形だけを持たせたい。使うのに適しているものを選びなさい。
+  <div class="opts"><span>a. 抽象クラス</span><span>b. インターフェイス</span><span>c. 具象クラス</span></div></div>
+
+<div class="q"><span class="q-title">練習4</span>インターフェイスの中に書けるものを<strong>2つ</strong>選びなさい。
+  <div class="opts"><span>a. コンストラクタ</span><span>b. 定数</span><span>c. インスタンス変数</span><span>d. 抽象メソッド</span></div></div>
+
+<div class="q"><span class="q-title">練習5</span>抽象クラスの中の抽象メソッドの宣言として、正しいものを<strong>1つ</strong>選びなさい。
+<pre><code>a. public abstract void stop() { }
+b. private abstract void stop();
+c. public abstract void stop();
+d. public final abstract void stop();</code></pre></div>
+
+<div class="q"><span class="q-title">練習6</span>スーパークラスのメソッド <code>void calc()</code>（修飾子なし）をオーバーライドするとき、指定できるアクセス修飾子を<strong>3つ</strong>選びなさい。
+  <div class="opts"><span>a. public</span><span>b. protected</span><span>c. 修飾子なし</span><span>d. private</span></div></div>
+
+<div class="q"><span class="q-title">練習7</span>スーパークラスのメソッドが <code>protected void save() throws IOException</code> である。オーバーライドしてもコンパイルエラーにならないものを<strong>2つ</strong>選びなさい。
+<pre><code>① protected void save() { }
+② private void save() throws IOException { }
+③ public void save() throws IOException { }
+④ protected void save() throws Exception { }</code></pre></div>
+
+<div class="q"><span class="q-title">練習8</span>クラスの宣言に final を付けた（例：<code>final class Ticket { }</code>）。正しい説明を選びなさい。
+  <div class="opts block"><span>a. そのクラスは new できない</span><span>b. そのクラスを継承できない</span><span>c. そのクラスは抽象クラスになる</span><span>d. そのクラスのメソッドは呼び出せない</span></div></div>
+
+<div class="q"><span class="q-title">練習9</span>インターフェイスの中で、修飾子を付けずに <code>double RATE = 0.1;</code> と宣言した。自動的に付けられる修飾子を選びなさい。
+  <div class="opts"><span>a. public static final</span><span>b. private final</span><span>c. public abstract</span><span>d. protected static</span></div></div>
+
+<div class="q"><span class="q-title">練習10〜13</span>次のプログラムの【式】をそれぞれ置き換えたときの結果を答えなさい。コンパイルエラーになる場合は「コンパイルエラー」と答えなさい。
+<pre><code>class Vehicle {
+    int wheels = 4;
+    int getWheels() { return wheels; }
+    static String category() { return "車両"; }
+}
+class Bike extends Vehicle {
+    int wheels = 2;
+    int getWheels() { return wheels; }
+    static String category() { return "二輪"; }
+    String ring() { return "チリン"; }
+}
+class Test {
+    public static void main(String[] args) {
+        Vehicle v = new Bike();
+        System.out.println( 【式】 );
+    }
+}</code></pre>
+<ul>
+  <li>練習10：<code>v.wheels</code></li>
+  <li>練習11：<code>v.getWheels()</code></li>
+  <li>練習12：<code>v.category()</code></li>
+  <li>練習13：<code>v.ring()</code></li>
+</ul></div>
+
+<div class="q"><span class="q-title">練習14</span>次のプログラムはコンパイルエラーになる。原因を選びなさい。
+<pre><code>abstract class Account {
+    abstract int balance();
+    abstract void deposit(int money);
+}
+class Saving extends Account {
+    int balance() { return 0; }
+}</code></pre>
+  <div class="opts block"><span>a. Accountにコンストラクタがない</span><span>b. Savingがdeposit()をオーバーライドしていない</span><span>c. balance()にpublicが付いていない</span><span>d. Savingにmainメソッドがない</span></div></div>
+
+<div class="q"><span class="q-title">練習15</span>次のプログラムはコンパイルエラーになる。原因を選びなさい。
+<pre><code>interface Config {
+    int PORT;
+    void load();
+}</code></pre>
+  <div class="opts block"><span>a. load()にabstractが付いていない</span><span>b. 変数PORTが初期化されていない</span><span>c. インターフェイス名が大文字で始まっている</span><span>d. load()の戻り値がvoidである</span></div></div>
+
+<div class="q"><span class="q-title">練習16</span>次のプログラムについて、(1)〜(4)に答えなさい。
+<pre><code>interface Sound {
+    void play();
+}
+class Piano 【ア】 Sound {
+    【イ】 void play() {
+        System.out.println("ポロン");
+    }
+}
+class Drum implements Sound {
+    public void play() {
+        System.out.println("ドン");
+    }
+}
+class Player {
+    private Sound _sound;
+    public Player(Sound s) { _sound = s; }
+    public void setSound(Sound s) { _sound = s; }
+    public void start() {
+        【ウ】
+    }
+}
+class Test {
+    public static void main(String[] args) {
+        Player p = new Player(new Drum());
+        p.start();
+        p.setSound(new Piano());
+        p.start();
+    }
+}</code></pre>
+<ul>
+  <li>(1) 【ア】に入るキーワードを答えなさい。</li>
+  <li>(2) 【イ】に入るアクセス修飾子を答えなさい。</li>
+  <li>(3) 【ウ】に入るものを選びなさい。
+    <div class="opts"><span>a. Sound.play();</span><span>b. _sound.play();</span><span>c. play(_sound);</span><span>d. new Drum().play();</span></div></li>
+  <li>(4) 空欄を正しく埋めたときの実行結果を答えなさい。</li>
+</ul></div>
+
+<!-- ===================== 7 ===================== -->
+<h2 id="answers">7. 練習問題の解答と解説</h2>
+<p>間違えた問題は、「読み直す場所」の節とテキストの頁をもう一度読んでください。</p>
+
+<details class="answer" id="answer-box">
+  <summary>解答を表示する（自分で解いてから開くこと）</summary>
+  <table>
+    <tr><th>問題</th><th>正答</th><th>解説</th><th>読み直す場所</th></tr>
+    <tr><td>練習1</td><td>b</td><td>「図書館は本を持っている」なのでhas-a（オブジェクトコンポジション）</td><td>1</td></tr>
+    <tr><td>練習2</td><td>c</td><td>クライアント＝依頼人、サプライア＝供給者</td><td>1、テ36頁</td></tr>
+    <tr><td>練習3</td><td>b</td><td>データ構造が違い、メソッドの形だけを揃えたいのでインターフェイス</td><td>1、テ72頁</td></tr>
+    <tr><td>練習4</td><td>b, d</td><td>インターフェイスにはコンストラクタもインスタンス変数も作れない</td><td>2、テ68頁</td></tr>
+    <tr><td>練習5</td><td>c</td><td>a：{ } がある、b：privateは不可、d：finalとabstractは同時に付けられない</td><td>2、テ24頁</td></tr>
+    <tr><td>練習6</td><td>a, b, c</td><td>「修飾子なし」と同じか、それより緩いもの。privateは狭い</td><td>3、テ34頁</td></tr>
+    <tr><td>練習7</td><td>①, ③</td><td>①：throwsを取り除いた（OK）、②：privateは狭い、③：publicは緩いのでOK、④：ExceptionはIOExceptionより広い</td><td>3、テ34頁</td></tr>
+    <tr><td>練習8</td><td>b</td><td>finalクラスは継承できない。newやメソッドの呼び出しはできる</td><td>3</td></tr>
+    <tr><td>練習9</td><td>a</td><td>インターフェイスの変数は自動的に定数（public static final）</td><td>2、テ49頁</td></tr>
+    <tr><td>練習10</td><td>4</td><td>変数は左側の型（Vehicle）を見る（隠蔽）</td><td>4、テ21頁</td></tr>
+    <tr><td>練習11</td><td>2</td><td>インスタンスメソッドは右側（Bike）を見る。BikeのgetWheels()はBikeのwheelsを返す</td><td>4</td></tr>
+    <tr><td>練習12</td><td>車両</td><td>クラスメソッドは左側の型（Vehicle）を見る</td><td>4</td></tr>
+    <tr><td>練習13</td><td>コンパイルエラー</td><td>ring()はBikeにしかない。Vehicle型の変数からは呼べない</td><td>4</td></tr>
+    <tr><td>練習14</td><td>b</td><td>具象クラスは、すべての抽象メソッドをオーバーライドしなければならない</td><td>2、テ24頁</td></tr>
+    <tr><td>練習15</td><td>b</td><td>インターフェイスの変数は定数なので、宣言と同時に初期化が必要。load()にはabstractが自動で付く</td><td>2、テ49頁</td></tr>
+    <tr><td>練習16(1)</td><td>implements</td><td>インターフェイスの実装はimplements（extendsではない）</td><td>2・5</td></tr>
+    <tr><td>練習16(2)</td><td>public</td><td>実装するメソッドにはpublicが必要</td><td>2・5、テ49頁</td></tr>
+    <tr><td>練習16(3)</td><td>b</td><td>格納した変数_soundを通して呼ぶ</td><td>5、テ79頁</td></tr>
+    <tr><td>練習16(4)</td><td>ドン／ポロン（2行）</td><td>最初はDrum、setterでPianoに入れ替わる</td><td>5</td></tr>
+  </table>
+  <p><strong>答え合わせの目安</strong>：練習1〜16の19問のうち、15問以上正解できれば、再試験の準備はできています。間違えた問題は、読み直したあともう一度解いてください。</p>
+</details>
+
+<p class="note">「テ○頁」はテキスト「Java 抽象クラスとインターフェイス」の頁です。印刷すると、解答のページは自動で開いた状態になります。</p>
+
+<footer>Java基本文法2 再試験 対策資料</footer>
+</div>
+
+<script>
+  // 印刷するときは解答を開いて印刷する
+  window.addEventListener('beforeprint', function () {
+    var box = document.getElementById('answer-box');
+    if (box) box.setAttribute('open', '');
+  });
+</script>
+</body>
+</html>
