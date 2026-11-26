@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaEE入門｜サーブレットを動かそう 学習ガイド</title>
+<style>
+:root{
+  --ink:#1f2933; --sub:#52606d; --line:#d9e2ec; --bg:#f7f9fb; --card:#fff;
+  --navy:#102a43;
+  --client:#2563eb; --client-bg:#e8f0fe;
+  --web:#475569;    --web-bg:#eef1f5;
+  --res:#be123c;    --res-bg:#fde8ee;
+  --biz:#059669;    --biz-bg:#e3f6ef;
+  --req:#2563eb; --req-bg:#e8f0fe;
+  --resp:#ea580c; --resp-bg:#fff1e6;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75}
+header{background:var(--navy);color:#fff;padding:36px 20px 28px}
+header .inner,main{max-width:980px;margin:0 auto}
+header .inner{display:flex;align-items:center;gap:20px;justify-content:space-between}
+header .kicker{font-size:13px;letter-spacing:.15em;opacity:.75}
+header h1{margin:6px 0 8px;font-size:30px;line-height:1.35}
+header p{margin:0;opacity:.85;font-size:15px}
+header .hero{flex:none;width:300px;height:110px}
+nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+nav .inner{max-width:980px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 12px}
+nav a{white-space:nowrap;padding:12px 12px;font-size:14px;color:var(--sub);text-decoration:none;border-bottom:3px solid transparent}
+nav a:hover{color:var(--ink);border-color:#9fb3c8}
+nav a.home{color:var(--navy);font-weight:bold}
+main{padding:12px 20px 60px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 28px 30px;margin:26px 0}
+h2{margin:0 0 4px;font-size:23px;display:flex;align-items:center;gap:10px}
+h2 .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-size:15px;flex:none}
+.lead{color:var(--sub);margin:4px 0 20px}
+h3{font-size:17px;margin:26px 0 10px;padding-left:10px;border-left:4px solid var(--navy);line-height:1.4}
+p{margin:8px 0}
+.point{background:#fffbea;border-left:5px solid #f0b429;padding:12px 16px;border-radius:6px;margin:18px 0;font-size:15px}
+.point b{color:#8d2b0b}
+.caution{background:var(--res-bg);border-left:5px solid var(--res);padding:12px 16px;border-radius:6px;margin:18px 0;font-size:15px}
+.caution b{color:var(--res)}
+.caution.big{border:2px solid var(--res);border-left-width:8px;font-size:16px}
+.caution.big .head{font-size:18px}
+.note{font-size:14px;color:var(--sub);background:#f0f4f8;padding:12px 16px;border-radius:8px;margin:16px 0}
+.note b{color:var(--ink)}
+.point p,.caution p,.note p{margin:6px 0 0}
+.word{background:linear-gradient(transparent 60%,#ffe58a 60%);font-weight:bold}
+
+/* goals */
+.goals{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.goals li{border:1px solid var(--line);border-radius:12px;padding:14px 14px 14px;font-size:14.5px;background:#fbfcfd}
+.goals li .gi{font-size:26px;line-height:1;display:block;margin-bottom:6px}
+.goals li .when{display:block;font-size:12.5px;color:var(--sub);font-weight:bold;margin-bottom:2px}
+
+/* terms */
+dl.terms{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:8px 0;font-size:14.5px}
+dl.terms dt{font-weight:bold}
+dl.terms dd{margin:0;color:var(--sub)}
+
+/* steps */
+ol.steps{margin:8px 0 12px;padding:0;list-style:none;counter-reset:st}
+ol.steps>li{counter-increment:st;position:relative;padding:4px 0 4px 40px;margin:4px 0}
+ol.steps>li::before{content:counter(st);position:absolute;left:0;top:5px;width:26px;height:26px;border-radius:50%;background:var(--web-bg);color:var(--navy);font-weight:bold;font-size:13px;display:grid;place-items:center;border:1.5px solid #9fb3c8}
+
+/* code */
+code{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:#f0f4f8;padding:1px 6px;border-radius:4px;font-size:.92em}
+pre{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:var(--navy);color:#e2e8f0;padding:16px 18px;border-radius:10px;overflow-x:auto;line-height:1.6;font-size:14px;margin:10px 0 14px}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .c-req{color:#93c5fd}
+pre .c-res{color:#fdba74}
+pre .c-dim{color:#8296ab}
+pre .c-key{color:#fde68a}
+pre .c-cmt{color:#86efac}
+pre .c-add{background:rgba(52,211,153,.22);display:block;margin:0 -18px;padding:0 18px}
+pre .c-del{background:rgba(248,113,113,.22);display:block;margin:0 -18px;padding:0 18px;color:#fecaca}
+
+/* tree / diagram */
+.tree{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace;background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:14px 18px;white-space:pre;line-height:1.65;overflow-x:auto;font-size:14px}
+.tree .c{color:var(--sub)}
+.tree .new{color:var(--biz);font-weight:bold}
+.tree .ng{color:var(--res)}
+.tree .rq{color:var(--req);font-weight:bold}
+.tree .rs{color:var(--resp);font-weight:bold}
+.tree .hl{background:#ffe58a;font-weight:bold}
+
+/* tables */
+table{border-collapse:collapse;width:100%;margin:10px 0 16px;font-size:14.5px;background:#fff}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f0f4f8;white-space:nowrap;font-size:14px}
+
+/* flow */
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0 6px}
+.fcard{border-radius:12px;padding:16px 18px;border:2px solid}
+.fcard.req{border-color:var(--req);background:var(--req-bg)}
+.fcard.resp{border-color:var(--resp);background:var(--resp-bg)}
+.fcard .hd{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:16px}
+.fcard.req .hd{color:var(--req)} .fcard.resp .hd{color:var(--resp)}
+.fcard .hd svg{width:110px;height:40px;flex:none}
+.fcard .dirtx{font-size:12.5px;color:var(--sub);margin:2px 0 10px}
+
+.part{display:flex;gap:10px;align-items:baseline;margin:14px 0 6px}
+.part .tag{flex:none;font-size:13px;font-weight:bold;padding:2px 10px;border-radius:999px}
+.part .tag.req{background:var(--req-bg);color:var(--req)}
+.part .tag.resp{background:var(--resp-bg);color:var(--resp)}
+.part .tag.biz{background:var(--biz-bg);color:var(--biz)}
+
+/* quiz */
+.q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.q .qt{font-weight:bold}
+.q details{margin-top:8px}
+.q summary{display:inline-block;cursor:pointer;font-size:13.5px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--sub);list-style:none}
+.q summary::-webkit-details-marker{display:none}
+.q details[open] summary{background:var(--biz-bg);border-color:var(--biz);color:var(--biz);font-weight:bold}
+.q .ans{margin-top:8px;font-size:14.5px;background:#f6fbf9;border-left:4px solid var(--biz);padding:8px 12px;border-radius:6px}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.check label{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;transition:.15s}
+.check input{width:20px;height:20px;margin-top:3px;accent-color:var(--biz);flex:none}
+.check label:has(input:checked){background:var(--biz-bg);border-color:var(--biz)}
+.check label:has(input:checked) span{color:var(--sub)}
+.progress{font-size:13px;color:var(--sub);margin:10px 0 0;text-align:right}
+.stephd{font-weight:bold;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.stephd .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--web-bg);color:var(--navy);font-size:13px;border:1.5px solid #9fb3c8}
+
+.illust{background:#fbfcfd;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px}
+.illust svg{display:block;width:100%;height:auto;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif}
+.illust svg .mono{font-family:Consolas,"BIZ UDゴシック","MS Gothic",monospace}
+.q ol.ch{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:6px}
+.q ol.ch li{counter-increment:ch}
+.q ol.ch{counter-reset:ch}
+.q ol.ch button{width:100%;text-align:left;font:inherit;font-size:14.5px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.q ol.ch button::before{content:counter(ch);flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--web-bg);color:var(--navy);font-weight:bold;font-size:12.5px;margin-top:1px}
+.q ol.ch button:hover{border-color:#9fb3c8}
+.q ol.ch button:disabled{cursor:default}
+.q ol.ch button.ok{background:var(--biz-bg);border-color:var(--biz)}
+.q ol.ch button.ok::before{content:"✓";background:var(--biz);color:#fff}
+.q ol.ch button.ng{background:var(--res-bg);border-color:var(--res)}
+.q ol.ch button.ng::before{content:"✕";background:var(--res);color:#fff}
+.q .ans{display:none}
+.q.done .ans{display:block}
+.q .res{font-weight:bold;margin-right:6px}
+.q .retry{font-size:12.5px;margin-top:8px;background:none;border:none;color:var(--sub);text-decoration:underline;cursor:pointer;padding:0}
+.score{font-size:14px;color:var(--sub);text-align:right;margin-top:12px}
+@media print{.q .ans{display:block}.q .retry,.score{display:none}}
+footer{text-align:center;font-size:12px;color:var(--sub);padding:0 0 30px}
+
+@media (max-width:760px){
+  header .hero{display:none}
+  .goals,.flow{grid-template-columns:1fr}
+  section{padding:20px 16px}
+  .fcard .hd svg{display:none}
+  dl.terms{grid-template-columns:1fr}
+}
+@media print{
+  nav{display:none}
+  body{background:#fff}
+  section{break-inside:avoid;border-color:#ccc}
+  pre,table,.point,.caution,.note,.q,.tree{break-inside:avoid}
+  .q details>summary{display:none}
+  .q details>.ans{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== イラスト部品 ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pc" viewBox="0 0 120 100">
+      <rect x="10" y="6" width="100" height="66" rx="8" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="19" y="14" width="82" height="50" rx="4" fill="currentColor"/>
+      <path d="M25 20 L56 20 L30 56 L25 56 Z" fill="#fff" opacity=".25"/>
+      <rect x="22" y="22" width="40" height="6" rx="3" fill="#fff" opacity=".7"/>
+      <rect x="22" y="33" width="56" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="22" y="41" width="48" height="4" rx="2" fill="#fff" opacity=".45"/>
+      <rect x="50" y="72" width="20" height="12" fill="#b7c3d0" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="28" y="84" width="64" height="9" rx="4.5" fill="#dfe6ee" stroke="#243b53" stroke-width="3.5"/>
+    </symbol>
+    <symbol id="i-server" viewBox="0 0 100 120">
+      <rect x="18" y="6" width="64" height="108" rx="10" fill="#eef2f7" stroke="#243b53" stroke-width="3.5"/>
+      <path d="M18 26 V16 a10 10 0 0 1 10 -10 h44 a10 10 0 0 1 10 10 V26 Z" fill="currentColor" stroke="#243b53" stroke-width="3.5"/>
+      <rect x="29" y="36" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="51" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <rect x="29" y="66" width="42" height="9" rx="3" fill="#c5d0dc" stroke="#243b53" stroke-width="2"/>
+      <circle cx="34" cy="90" r="4.5" fill="#3ebd93" stroke="#243b53" stroke-width="2"/>
+      <circle cx="48" cy="90" r="4.5" fill="currentColor" stroke="#243b53" stroke-width="2"/>
+      <path d="M30 103 h40" stroke="#9aa5b1" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header><div class="inner">
+  <div>
+    <div class="kicker">JavaEE入門｜補助資料</div>
+    <h1>サーブレットを動かそう</h1>
+    <p>まずは MyName を動かし、次に「入力した名前を受け取って表示する」形に書き換えよう</p>
+  </div>
+  <svg class="hero" viewBox="0 0 300 110" aria-hidden="true">
+    <use href="#i-pc" x="0" y="18" width="88" height="74" color="#60a5fa"/>
+    <path d="M96 40 h104" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/>
+    <path d="M192 32 l12 8 l-12 8" fill="none" stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="148" y="30" text-anchor="middle" font-size="12" font-weight="bold" fill="#93c5fd">txt=山田</text>
+    <path d="M200 72 h-104" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M104 64 l-12 8 l12 8" fill="none" stroke="#fb923c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="148" y="94" text-anchor="middle" font-size="12" font-weight="bold" fill="#fdba74">なまえは、山田です。</text>
+    <use href="#i-server" x="212" y="6" width="80" height="96" color="#94a3b8"/>
+  </svg>
+</div></header>
+
+<nav><div class="inner">
+  <a href="index.html" class="home">← 一覧</a>
+  <a href="#s1">1. ファイル構成</a>
+  <a href="#s2">2. MyName を動かす</a>
+  <a href="#s3">3. 受け取りの仕組み・GET/POST</a>
+  <a href="#s4">4. 書き換える</a>
+  <a href="#s5">5. 困ったとき</a>
+  <a href="#s6">6. 課題</a>
+  <a href="#s7">7. 確認問題</a>
+</div></nav>
+
+<main>
+
+<!-- ================= ゴール ================= -->
+<section id="s0">
+  <h2><span class="no">★</span>この授業のゴール</h2>
+  <p class="lead">テキスト p.23〜45「Tomcat の設定とサーブレットの実行」を、2コマ連続で学びます。</p>
+  <ul class="goals">
+    <li><span class="gi">📖</span><span class="when">1コマ目（講義）</span>Tomcat とサーブレットの仕組み、<b>どのファイルをどこに置くか</b>を説明できる</li>
+    <li><span class="gi">⌨️</span><span class="when">2コマ目（実習）</span>p.25 の <b>MyName を動かし</b>、それを<b>入力した名前を表示する形</b>に書き換えられる</li>
+    <li><span class="gi">📝</span><span class="when">課題</span>p.33〜45 の <b>ShareServlet</b> を作り、複数のブラウザで動作を確認できる</li>
+  </ul>
+
+  <h3>実習は 2 ステップで進めます</h3>
+<div class="tree"> <span class="new">STEP 1（2章）</span>  p.25 の MyName をそのまま動かす
+                 → 「My Name is Fujita」と表示される
+        │
+        ▼
+ <span class="new">STEP 2（4章）</span>  同じ MyName.java を直接書き換える
+                 → 入力した名前が「なまえは、○○です。」と表示される</div>
+
+  <h3>最初に覚えたい言葉</h3>
+  <dl class="terms">
+    <dt>Tomcat（トムキャット）</dt><dd>サーブレットを動かすためのソフト。役割としては<b>アプリケーションサーバ</b>（プログラムを実行して結果を返すサーバ）にあたる</dd>
+    <dt>J2EE コンテナ</dt><dd>Tomcat の中にある、サーブレットの実行環境。サーブレットを<b>インスタンス化</b>し、doGet などの<b>メソッドを呼び出す</b>係</dd>
+    <dt>サーブレット</dt><dd>Web サーバ上で動き、HTML を作ってブラウザに返す Java プログラム。J2EE の Web アプリケーションの<b>最も基本的な構成要素</b></dd>
+    <dt>Request／Response</dt><dd>ブラウザ → サーバへの「お願い」／サーバ → ブラウザへの「返事」</dd>
+    <dt>パラメータ</dt><dd>フォームに入力され、Request に入れてサーバへ送られる値（例：名前）</dd>
+    <dt>ポート番号</dt><dd>サーバの中で動いているソフトを区別する番号。Tomcat は <b>8080</b>（Web サーバの標準は 80）なので、URL に <code>:8080</code> を書く</dd>
+    <dt>デプロイメントディスクリプタ</dt><dd>Web アプリの構成（どのサーブレットをどの URL で動かすか）を書く設定ファイル。実際のファイル名は <b>web.xml</b></dd>
+  </dl>
+</section>
+
+<!-- ================= 1 ================= -->
+<section id="s1">
+  <h2><span class="no">1</span>ファイル構成：どこに何を置く？</h2>
+  <p class="lead">サーブレットは「置く場所」が決まっています。テキスト p.29 と同じ構成です。</p>
+
+  <h3>1-1. 全体の配置図</h3>
+<div class="tree">C:\tomcat10                    <span class="c">← Tomcat 本体（インストール済み）</span>
+ ├ bin
+ │  ├ startup.bat            <span class="c">← Tomcat を起動する</span>
+ │  └ shutdown.bat           <span class="c">← Tomcat を停止する</span>
+ ├ lib
+ │  └ <span class="hl">servlet-api.jar</span>        <span class="c">← ★ コンパイルのときに使う jar ファイル</span>
+ └ webapps                   <span class="c">← Tomcat の中にある webapps フォルダ</span>
+     └ <span class="new">myapps</span>                <span class="c">← URL の /myapps/ にあたる</span>
+         └ <span class="new">WEB-INF</span>           <span class="c">← すべて大文字・ハイフン</span>
+             ├ <span class="new">web.xml</span>       <span class="c">← サーブレットの登録ファイル</span>
+             └ <span class="new">classes</span>
+                 ├ <span class="new">MyName.java</span>   <span class="c">← ソース（ここでコンパイル）</span>
+                 └ <span class="new">MyName.class</span>  <span class="c">← コンパイルするとできる</span></div>
+  <p style="font-size:13.5px;color:var(--sub)">緑の文字＝自分で作るフォルダ・ファイル</p>
+
+  <div class="caution">⚠️ <b>注意：フォルダ名は正確に</b>
+    <p><code>myapps</code> は必ず <code>C:\tomcat10\webapps</code> の<b>中</b>に作ります。<code>WEB-INF</code> は<b>すべて大文字</b>で、間は<b>ハイフン（-）</b>です。アンダーバー（_）にしないよう気をつけましょう。</p>
+  </div>
+
+  <h3>1-2. 「何をどこに置くか」早見表</h3>
+  <table>
+    <tr><th>ファイル</th><th>置き場所</th><th>役割</th></tr>
+    <tr><td><code>servlet-api.jar</code></td><td><code>C:\tomcat10\lib</code></td><td>サーブレット用の部品集（最初から入っている）</td></tr>
+    <tr><td><code>web.xml</code></td><td><code>C:\tomcat10\webapps\myapps\WEB-INF</code></td><td>「この URL ならこのサーブレット」という対応表</td></tr>
+    <tr><td><code>MyName.java</code> / <code>.class</code></td><td><code>C:\tomcat10\webapps\myapps\WEB-INF\classes</code></td><td>サーブレット本体</td></tr>
+  </table>
+
+  <div class="note">📝 <b>jar（ジャー）ファイルとは</b>
+    <p>たくさんの class ファイルを 1 つにまとめたファイルです（zip のようなもの）。<code>servlet-api.jar</code> には <code>HttpServlet</code> などサーブレット用のクラスが入っています。</p>
+  </div>
+
+  <div class="point">💡 <b>ここがポイント：フォルダと URL の対応</b>
+    <p><code>webapps</code> より後ろのフォルダ名がそのまま URL になります。<code>myapps</code> フォルダのサーブレットは、web.xml に登録した名前で <code>http://localhost:8080/myapps/MyName</code> になります。</p>
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="s2">
+  <h2><span class="no">2</span>STEP 1：まずは MyName を動かそう</h2>
+  <p class="lead">テキスト p.25〜30 のとおりに作ります。ここで動かないと STEP 2 に進めないので、1つずつ確実に。</p>
+
+  <h3>2-1. MyName.java（テキスト p.25）</h3>
+  <p><code>C:\tomcat10\webapps\myapps\WEB-INF\classes</code> に、VS Code で <code>MyName.java</code> を作ります。</p>
+<pre><code>import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
+public class MyName extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        out.println("&lt;html&gt;");
+        out.println("&lt;head&gt;");
+        out.println("&lt;title&gt;My Name is Fujita&lt;/title&gt;");
+        out.println("&lt;/head&gt;");
+        out.println("&lt;body&gt;");
+        out.println("&lt;h1&gt;My Name is Fujita&lt;/h1&gt;");
+        out.println("&lt;/body&gt;");
+        out.println("&lt;/html&gt;");
+    }
+}</code></pre>
+
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>import java.io.*;</code></td><td>出力に使う <code>PrintWriter</code> や <code>IOException</code> を使えるようにする</td></tr>
+    <tr><td><code>import jakarta.servlet.*;</code><br><code>import jakarta.servlet.http.*;</code></td><td>サーブレット用のクラスを使えるようにする。Tomcat 10 では <b><code>jakarta</code></b>（古い資料にある <code>javax</code> ではない）</td></tr>
+    <tr><td><code>extends HttpServlet</code></td><td>HttpServlet クラスを<b>継承</b>（機能を受け継ぐこと）して、サーブレットにする</td></tr>
+    <tr><td><code>doGet(request, response)</code></td><td>ブラウザから <b>GET の Request</b> が来たときに、Tomcat が自動で呼ぶメソッド。<code>request</code> は届いた情報、<code>response</code> は返す情報</td></tr>
+    <tr><td><code>response.setContentType("text/html");</code></td><td>「返すのは HTML です」とブラウザに伝える。<code>text/html</code> は HTML を表す <b>MIME タイプ</b>（データの種類を表す決まった書き方）。<code>"text/html; charset=UTF-8"</code> のように文字コードも一緒に書ける</td></tr>
+    <tr><td><code>PrintWriter out = response.getWriter();</code></td><td>ブラウザへ文字を書き出すための「ペン」を用意する</td></tr>
+    <tr><td><code>out.println(...)</code></td><td>HTML を 1 行ずつブラウザへ書き出す</td></tr>
+  </table>
+
+  <h3>2-2. web.xml（テキスト p.29〜30）</h3>
+  <p><code>C:\tomcat10\webapps\myapps\WEB-INF</code> に <code>web.xml</code> を作ります。</p>
+<pre><code>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+  http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1"
+  metadata-complete="true"&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;<span class="c-key">myname</span>&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;<span class="c-res">MyName</span>&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;<span class="c-key">myname</span>&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;<span class="c-req">/MyName</span>&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+
+<div class="tree"> URL の <span class="rq">/myapps/MyName</span>
+        │ <span class="c">一致させる</span>
+        ▼
+ &lt;url-pattern&gt;<span class="rq">/MyName</span> ── &lt;servlet-name&gt;<span class="hl">myname</span>   <span class="c">← 同じ名前でつなぐ</span>
+                                      │
+ &lt;servlet-class&gt;<span class="rs">MyName</span> ─ &lt;servlet-name&gt;<span class="hl">myname</span>
+        │ <span class="c">クラス名と一致させる</span>
+        ▼
+ classes フォルダの <span class="rs">MyName.class</span></div>
+
+  <h3>2-3. コンパイル → 起動 → 確認</h3>
+  <div class="stephd"><span class="n">1</span>ファイルを配置する</div>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><code>C:\tomcat10\webapps</code> の中に <code>myapps\WEB-INF\classes</code> まで作成した</span></label></li>
+    <li><label><input type="checkbox"><span><code>MyName.java</code> を <code>classes</code> に、<code>web.xml</code> を <code>WEB-INF</code> に保存した</span></label></li>
+  </ul>
+
+  <div class="stephd"><span class="n">2</span>コンパイルする（コマンドプロンプト）</div>
+<pre><code>cd C:\tomcat10\webapps\myapps\WEB-INF\classes
+javac -cp ".;c:\tomcat10\lib\servlet-api.jar" MyName.java</code></pre>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>エラーが出ずに、<code>MyName.class</code> ができた</span></label></li>
+  </ul>
+
+  <h3>コンパイルのコマンドを読み解こう</h3>
+<pre><code><span class="c-key">javac</span> <span class="c-req">-cp</span> <span class="c-res">"</span><span class="c-cmt">.</span><span class="c-res">;</span><span class="c-cmt">c:\tomcat10\lib\servlet-api.jar</span><span class="c-res">"</span> <span class="c-key">MyName.java</span></code></pre>
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>javac</code></td><td>Java のソース（.java）をコンパイルして、class ファイル（.class）を作るコマンド</td></tr>
+    <tr><td><code>-cp</code></td><td><b>クラスパス</b>（class path）を指定するオプション。クラスパスとは、「コンパイルに必要なクラスを<b>どこから探すか</b>」という場所のリストです。<code>-classpath</code> を短くした書き方で、意味は同じです</td></tr>
+    <tr><td><code>"…"</code></td><td>ダブルクォーテーションで囲んで、ここまでが<b>1 つのクラスパスの指定</b>だと示す。パスに空白が入っていても正しく読ませることができる</td></tr>
+    <tr><td><code>.</code>（ドット）</td><td><b>今いるフォルダ</b>（カレントフォルダ）のこと。今回は <code>classes</code> フォルダ。自分で作ったクラスもここから探せるようにする</td></tr>
+    <tr><td><code>;</code>（セミコロン）</td><td>複数の場所を<b>区切る</b>記号（Windows の場合）。「<code>.</code> と <code>servlet-api.jar</code> の両方から探してね」という意味になる</td></tr>
+    <tr><td><code>c:\tomcat10\lib\servlet-api.jar</code></td><td><code>HttpServlet</code> などサーブレット用のクラスが入った jar ファイル。これがないと <code>jakarta.servlet</code> が見つからずエラーになる</td></tr>
+    <tr><td><code>MyName.java</code></td><td>コンパイルするソースファイル。<b>大文字・小文字もクラス名と同じ</b>に書く</td></tr>
+  </table>
+
+  <div class="point">💡 <b>なぜ「.」を入れるの？</b>
+    <p><code>-cp</code> を書くと、Java は<b>指定した場所だけ</b>を探すようになり、今いるフォルダを探さなくなります。そこで <code>.</code> を入れて、「今いるフォルダも探して」と伝えています。今回の MyName だけなら無くても動きますが、自分で作った<b>複数のクラスを組み合わせる</b>ときに必要になるので、いつも付けておく習慣にしましょう。</p>
+  </div>
+
+  <div class="note">📝 <b>テキストとの違い</b>
+    <p>テキスト p.29 は <code>javac -classpath c:\tomcat8\lib\servlet-api.jar MyName.java</code> です。この授業では、フォルダを <b><code>c:\tomcat10\lib</code></b> に読み替え、<code>-classpath</code> を <code>-cp</code> に、クラスパスに <code>.;</code> を加えた形で書きます。</p>
+  </div>
+
+  <div class="stephd"><span class="n">3</span>Tomcat を起動する</div>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><code>C:\tomcat10\bin\startup.bat</code> を実行し、開いた黒い画面は閉じずにおいた</span></label></li>
+  </ul>
+
+  <div class="stephd"><span class="n">4</span>ブラウザで確認する</div>
+<pre><code>http://localhost:8080/myapps/MyName</code></pre>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>「My Name is Fujita」と表示された</span></label></li>
+  </ul>
+  <p class="progress" data-for="s2"></p>
+
+  <div class="point">💡 <b>ここまでできたら STEP 2 へ</b>
+    <p>表示されない場合は、<a href="#s5">5. うまくいかないときは</a> を見て直してから進みましょう。</p>
+  </div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="s3">
+  <h2><span class="no">3</span>入力した名前を受け取る仕組み</h2>
+  <p class="lead">MyName は、いつ誰が開いても同じ文字しか表示しません。入力した名前を表示するには、<b>「入力する画面」</b>と<b>「受け取る処理」</b>が必要です。</p>
+
+  <div class="flow">
+    <div class="fcard req">
+      <div class="hd"><svg viewBox="0 0 220 80" aria-hidden="true"><use href="#i-pc" x="0" y="8" width="76" height="64" color="#3b82f6"/><path d="M84 40 h50" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/><path d="M128 31 l12 9 l-12 9" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-server" x="150" y="2" width="64" height="76" color="#64748b"/></svg>Request</div>
+      <div class="dirtx">ブラウザ → Tomcat</div>
+      <p style="margin:0;font-size:14.5px">フォームの入力値が <code>txt=山田</code> の形で送られる</p>
+    </div>
+    <div class="fcard resp">
+      <div class="hd"><svg viewBox="0 0 220 80" aria-hidden="true"><use href="#i-pc" x="0" y="8" width="76" height="64" color="#3b82f6"/><path d="M138 40 h-50" stroke="#ea580c" stroke-width="5" stroke-linecap="round"/><path d="M94 31 l-12 9 l12 9" fill="none" stroke="#ea580c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-server" x="150" y="2" width="64" height="76" color="#64748b"/></svg>Response</div>
+      <div class="dirtx">Tomcat → ブラウザ</div>
+      <p style="margin:0;font-size:14.5px">サーブレットが名前入りの HTML を作って返す</p>
+    </div>
+  </div>
+
+  <h3>3-1. データの流れ</h3>
+<div class="illust">
+<svg viewBox="0 0 960 400" role="img" aria-label="ブラウザからTomcatのサーブレットに名前が送られ、結果のHTMLが返ってくる流れ">
+  <defs>
+    <marker id="ah-req" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker>
+    <marker id="ah-resp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#ea580c"/></marker>
+    <marker id="ah-navy" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#102a43"/></marker>
+  </defs>
+
+  <!-- ===== ① 入力のブラウザ ===== -->
+  <text x="10" y="22" font-size="14" font-weight="bold" fill="#2563eb">① ブラウザ（input.html）</text>
+  <rect x="10" y="32" width="230" height="140" rx="10" fill="#fff" stroke="#243b53" stroke-width="2.5"/>
+  <path d="M10 42 a10 10 0 0 1 10 -10 h210 a10 10 0 0 1 10 10 v14 h-230 z" fill="#dfe6ee"/>
+  <circle cx="24" cy="44" r="4" fill="#f87171"/><circle cx="36" cy="44" r="4" fill="#fbbf24"/><circle cx="48" cy="44" r="4" fill="#34d399"/>
+  <rect x="58" y="37" width="172" height="14" rx="7" fill="#fff"/>
+  <text x="66" y="48" font-size="9.5" fill="#52606d" class="mono">localhost:8080/myapps/input.html</text>
+  <text x="24" y="84" font-size="14" font-weight="bold" fill="#1f2933">あなたのお名前は？</text>
+  <text x="24" y="116" font-size="13" fill="#1f2933">名前：</text>
+  <rect x="66" y="100" width="110" height="24" rx="4" fill="#fff" stroke="#9fb3c8" stroke-width="1.5"/>
+  <text x="74" y="117" font-size="13" fill="#1f2933">山田</text>
+  <rect x="24" y="134" width="52" height="26" rx="5" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="50" y="152" font-size="12.5" text-anchor="middle" fill="#2563eb" font-weight="bold">送信</text>
+  <path d="M90 155 l8 -8 l3 9 z" fill="#102a43"/>
+
+  <!-- ===== ⑦ 結果のブラウザ ===== -->
+  <text x="10" y="250" font-size="14" font-weight="bold" fill="#ea580c">⑦ ブラウザに結果を表示</text>
+  <rect x="10" y="260" width="230" height="120" rx="10" fill="#fff" stroke="#243b53" stroke-width="2.5"/>
+  <path d="M10 270 a10 10 0 0 1 10 -10 h210 a10 10 0 0 1 10 10 v14 h-230 z" fill="#dfe6ee"/>
+  <circle cx="24" cy="272" r="4" fill="#f87171"/><circle cx="36" cy="272" r="4" fill="#fbbf24"/><circle cx="48" cy="272" r="4" fill="#34d399"/>
+  <rect x="58" y="265" width="172" height="14" rx="7" fill="#fff"/>
+  <text x="66" y="276" font-size="9.5" fill="#52606d" class="mono">…/myapps/MyName?txt=山田</text>
+  <text x="125" y="335" font-size="16" font-weight="bold" text-anchor="middle" fill="#1f2933">なまえは、山田です。</text>
+
+  <!-- ===== Tomcat ===== -->
+  <rect x="380" y="20" width="570" height="370" rx="16" fill="#eef1f5" stroke="#475569" stroke-width="2" stroke-dasharray="7 5"/>
+  <use href="#i-server" x="890" y="28" width="46" height="56" color="#94a3b8"/>
+  <text x="400" y="48" font-size="15" font-weight="bold" fill="#102a43">Tomcat（ポート 8080）</text>
+
+  <!-- ② Request 矢印 -->
+  <path d="M242 90 H485 V122" fill="none" stroke="#2563eb" stroke-width="4" marker-end="url(#ah-req)"/>
+  <text x="310" y="76" font-size="13" font-weight="bold" text-anchor="middle" fill="#2563eb">② Request（GET）</text>
+  <rect x="254" y="98" width="112" height="22" rx="11" fill="#e8f0fe"/>
+  <text x="310" y="114" font-size="12.5" font-weight="bold" text-anchor="middle" fill="#2563eb" class="mono">?txt=山田</text>
+
+  <!-- ③ web.xml -->
+  <path d="M415 130 h120 l22 22 v118 h-142 z" fill="#fff" stroke="#243b53" stroke-width="2"/>
+  <path d="M535 130 v22 h22" fill="#dfe6ee" stroke="#243b53" stroke-width="2"/>
+  <text x="425" y="152" font-size="13" font-weight="bold" fill="#102a43">③ web.xml</text>
+  <text x="425" y="172" font-size="11" fill="#52606d">を見て探す</text>
+  <rect x="425" y="186" width="120" height="24" rx="5" fill="#e8f0fe"/>
+  <text x="485" y="203" font-size="12.5" text-anchor="middle" fill="#2563eb" class="mono">/MyName</text>
+  <text x="485" y="226" font-size="14" text-anchor="middle" fill="#52606d">↓</text>
+  <rect x="425" y="234" width="120" height="24" rx="5" fill="#e3f6ef"/>
+  <text x="485" y="251" font-size="12" text-anchor="middle" fill="#059669" class="mono">MyName クラス</text>
+
+  <!-- ④ 呼び出し -->
+  <path d="M560 200 H618" fill="none" stroke="#102a43" stroke-width="3" marker-end="url(#ah-navy)"/>
+  <text x="590" y="188" font-size="12" font-weight="bold" text-anchor="middle" fill="#102a43">④ doGet()</text>
+  <text x="590" y="222" font-size="11" text-anchor="middle" fill="#52606d">を呼ぶ</text>
+
+  <!-- ⑤ サーブレット -->
+  <rect x="625" y="100" width="305" height="200" rx="12" fill="#fff" stroke="#059669" stroke-width="2.5"/>
+  <path d="M625 112 a12 12 0 0 1 12 -12 h281 a12 12 0 0 1 12 12 v20 h-305 z" fill="#e3f6ef"/>
+  <text x="640" y="125" font-size="13.5" font-weight="bold" fill="#059669">⑤ サーブレット（MyName）</text>
+  <text x="640" y="158" font-size="12" fill="#1f2933" class="mono">String n =</text>
+  <text x="652" y="178" font-size="12" fill="#1f2933" class="mono">request.getParameter("<tspan fill="#ea580c" font-weight="bold">txt</tspan>");</text>
+  <rect x="640" y="188" width="170" height="22" rx="11" fill="#fff1e6"/>
+  <text x="652" y="204" font-size="12" fill="#ea580c" font-weight="bold">→ n に "山田" が入る</text>
+  <text x="640" y="236" font-size="12" fill="#1f2933" class="mono">out.println(</text>
+  <text x="652" y="256" font-size="12" fill="#1f2933" class="mono">"なまえは、" + n + "です。");</text>
+  <text x="640" y="284" font-size="11.5" fill="#52606d">→ HTML を作る</text>
+
+  <!-- ⑥ Response 矢印 -->
+  <path d="M777 302 V345 H244" fill="none" stroke="#ea580c" stroke-width="4" marker-end="url(#ah-resp)"/>
+  <text x="510" y="336" font-size="13" font-weight="bold" text-anchor="middle" fill="#ea580c">⑥ Response（できあがった HTML）</text>
+</svg>
+</div>
+  <p>文字で書くと、次のようになります。</p>
+<div class="tree"> <span class="rq">① ブラウザ（input.html）</span>
+     名前：[ 山田 ]  [送信]
+        │
+        │ <span class="rq">② 送信ボタンで Request（GET）</span>
+        │    http://localhost:8080/myapps/MyName?<span class="hl">txt=山田</span>&amp;send=送信
+        ▼
+ <b>③ Tomcat（ポート 8080）</b>
+     web.xml を見て「/MyName → MyName クラス」と判断
+        │
+        │ ④ doGet() を呼び出す
+        ▼
+ <span class="new">⑤ サーブレット（MyName）</span>
+     n = request.getParameter("<span class="hl">txt</span>");   <span class="c">→ n には "山田" が入る</span>
+     out.println(...) で HTML を作る
+        │
+        │ <span class="rs">⑥ Response（できあがった HTML）</span>
+        ▼
+ <span class="rs">⑦ ブラウザに結果を表示</span>
+     なまえは、山田です。</div>
+
+  <h3>3-2. name 属性と getParameter の対応</h3>
+<div class="tree">  <span class="c">HTML 側（input.html）</span>                      <span class="c">Java 側（MyName.java）</span>
+  &lt;input type="text" name="<span class="hl">txt</span>"&gt;   ───→   request.getParameter("<span class="hl">txt</span>")
+                            <span class="c">└──── 同じ名前にする ────┘</span></div>
+
+  <ul>
+    <li>フォームの部品には <code>name</code> 属性で<b>名前</b>が付いています。送信すると「<code>txt=山田</code>」のように <b>名前=値</b> の組で届きます。</li>
+    <li>サーブレットは <code>getParameter("txt")</code> と<b>同じ名前</b>を指定して、値を取り出します。</li>
+  </ul>
+
+  <div class="caution">⚠️ <b>注意：名前が 1 文字でも違うと受け取れない</b>
+    <p>たとえば HTML が <code>name="txt"</code> なのに Java で <code>getParameter("text")</code> と書くと、値は取れずに <code>null</code>（何もない）になります。画面には「なまえは、nullです。」と表示されます。</p>
+  </div>
+
+  <h3>3-3. doGet と doPost の違い（GET と POST）</h3>
+  <p>フォームの <code>method</code> 属性によって、サーブレットのどちらのメソッドが呼ばれるかが決まります（テキスト p.31）。</p>
+<div class="tree"> &lt;form method="<span class="rq">get</span>" …&gt;   ───→   サーブレットの <span class="rq">doGet</span> が呼ばれる
+ &lt;form method="<span class="rs">post</span>" …&gt;  ───→   サーブレットの <span class="rs">doPost</span> が呼ばれる
+ URL を直接入力・リンクをクリック  ───→   いつも <span class="rq">doGet</span> が呼ばれる</div>
+
+  <p>いちばん大きな違いは、<b>入力したデータを Request のどこに入れて送るか</b>です。</p>
+
+  <div class="flow">
+    <div class="fcard req">
+      <div class="hd">GET → doGet</div>
+      <div class="dirtx">データを <b>URL（リクエスト行）</b> にくっつけて送る</div>
+<pre style="margin:0;font-size:12.5px"><code><span class="c-req">GET /myapps/MyName?<span class="c-key">txt=山田&amp;send=送信</span> HTTP/1.1</span>
+<span class="c-req">Host: localhost:8080</span>
+<span class="c-dim">（空行）</span>
+<span class="c-dim">（メッセージボディなし）</span></code></pre>
+    </div>
+    <div class="fcard resp">
+      <div class="hd">POST → doPost</div>
+      <div class="dirtx">データを <b>メッセージボディ</b> に入れて送る</div>
+<pre style="margin:0;font-size:12.5px"><code><span class="c-res">POST /myapps/share HTTP/1.1</span>
+<span class="c-res">Host: localhost:8080</span>
+<span class="c-res">Content-Type: application/x-www-form-urlencoded</span>
+<span class="c-dim">（空行）</span>
+<span class="c-key">txt=山田&amp;chk=1&amp;chk=2&amp;send=送信</span></code></pre>
+    </div>
+  </div>
+  <p style="font-size:13.5px;color:var(--sub)">※ 実際の送信では、日本語は <code>%E5%B1%B1…</code> のような記号に変換されて送られます。</p>
+
+  <table>
+    <tr><th></th><th>GET（doGet）</th><th>POST（doPost）</th></tr>
+    <tr><td>データの入れ場所</td><td>URL の後ろ（<code>?txt=山田</code>）</td><td>メッセージボディ</td></tr>
+    <tr><td>アドレス欄に見えるか</td><td>見える</td><td>見えない</td></tr>
+    <tr><td>送れるデータの量</td><td>少なめ（URL の長さに限りがある）</td><td>多くても大丈夫</td></tr>
+    <tr><td>ブックマーク・URL の共有</td><td>入力内容ごとできる</td><td>できない</td></tr>
+    <tr><td>主な使いみち</td><td>検索、ページの表示など「<b>データをもらう</b>」とき</td><td>登録、ログイン、書き込みなど「<b>データを送って処理してもらう</b>」とき</td></tr>
+    <tr><td>この授業での例</td><td>MyName（STEP 2）</td><td>ShareServlet（課題）</td></tr>
+  </table>
+
+  <div class="caution">⚠️ <b>注意：method と メソッドの組み合わせを間違えると動かない</b>
+    <p><code>method="post"</code> のフォームから送信したのに、サーブレットに <code>doGet</code> しか書いていないと、<b>405 エラー</b>（その方法では受け付けていません）になります。逆も同じです。</p>
+    <p>パスワードなど人に見られたくない値は、アドレス欄に表示されない <b>POST</b> で送ります（ただし POST でも暗号化されるわけではありません）。</p>
+  </div>
+
+  <div class="point">💡 <b>課題の ShareServlet では両方を使います</b>
+    <p>フォーム（<code>method="post"</code>）から送ると <b>doPost</b> が動いて氏名を保存し、別のブラウザで URL を直接開くと <b>doGet</b> が動いて保存された氏名を表示します。<span class="word">同じサーブレットでも、どうアクセスしたかで呼ばれるメソッドが変わる</span>ことを確かめましょう。</p>
+  </div>
+
+  <div class="note">📝 <b>setCharacterEncoding と POST</b>
+    <p><code>request.setCharacterEncoding("UTF-8")</code> は、主に <b>POST のメッセージボディ</b>の文字コードを指定するものです。課題の ShareServlet でも、doPost の最初に書かれています（テキスト p.36）。GET の URL に付いた文字は、Tomcat 10 では最初から UTF-8 として読まれます。</p>
+  </div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="s4">
+  <h2><span class="no">4</span>STEP 2：MyName を書き換えよう</h2>
+  <p class="lead">STEP 1 で動いた <code>MyName.java</code> を<b>直接書き換えます</b>。ファイル名もクラス名も <code>MyName</code> のまま、web.xml も<b>そのまま</b>です。やることは「Java を書き換える」と「HTML を作る」の 2 つだけです。</p>
+
+  <h3>4-1. STEP 2 のファイル構成</h3>
+<div class="tree">C:\tomcat10
+ └ webapps
+     └ myapps
+         ├ <span class="rs">input.html</span>        <span class="c">← ★ 新しく作る（名前の入力フォーム）</span>
+         └ WEB-INF
+             ├ web.xml       <span class="c">← STEP 1 のまま（変更なし）</span>
+             └ classes
+                 ├ <span class="rs">MyName.java</span>   <span class="c">← ★ 直接書き換えて上書き保存</span>
+                 └ MyName.class  <span class="c">← コンパイルし直すと新しくなる</span></div>
+  <p style="font-size:13.5px;color:var(--sub)">オレンジの文字＝STEP 2 で作業するファイル</p>
+
+  <table>
+    <tr><th>ファイル</th><th>置き場所</th><th>STEP 2 ですること</th></tr>
+    <tr><td><code>MyName.java</code></td><td><code>C:\tomcat10\webapps\myapps\WEB-INF\classes</code></td><td>書き換えて上書き保存（4-2）</td></tr>
+    <tr><td><code>input.html</code></td><td><code>C:\tomcat10\webapps\myapps</code></td><td>新しく作る（4-4）</td></tr>
+    <tr><td><code>web.xml</code></td><td><code>C:\tomcat10\webapps\myapps\WEB-INF</code></td><td>何もしない</td></tr>
+  </table>
+
+  <div class="caution">⚠️ <b>注意：input.html は WEB-INF の「外」に置く</b>
+    <p><code>input.html</code> は <code>myapps</code> フォルダの直下に置きます。<code>WEB-INF</code> の中に置くと、ブラウザから開けません（404 になります）。</p>
+  </div>
+
+  <div class="note">📝 <b>なぜ WEB-INF の中は開けないの？</b>
+    <p><code>WEB-INF</code> は「<b>外から見せない</b>」ための特別なフォルダです。サーブレットの決まりで、Tomcat は <code>WEB-INF</code> の中のファイルを<b>ブラウザに直接渡さない</b>ようになっています。</p>
+    <p>理由は、ここに <b>web.xml（アプリの設定）</b> や <b>classes（プログラム本体）</b> が入っているからです。もし直接開けたら、<code>http://localhost:8080/myapps/WEB-INF/web.xml</code> のような URL で、だれでも設定やプログラムをダウンロードできてしまいます。</p>
+<div class="tree"> myapps
+  ├ input.html      <span class="new">← ブラウザから直接開ける（公開する場所）</span>
+  └ WEB-INF         <span class="ng">← ブラウザから直接は開けない（非公開の場所）</span>
+      ├ web.xml
+      └ classes
+          └ MyName.class</div>
+    <p>では、<code>classes</code> の中のサーブレットはどうやって動くのでしょうか。ブラウザはファイルを直接開くのではなく、<b>web.xml に登録した URL（<code>/MyName</code>）</b>にアクセスします。Tomcat がその URL を見て、<code>WEB-INF</code> の中のサーブレットを<b>代わりに実行</b>し、結果の HTML だけを返します。プログラムそのものは外に出ません。</p>
+    <p>つまり、<span class="word">ブラウザで開きたいファイル（HTML や画像）は WEB-INF の外、見せたくないファイルは WEB-INF の中</span>に置きます。</p>
+  </div>
+
+  <div class="point">💡 <b>フォルダと URL の対応</b>
+    <p><code>C:\tomcat10\webapps\myapps\input.html</code> は <code>http://localhost:8080/myapps/input.html</code> でアクセスできます。</p>
+  </div>
+
+  <h3>4-2. MyName.java のどこを変える？</h3>
+<pre><code>import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
+public class MyName extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException {
+<span class="c-add">+       request.setCharacterEncoding("UTF-8");            <span class="c-cmt">← ① 追加</span></span><span class="c-add">+       String n = request.getParameter("txt");           <span class="c-cmt">← ② 追加</span></span>        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        out.println("&lt;html&gt;");
+        out.println("&lt;head&gt;");
+<span class="c-del">-       out.println("&lt;title&gt;My Name is Fujita&lt;/title&gt;");</span><span class="c-add">+       out.println("&lt;title&gt;なまえ&lt;/title&gt;");               <span class="c-cmt">← ③ 変更</span></span>        out.println("&lt;/head&gt;");
+        out.println("&lt;body&gt;");
+<span class="c-del">-       out.println("&lt;h1&gt;My Name is Fujita&lt;/h1&gt;");</span><span class="c-add">+       out.println("&lt;h1&gt;なまえは、" + n +"です。&lt;/h1&gt;");  <span class="c-cmt">← ④ 変更</span></span>        out.println("&lt;/body&gt;");
+        out.println("&lt;/html&gt;");
+    }
+}</code></pre>
+  <p style="font-size:13.5px;color:var(--sub)">赤い行（−）＝消す行、緑の行（＋）＝書き足す・書き換える行。それ以外はそのまま。</p>
+
+  <table>
+    <tr><th>番号</th><th>書き換え</th><th>意味</th></tr>
+    <tr><td>①</td><td><code>request.setCharacterEncoding("UTF-8");</code></td><td>届いたデータを <b>UTF-8</b>（文字コード＝文字を数値で表す決まり）として読む。日本語の<b>文字化けを防ぐ</b>ため、値を取り出す<b>前</b>に書く</td></tr>
+    <tr><td>②</td><td><code>String n = request.getParameter("txt");</code></td><td>name 属性が <code>txt</code> の入力値を<b>文字列で受け取り</b>、変数 <code>n</code> に入れる</td></tr>
+    <tr><td>③</td><td>タイトルを「なまえ」に</td><td>ブラウザのタブに出る文字。好きな文字でよい</td></tr>
+    <tr><td>④</td><td><code>"なまえは、" + n +"です。"</code></td><td><b>固定の文字</b>だったところに、<b>受け取った名前 <code>n</code> をつなげて</b>表示する</td></tr>
+  </table>
+
+  <div class="point">💡 <b>ここがポイント：「固定表示」→「パラメータを受け取って表示」</b>
+    <p>変わったのは②と④です。②で<b>受け取り</b>、④で<b>表示に使う</b>。<span class="word">Request の内容に合わせて HTML を作れること</span>が、サーブレットのいちばんの特長です。</p>
+  </div>
+
+  <h3>4-3. 書き換え後の MyName.java（完成形）</h3>
+<pre><code>import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
+public class MyName extends HttpServlet{
+    public void doGet(HttpServletRequest request,HttpServletResponse response)
+        throws IOException,ServletException{
+
+            <span class="c-key">request.setCharacterEncoding("UTF-8");</span>
+
+            <span class="c-key">String n = request.getParameter("txt");</span>
+
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
+
+            out.println("&lt;html&gt;");
+            out.println("&lt;head&gt;");
+            out.println("&lt;title&gt;なまえ&lt;/title&gt;");
+            out.println("&lt;/head&gt;");
+            out.println("&lt;body&gt;");
+            out.println(<span class="c-key">"&lt;h1&gt;なまえは、" + n +"です。&lt;/h1&gt;"</span>);
+            out.println("&lt;/body&gt;");
+            out.println("&lt;/html&gt;");
+    }
+}</code></pre>
+
+  <h3>4-4. 入力フォーム input.html を作る</h3>
+  <p><code>C:\tomcat10\webapps\myapps</code> に、VS Code で <code>input.html</code> を新しく作ります（<code>WEB-INF</code> の中ではありません）。</p>
+<pre><code>&lt;html&gt;
+    &lt;head&gt;
+        <span class="c-key">&lt;meta charset="UTF-8"&gt;</span>
+        &lt;title&gt;あなたのお名前は？&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;あなたのお名前は？&lt;/h1&gt;
+        &lt;form <span class="c-key">method = "get"</span> <span class="c-key">action = "MyName"</span>&gt;
+            名前：&lt;input type = "text" <span class="c-key">name = "txt"</span> size = "30"&gt;&lt;br&gt;&lt;br&gt;
+            &lt;input type = "submit" name = "send" value="送信"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>&lt;meta charset="UTF-8"&gt;</code></td><td>この HTML は UTF-8 で書かれている、と宣言する（文字化け防止）</td></tr>
+    <tr><td><code>method = "get"</code></td><td>GET で送信する → サーブレットの <b>doGet</b> が呼ばれる（<code>post</code> なら <b>doPost</b>）</td></tr>
+    <tr><td><code>action = "MyName"</code></td><td>送信先。web.xml の <code>&lt;url-pattern&gt;/MyName&lt;/url-pattern&gt;</code> と<b>一致させる</b>（STEP 1 の web.xml のままで OK）</td></tr>
+    <tr><td><code>name = "txt"</code></td><td>この名前で値が送られる → <code>getParameter("txt")</code> で受け取る</td></tr>
+  </table>
+
+  <h3>4-5. 書き換えたら：コンパイル → 再起動 → 確認</h3>
+  <div class="stephd"><span class="n">1</span>書き換える・作る</div>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><code>MyName.java</code> を 4-2 のとおりに書き換えて、上書き保存した</span></label></li>
+    <li><label><input type="checkbox"><span><code>input.html</code> を <code>C:\tomcat10\webapps\myapps</code> に UTF-8 で保存した</span></label></li>
+  </ul>
+
+  <div class="stephd"><span class="n">2</span>コンパイルし直す</div>
+<pre><code>cd C:\tomcat10\webapps\myapps\WEB-INF\classes
+javac -cp ".;c:\tomcat10\lib\servlet-api.jar" MyName.java</code></pre>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>エラーが出ずにコンパイルできた（<code>MyName.class</code> が新しくなる）</span></label></li>
+  </ul>
+
+  <div class="stephd"><span class="n">3</span>Tomcat を再起動する</div>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><code>shutdown.bat</code> → <code>startup.bat</code> で再起動した</span></label></li>
+  </ul>
+  <div class="caution">⚠️ <b>注意：Tomcat は自動では読み直さない</b>
+    <p>Tomcat は一度読み込んだサーブレットを使い続けます。コンパイルし直したら<b>必ず再起動</b>してください。再起動しないと「My Name is Fujita」のままです。</p>
+  </div>
+
+  <div class="stephd"><span class="n">4</span>ブラウザで確認する</div>
+<pre><code>http://localhost:8080/myapps/input.html</code></pre>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>名前を入力して送信し、「なまえは、○○です。」と表示された</span></label></li>
+    <li><label><input type="checkbox"><span>アドレス欄の URL の後ろに <code>?txt=○○</code> が付いていることを確認した（GET の特徴）</span></label></li>
+  </ul>
+  <p class="progress" data-for="s4"></p>
+
+  <div class="note">📝 <b>やってみよう</b>
+    <p>アドレス欄の <code>?txt=○○</code> の部分を直接書き換えて Enter を押すと、どうなるでしょうか。フォームを使わなくても、パラメータは URL で送れることがわかります。</p>
+  </div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="s5">
+  <h2><span class="no">5</span>うまくいかないときは</h2>
+  <p class="lead">困ったときは、症状に合わせて次の点を確認しましょう。</p>
+  <table>
+    <tr><th>症状</th><th>よくある原因</th><th>確認すること</th></tr>
+    <tr><td>ブラウザに「このサイトにアクセスできません」と出る</td><td>Tomcat が起動していない／黒い画面を閉じた</td><td><code>startup.bat</code> を実行し、黒い画面を閉じずにおく</td></tr>
+    <tr><td>404 エラー</td><td><b>パスの間違い</b></td><td>・置き場所が <code>C:\tomcat10\webapps\myapps</code> になっているか<br>・<code>WEB-INF</code> がすべて大文字・ハイフンか<br>・URL のつづりが正しいか（<code>MyName</code> の大文字・小文字も区別される）</td></tr>
+    <tr><td>送信したあとだけ 404 エラー</td><td><b>サーブレット名の不一致</b></td><td><code>action="MyName"</code> と <code>&lt;url-pattern&gt;/MyName</code> が同じか</td></tr>
+    <tr><td>405 エラー</td><td>フォームの <code>method</code> と、サーブレットのメソッドが合っていない</td><td><code>method="get"</code> なら <code>doGet</code>、<code>method="post"</code> なら <code>doPost</code> があるか（3-3）</td></tr>
+    <tr><td>500 エラー／ClassNotFoundException</td><td>class ファイルの場所違い、web.xml の書き間違い</td><td><code>MyName.class</code> が <code>classes</code> にあるか、<code>&lt;servlet-class&gt;</code> がクラス名と同じか</td></tr>
+    <tr><td>コンパイルで <code>package jakarta.servlet does not exist</code></td><td>クラスパスの指定間違い</td><td><code>-cp ".;c:\tomcat10\lib\servlet-api.jar"</code> のつづり（<code>servlet</code>）、<code>;</code> と <code>"</code> を正しく入力したか</td></tr>
+    <tr><td>コンパイルで日本語の部分がエラーになる</td><td>ソースの文字コードの扱い</td><td>ソースを UTF-8 で保存している場合は、<code>-encoding UTF-8</code> を付けてコンパイルしてみる。直らなければ先生に相談</td></tr>
+    <tr><td>画面の日本語が<b>文字化け</b>する</td><td>HTML の <code>meta charset</code> がない、UTF-8 で保存していない</td><td>VS Code の右下が「UTF-8」か確認。直したら <b>Ctrl + F5</b> で再読み込み。直らなければ先生に相談</td></tr>
+    <tr><td>「なまえは、nullです。」と表示される</td><td>name 属性と getParameter の名前が違う</td><td><code>name="txt"</code> と <code>getParameter("txt")</code> のつづりを見比べる</td></tr>
+    <tr><td>書き換えたのに「My Name is Fujita」のまま</td><td><b>Tomcat の再起動忘れ</b>、上書き保存忘れ</td><td>Ctrl + S で保存 → コンパイル → <code>shutdown.bat</code> → <code>startup.bat</code></td></tr>
+  </table>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="s6">
+  <h2><span class="no">6</span>課題：テキスト p.33〜45 を作成しよう</h2>
+  <p class="lead">サーブレットのインスタンス変数（p.33〜40）と、コレクション API の利用（p.41〜45）に取り組みます。</p>
+
+  <h3>6-1. 作るもの</h3>
+  <table>
+    <tr><th>ファイル</th><th>内容</th><th>テキスト</th></tr>
+    <tr><td><code>inputdata.html</code></td><td>氏名とチェックボックスの入力フォーム（<code>method="post"</code>、<code>action="share"</code>）</td><td>p.33</td></tr>
+    <tr><td><code>ShareServlet.java</code></td><td>前半：氏名を 1 つ保存する版 → 後半：HashSet で複数の氏名を保存する版</td><td>p.35〜37、p.41〜43</td></tr>
+    <tr><td><code>web.xml</code></td><td><code>shareservlet</code> → <code>/share</code> の登録を<b>追加</b>（MyName の登録は残したまま）</td><td>p.38</td></tr>
+  </table>
+
+  <h3>6-2. 取り組むときのポイント</h3>
+  <div class="part"><span class="tag biz">置き場所</span><span>MyName と同じ <code>C:\tomcat10\webapps\myapps</code> でかまいません。テキストの URL <code>/j2ee1/</code> は <b><code>/myapps/</code></b> に読み替えます。</span></div>
+  <div class="part"><span class="tag req">doGet と doPost</span><span>フォームは <code>method="post"</code> なので <b>doPost</b> が呼ばれます。URL を直接入力して開いたときは <b>doGet</b> が呼ばれます。</span></div>
+  <div class="part"><span class="tag req">チェックボックス</span><span>同じ name のチェックボックスは、<code>getParameterValues("chk")</code> で<b>配列</b>として受け取ります（p.34）。</span></div>
+  <div class="part"><span class="tag resp">書き換え後</span><span>p.41 以降の版に書き換えたら、<b>再コンパイルと Tomcat の再起動</b>を忘れずに。</span></div>
+
+  <div class="caution">⚠️ <b>注意：つまずきやすい 2 つのポイント</b>
+    <p>① テキストの <code>inputdata.html</code> には <code>&lt;meta charset="UTF-8"&gt;</code> がありません。<code>&lt;head&gt;</code> の中に追加しておくと、文字化けしにくくなります。</p>
+    <p>② 動作確認では、<b>チェックを 1 つ以上入れて</b>送信してください。1 つも選ばないと配列が <code>null</code> になり、エラーになります。</p>
+  </div>
+
+  <h3>6-3. 提出前の自己チェック</h3>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>ブラウザ A で送信した氏名が、ブラウザ B で <code>http://localhost:8080/myapps/share</code> を開いたときに表示される（前半）</span></label></li>
+    <li><label><input type="checkbox"><span>ブラウザ A・B で別々の氏名を送信し、ブラウザ C で両方が表示される（後半）</span></label></li>
+    <li><label><input type="checkbox"><span>Tomcat を再起動すると登録した氏名が消えることを確かめ、その理由を説明できる（p.45）</span></label></li>
+    <li><label><input type="checkbox"><span>「別のブラウザなのに、なぜ同じ氏名が見えるのか」を自分の言葉で説明できる</span></label></li>
+  </ul>
+  <p class="progress" data-for="s6"></p>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="s7">
+  <h2><span class="no">7</span>確認問題</h2>
+  <p class="lead">すべて選択問題です。正しいと思うものをクリックすると、答えと解説が表示されます。</p>
+
+  <h3>A. Tomcat とサーブレットの実行</h3>
+  <div class="q" data-c="1">
+    <div class="qt">A1. HTML ファイルを返すだけの Web サーバでは、サーブレットは動きません。サーブレットを動かしているのはどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0">ブラウザが、受け取った Java のプログラムを実行している</button></li><li><button type="button" data-i="1">Tomcat（アプリケーションサーバ）の中の J2EE コンテナが実行している</button></li><li><button type="button" data-i="2">web.xml がサーブレットを実行している</button></li><li><button type="button" data-i="3">javac コマンドがサーブレットを実行している</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。サーブレットは <b>Tomcat</b> のような<b>アプリケーションサーバ</b>の中の <b>J2EE コンテナ</b>が、インスタンスを作って doGet などを呼び出して実行しています。Web サーバは「置いてあるファイルを返す」、アプリケーションサーバは「プログラムを実行して結果を返す」と覚えましょう。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="2">
+    <div class="qt">A2. 実習中に Tomcat の黒い画面を ✕ で閉じてしまいました。元に戻すにはどうしますか。</div>
+    <ol class="ch"><li><button type="button" data-i="0">ブラウザを再読み込み（F5）する</button></li><li><button type="button" data-i="1">MyName.java をコンパイルし直す</button></li><li><button type="button" data-i="2"><code>C:\tomcat10\bin</code> の startup.bat を実行する</button></li><li><button type="button" data-i="3"><code>C:\tomcat10\bin</code> の shutdown.bat を実行する</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>3</b>。黒い画面を閉じると Tomcat が止まります。<b>startup.bat</b> で起動し直します。shutdown.bat は Tomcat を<b>止める</b>ときに使います。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="1">
+    <div class="qt">A3. ある PC では、Tomcat が 8081 番を使う設定になっていました。この「8081」のような番号を何といいますか。また、MyName を開く正しい URL はどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0">IP アドレス／<code>http://8081/myapps/MyName</code></button></li><li><button type="button" data-i="1">ポート番号／<code>http://localhost:8081/myapps/MyName</code></button></li><li><button type="button" data-i="2">ポート番号／<code>http://localhost/myapps/MyName:8081</code></button></li><li><button type="button" data-i="3">バージョン番号／<code>http://localhost:8080/myapps/MyName</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。<b>ポート番号</b>は、1 台のコンピュータで動く複数のサーバソフトを見分ける番号です。ホスト名のすぐ後ろに <code>:8081</code> と書きます。Tomcat は通常 8080 番で、書かないと Web サーバの標準の 80 番に接続されます。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="1">
+    <div class="qt">A4. web.xml（デプロイメントディスクリプタ）を置くフォルダはどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>C:\tomcat10\webapps\myapps</code></button></li><li><button type="button" data-i="1"><code>C:\tomcat10\webapps\myapps\WEB-INF</code></button></li><li><button type="button" data-i="2"><code>C:\tomcat10\webapps\myapps\WEB-INF\classes</code></button></li><li><button type="button" data-i="3"><code>C:\tomcat10\lib</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。web.xml は <b>WEB-INF の直下</b>に置きます。Web アプリの構成を書いたこのファイルを<b>デプロイメントディスクリプタ</b>といいます。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="2">
+    <div class="qt">A5. コンパイルしてできた MyName.class を置くフォルダはどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>C:\tomcat10\webapps\myapps</code></button></li><li><button type="button" data-i="1"><code>C:\tomcat10\webapps\myapps\WEB-INF</code></button></li><li><button type="button" data-i="2"><code>C:\tomcat10\webapps\myapps\WEB-INF\classes</code></button></li><li><button type="button" data-i="3"><code>C:\tomcat10\lib</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>3</b>。class ファイルは <b>WEB-INF\classes</b> に置きます。名前のとおり「クラスを置く場所」です。置くだけでなく、web.xml への登録も必要です。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="1">
+    <div class="qt">A6. 新しいサーブレットのソースを書きました。動かすまでの作業の順番として正しいものはどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0">Tomcat の再起動 → コンパイル → web.xml に登録 → クラスファイルの配備</button></li><li><button type="button" data-i="1">コンパイル → クラスファイルの配備 → web.xml に登録 → Tomcat の再起動</button></li><li><button type="button" data-i="2">web.xml に登録 → Tomcat の再起動 → コンパイル → クラスファイルの配備</button></li><li><button type="button" data-i="3">クラスファイルの配備 → コンパイル → Tomcat の再起動 → web.xml に登録</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。<b>コンパイル → 配備 → web.xml に登録 → Tomcat の再起動</b>。web.xml の登録は再起動より前ならいつでもかまいません。この授業では classes フォルダでコンパイルするので、コンパイルした時点で配備もできています。Tomcat は一度読み込んだものを使い続けるので、<b>最後に必ず再起動</b>します。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="0">
+    <div class="qt">A7. サーブレット名 <code>hello</code> を URL <code>/greet</code> に結びつけたい。正しい web.xml の書き方はどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>&lt;servlet-mapping&gt;&lt;servlet-name&gt;hello&lt;/servlet-name&gt;&lt;url-pattern&gt;/greet&lt;/url-pattern&gt;&lt;/servlet-mapping&gt;</code></button></li><li><button type="button" data-i="1"><code>&lt;servlet-mapping&gt;&lt;servlet-name&gt;hello&lt;/servlet-name&gt;&lt;url-pattern&gt;greet&lt;/url-pattern&gt;&lt;/servlet-mapping&gt;</code></button></li><li><button type="button" data-i="2"><code>&lt;servlet&gt;&lt;servlet-name&gt;hello&lt;/servlet-name&gt;&lt;url-pattern&gt;/greet&lt;/url-pattern&gt;&lt;/servlet&gt;</code></button></li><li><button type="button" data-i="3"><code>&lt;servlet-mapping&gt;&lt;servlet-class&gt;hello&lt;/servlet-class&gt;&lt;url-pattern&gt;/greet&lt;/url-pattern&gt;&lt;/servlet-mapping&gt;</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>1</b>。URL との結びつけは <b><code>&lt;servlet-mapping&gt;</code></b> に、<b><code>&lt;servlet-name&gt;</code></b> と <b><code>&lt;url-pattern&gt;</code></b> で書きます。<code>&lt;url-pattern&gt;</code> は必ず <b>/</b> から書き始めます。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+
+  <h3>B. サーブレットのプログラム</h3>
+  <div class="q" data-c="2">
+    <div class="qt">B1. <code>HttpServlet</code> の完全修飾名（パッケージ名まで含めた名前）はどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>javax.servlet.http.HttpServlet</code></button></li><li><button type="button" data-i="1"><code>jakarta.servlet.HttpServlet</code></button></li><li><button type="button" data-i="2"><code>jakarta.servlet.http.HttpServlet</code></button></li><li><button type="button" data-i="3"><code>java.servlet.http.HttpServlet</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>3</b>。<b><code>jakarta.servlet.http.HttpServlet</code></b>。Tomcat 10 では <code>javax</code> ではなく <code>jakarta</code> から始まります。MyName.java の <code>import jakarta.servlet.http.*;</code> を見ると分かります。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="1">
+    <div class="qt">B2. パスワードを入力するフォームで、入力した値をアドレス欄に表示させたくない。<code>&lt;form&gt;</code> タグに書くものと、呼ばれるメソッドの組み合わせはどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>method="get"</code>／doGet</button></li><li><button type="button" data-i="1"><code>method="post"</code>／doPost</button></li><li><button type="button" data-i="2"><code>action="post"</code>／doPost</button></li><li><button type="button" data-i="3"><code>method="post"</code>／doGet</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。<b><code>method="post"</code></b> で送ると <b>doPost</b> が呼ばれます。POST ではデータがメッセージボディに入るので、アドレス欄には表示されません（3-3）。<code>action</code> は送信先を書く属性です。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="1">
+    <div class="qt">B3. 次の doPost の宣言の ①・② に入る組み合わせはどれですか。<pre style="margin:8px 0 0"><code>public void doPost(HttpServletRequest request, <span class="c-key">①</span> response)
+    throws IOException, <span class="c-key">②</span> {</code></pre></div>
+    <ol class="ch"><li><button type="button" data-i="0">① HttpServletRequest　② ServletException</button></li><li><button type="button" data-i="1">① HttpServletResponse　② ServletException</button></li><li><button type="button" data-i="2">① HttpServletResponse　② Exception</button></li><li><button type="button" data-i="3">① PrintWriter　② IOException</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>2</b>。第 2 引数は Response（返す情報）を扱う <b>HttpServletResponse</b>、投げる例外は IOException と <b>ServletException</b>（完全修飾名は <code>jakarta.servlet.ServletException</code>）です。doGet と同じ形です。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="3">
+    <div class="qt">B4. すべて <code>name="hobby"</code> のチェックボックスで、選ばれた値を全部受け取りたい。正しい 1 行はどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>String hobbies = request.getParameter("hobby");</code></button></li><li><button type="button" data-i="1"><code>String[] hobbies = request.getParameter("hobby");</code></button></li><li><button type="button" data-i="2"><code>String hobbies = request.getParameterValues("hobby");</code></button></li><li><button type="button" data-i="3"><code>String[] hobbies = request.getParameterValues("hobby");</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>4</b>。値が複数あるので <b>getParameterValues</b> を使います。戻り値は String の配列 <b>String[]</b> です。getParameter の戻り値は String で、値を 1 つしか受け取れません。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="0">
+    <div class="qt">B5. 「返すのは HTML で、文字コードは UTF-8」とブラウザに伝える 1 行はどれですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0"><code>response.setContentType("text/html; charset=UTF-8");</code></button></li><li><button type="button" data-i="1"><code>response.setContentType("html; charset=UTF-8");</code></button></li><li><button type="button" data-i="2"><code>request.setContentType("text/html; charset=UTF-8");</code></button></li><li><button type="button" data-i="3"><code>response.setCharacterEncoding("text/html");</code></button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>1</b>。Response のデータ形式は <b>setContentType</b> で指定します。<b>text/html</b> は HTML を表す MIME タイプです。返す情報なので <code>request</code> ではなく <code>response</code> を使います。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <div class="q" data-c="2">
+    <div class="qt">B6. 課題の ShareServlet で、ブラウザ A で登録した氏名が別のブラウザ B からも見えるのはなぜですか。</div>
+    <ol class="ch"><li><button type="button" data-i="0">ブラウザ A と B が同じ Cookie を使っているから</button></li><li><button type="button" data-i="1">サーブレットのインスタンスがブラウザごとに 1 つずつ作られるから</button></li><li><button type="button" data-i="2">サーブレットのインスタンスは 1 つだけで、A と B が同じインスタンスを使うから</button></li><li><button type="button" data-i="3">氏名が web.xml に書き込まれるから</button></li></ol>
+    <div class="ans"><span class="res"></span>正解は <b>3</b>。J2EE コンテナが作るサーブレットの<b>インスタンスは 1 つだけ</b>です。どのブラウザからのアクセスも同じインスタンスが処理するので、インスタンス変数に入れた氏名を共有することになります（テキスト p.40）。<br><button type="button" class="retry">もう一度解く</button></div>
+  </div>
+  <p class="score" id="score"></p>
+</section>
+
+</main>
+<footer>JavaEE入門 補助資料 ― テキスト p.23〜45「Tomcat の設定とサーブレットの実行」より</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('.progress[data-for]').forEach(function(out){
+    const sec=document.getElementById(out.dataset.for);
+    const boxes=[...sec.querySelectorAll('.check input')];
+    function update(){
+      const n=boxes.filter(b=>b.checked).length;
+      out.textContent=n===boxes.length?'🎉 すべてできました！':`${n} / ${boxes.length} 完了`;
+    }
+    boxes.forEach(b=>b.addEventListener('change',update));
+    update();
+  });
+})();
+
+(function(){
+  const qs=[...document.querySelectorAll('#s7 .q')];
+  const sc=document.getElementById('score');
+  function score(){
+    const done=qs.filter(q=>q.classList.contains('done'));
+    const ok=done.filter(q=>q.dataset.ok==='1').length;
+    sc.textContent=done.length===qs.length?`${qs.length} 問中 ${ok} 問正解${ok===qs.length?' 🎉':''}`:`${done.length} / ${qs.length} 問 解答済み`;
+  }
+  qs.forEach(q=>{
+    const btns=[...q.querySelectorAll('ol.ch button')];
+    const c=+q.dataset.c, res=q.querySelector('.res');
+    btns.forEach(b=>b.addEventListener('click',()=>{
+      const i=+b.dataset.i;
+      btns.forEach(x=>x.disabled=true);
+      btns[c].classList.add('ok');
+      if(i!==c) b.classList.add('ng');
+      q.dataset.ok=i===c?'1':'0';
+      res.textContent=i===c?'⭕ 正解！':'❌ 残念…';
+      res.style.color=i===c?'var(--biz)':'var(--res)';
+      q.classList.add('done'); score();
+    }));
+    q.querySelector('.retry').addEventListener('click',()=>{
+      btns.forEach(x=>{x.disabled=false;x.classList.remove('ok','ng')});
+      q.classList.remove('done'); delete q.dataset.ok; score();
+    });
+  });
+  score();
+})();
+</script>
+</body>
+</html>
