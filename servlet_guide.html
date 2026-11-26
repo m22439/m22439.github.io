@@ -334,7 +334,33 @@ public class MyName extends HttpServlet {
   </table>
 
   <h3>2-2. web.xml（テキスト p.29〜30）</h3>
-  <p><code>C:\tomcat10\webapps\myapps\WEB-INF</code> に <code>web.xml</code> を作ります。</p>
+
+  <div class="point">💡 <b>web.xml ＝ デプロイメントディスクリプタ</b>
+    <p>web.xml のように、Web アプリの構成を書いたファイルを<b>デプロイメントディスクリプタ</b>（Deployment Descriptor）といいます。</p>
+  </div>
+  <table>
+    <tr><th>ことば</th><th>意味</th></tr>
+    <tr><td>デプロイ（deploy）</td><td>作ったアプリをサーバに置いて、<b>使える状態にすること</b>（日本語では「配備」）</td></tr>
+    <tr><td>ディスクリプタ（descriptor）</td><td>中身を説明するもの。<b>説明書き</b></td></tr>
+    <tr><td>デプロイメントディスクリプタ</td><td>「このアプリをどう配備するか」を Tomcat に伝える<b>説明書</b>。実際のファイル名は <b>web.xml</b> で、必ず <b>WEB-INF の直下</b>に置く</td></tr>
+  </table>
+
+  <p>classes フォルダに MyName.class を置いただけでは、Tomcat は「どの URL で、どのクラスを動かせばいいか」が分かりません。それを教えるのが web.xml です。</p>
+<div class="tree"> <b>Tomcat（J2EE コンテナ）</b>
+     │ <span class="c">起動するときに web.xml を読む</span>
+     ▼
+ <span class="new">web.xml（デプロイメントディスクリプタ）</span>
+     ├ &lt;servlet&gt;          <span class="c">… サーブレットに「名前」を付ける（名前 ⇔ クラス）</span>
+     └ &lt;servlet-mapping&gt;  <span class="c">… その「名前」に URL を結びつける（名前 ⇔ URL）</span>
+     │
+     ▼
+ 「/MyName に来たら MyName クラスを動かす」と分かる</div>
+
+  <div class="note">📝 <b>web.xml を直したら Tomcat を再起動するのはなぜ？</b>
+    <p>Tomcat は web.xml を<b>起動するときに読み込みます</b>。起動したあとに書き換えても、再起動するまで新しい内容は使われません。</p>
+  </div>
+
+  <p><code>C:\tomcat10\webapps\myapps\WEB-INF</code> に、次の内容で <code>web.xml</code> を作ります。</p>
 <pre><code>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
 &lt;web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -363,6 +389,18 @@ public class MyName extends HttpServlet {
         │ <span class="c">クラス名と一致させる</span>
         ▼
  classes フォルダの <span class="rs">MyName.class</span></div>
+
+  <table>
+    <tr><th>部分</th><th>意味</th></tr>
+    <tr><td><code>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;</code></td><td>このファイルが XML で書かれていることと、その文字コードを表す宣言。1 行目に書く</td></tr>
+    <tr><td><code>&lt;web-app …&gt;</code> 〜 <code>&lt;/web-app&gt;</code></td><td>デプロイメントディスクリプタ全体を囲むタグ。<code>xmlns</code> や <code>version</code> は、どの決まり（サーブレット仕様のバージョン）で書いたかを表す。<b>テキストのとおりに写せばよい</b></td></tr>
+    <tr><td><code>&lt;servlet&gt;</code></td><td><code>&lt;servlet-name&gt;</code>（自分で付ける名前）と <code>&lt;servlet-class&gt;</code>（クラス名）を結びつける</td></tr>
+    <tr><td><code>&lt;servlet-mapping&gt;</code></td><td><code>&lt;servlet-name&gt;</code> と <code>&lt;url-pattern&gt;</code>（URL）を結びつける。url-pattern は必ず <b>/</b> から書き始める</td></tr>
+  </table>
+
+  <div class="caution">⚠️ <b>注意：web.xml に日本語は書かない</b>
+    <p>1 行目で文字コードを <code>ISO-8859-1</code>（英数字用）と宣言しているので、コメントなどに日本語を書くと Tomcat が読み込めなくなることがあります。web.xml は<b>英数字だけ</b>で書きましょう。タグの書き間違い（閉じタグ忘れなど）があると、アプリ全体が動かなくなります。</p>
+  </div>
 
   <h3>2-3. コンパイル → 起動 → 確認</h3>
   <div class="stephd"><span class="n">1</span>ファイルを配置する</div>
