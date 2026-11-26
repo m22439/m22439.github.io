@@ -361,7 +361,7 @@ public class MyName extends HttpServlet {
   </div>
 
   <p><code>C:\tomcat10\webapps\myapps\WEB-INF</code> に、次の内容で <code>web.xml</code> を作ります。</p>
-<pre><code>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
@@ -392,14 +392,15 @@ public class MyName extends HttpServlet {
 
   <table>
     <tr><th>部分</th><th>意味</th></tr>
-    <tr><td><code>&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;</code></td><td>このファイルが XML で書かれていることと、その文字コードを表す宣言。1 行目に書く</td></tr>
+    <tr><td><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code></td><td>このファイルが XML で書かれていることと、その文字コードを表す宣言。1 行目に書く。テキストでは <code>ISO-8859-1</code> ですが、この授業では <b>UTF-8</b> にします</td></tr>
     <tr><td><code>&lt;web-app …&gt;</code> 〜 <code>&lt;/web-app&gt;</code></td><td>デプロイメントディスクリプタ全体を囲むタグ。<code>xmlns</code> や <code>version</code> は、どの決まり（サーブレット仕様のバージョン）で書いたかを表す。<b>テキストのとおりに写せばよい</b></td></tr>
     <tr><td><code>&lt;servlet&gt;</code></td><td><code>&lt;servlet-name&gt;</code>（自分で付ける名前）と <code>&lt;servlet-class&gt;</code>（クラス名）を結びつける</td></tr>
     <tr><td><code>&lt;servlet-mapping&gt;</code></td><td><code>&lt;servlet-name&gt;</code> と <code>&lt;url-pattern&gt;</code>（URL）を結びつける。url-pattern は必ず <b>/</b> から書き始める</td></tr>
   </table>
 
-  <div class="caution">⚠️ <b>注意：web.xml に日本語は書かない</b>
-    <p>1 行目で文字コードを <code>ISO-8859-1</code>（英数字用）と宣言しているので、コメントなどに日本語を書くと Tomcat が読み込めなくなることがあります。web.xml は<b>英数字だけ</b>で書きましょう。タグの書き間違い（閉じタグ忘れなど）があると、アプリ全体が動かなくなります。</p>
+  <div class="caution">⚠️ <b>注意：文字コードとタグの書き間違い</b>
+    <p>1 行目で文字コードを <code>UTF-8</code> と宣言しているので、web.xml も VS Code で <b>UTF-8 のまま保存</b>します（右下の表示を確認）。宣言と保存の文字コードが違うと、Tomcat が読み込めなくなることがあります。</p>
+    <p>タグの書き間違い（閉じタグ忘れ、つづり間違いなど）があると、アプリ全体が動かなくなります。</p>
   </div>
 
   <h3>2-3. コンパイル → 起動 → 確認</h3>
